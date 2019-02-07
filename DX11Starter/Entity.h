@@ -13,7 +13,7 @@ class Entity
 {
 	XMFLOAT4X4 translation, rotation, scaling; // Guess this is pretty obvious
 	Mesh *mesh;
-	static float dT,tT; //static variables representing delta time and totalt time, respectively, for the all entity objects to use.
+	//static float dT,tT; //static variables representing delta time and totalt time, respectively, for the all entity objects to use.
 public:
 	Entity(XMMATRIX a, XMMATRIX b, XMMATRIX c, Mesh* d)
 	{
@@ -22,7 +22,7 @@ public:
 		XMStoreFloat4x4(&scaling, c);
 		mesh = d;
 	}
-	~Entity(){ delete &translation,&rotation,&scaling,&mesh;}
+	~Entity() { mesh = nullptr; }
 	static void SetTime(float a, float b)
 	{
 		/*dT = a;

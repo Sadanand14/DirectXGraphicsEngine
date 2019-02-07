@@ -19,11 +19,11 @@ public:
 	//Camera instance created
 	Camera* camera;
 	// vector for storing different Entity instances
-	std::vector<Entity*> entityList;
+	std::vector<Entity> entityList;
 	//Creating 5 Entity Variables
-	Entity *entity1, *entity2, *entity3, *entity4, *entity5;
+	//Entity *entity1, *entity2, *entity3, *entity4, *entity5;
 	//Creating 4 mesh variables
-	Mesh *mesh1,*mesh2,*mesh3, *mesh4;
+	Mesh *mesh1 = nullptr, *mesh2 = nullptr, *mesh3 = nullptr, *mesh4 = nullptr;
 	
 	
 	// Overridden setup and game loop methods, which

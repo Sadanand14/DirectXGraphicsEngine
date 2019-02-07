@@ -4,6 +4,7 @@
 #include "Mesh.h"
 #include <vector>
 #include "Camera.h"
+#include <iostream>
 
 
 // For the DirectX Math library
@@ -49,11 +50,20 @@ Game::Game(HINSTANCE hInstance)
 // --------------------------------------------------------
 Game::~Game()
 {
+	entityList.clear();
 	// Release any (and all!) DirectX objects
 	// we've made in the Game class
 	if (vertexBuffer) { vertexBuffer->Release(); }
 	if (indexBuffer) { indexBuffer->Release(); }
-	delete mesh1, mesh2, mesh3, mesh4,entity1, entity2, entity3, entity4, entity5, &entityList;
+	//delete mesh1, mesh2, mesh3, mesh4,entity1, entity2, entity3, entity4, entity5, &entityList;
+	if (mesh1 != nullptr)
+		delete mesh1;
+	if (mesh2 != nullptr)
+		delete mesh2;
+	if (mesh3 != nullptr)
+		delete mesh3;
+	if (mesh4 != nullptr)
+		delete mesh4;
 	// Delete our simple shader objects, which
 	// will clean up their own internal DirectX stuff
 	delete vertexShader;
@@ -199,32 +209,32 @@ void Game::CreateBasicGeometry()
 	XMMATRIX trans = XMMatrixTranslation(-2.0f, 1.0f, 0.0f);
 	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.2f, 0.0f, 0.0f);
 	XMMATRIX scale = XMMatrixScaling(0.5f,0.5f,0.0f);
-	entity1 = new Entity(trans,rot,scale,mesh1);
-	entityList.push_back(entity1);
+	
+	entityList.push_back(Entity(trans, rot, scale, mesh1));
 	
 	trans = XMMatrixTranslation(-2.0f, -1.0f, 0.0f);
 	rot = XMMatrixRotationRollPitchYaw(0.0f,-0.2f,0.0f);
 	scale = XMMatrixScaling(0.5f, 1.1f, 0.0f);
-	entity2 = new Entity(trans, rot, scale, mesh1);
-	entityList.push_back(entity2);
+	entityList.push_back(Entity(trans, rot, scale, mesh1));
 	
 	trans = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
 	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 1.5f); 
 	scale = XMMatrixScaling(0.5f, 2.0f, 0.0f);
-	entity3 = new Entity(trans, rot, scale, mesh2);
-	entityList.push_back(entity3);
+	
+	entityList.push_back(Entity(trans, rot, scale, mesh2));
 
 	trans = XMMatrixTranslation(3.0f, -1.0f, 0.0f);
 	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 1.3f);
 	scale = XMMatrixScaling(0.4f, 0.3f, 0.0f);
-	entity4 = new Entity(trans, rot, scale, mesh2);
-	entityList.push_back(entity4);
+	
+	entityList.push_back(Entity(trans, rot, scale, mesh2));
 
 	trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
 	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.25f);
 	scale = XMMatrixScaling(0.5f, 0.8f, 0.0f);
-	entity5 = new Entity(trans, rot, scale, mesh3);
-	entityList.push_back(entity5);
+	
+	entityList.push_back(Entity(trans, rot, scale, mesh3));
+	std::cout << entityList.size() << std::endl;
 }
 
 
@@ -251,12 +261,12 @@ void Game::OnResize()
 // --------------------------------------------------------
 void Game::Update(float deltaTime, float totalTime)
 {
-	camera->Update();
+	//camera->Update();
 	// Quit if the escape key is pressed
 	if (GetAsyncKeyState(VK_ESCAPE))
 		Quit();
 	
-	if (GetAsyncKeyState('W')) 
+	/*if (GetAsyncKeyState('W')) 
 	{
 		camera->MoveForward(deltaTime);
 	}
@@ -287,7 +297,7 @@ void Game::Update(float deltaTime, float totalTime)
 	if (GetAsyncKeyState('C')) 
 	{
 		camera->RotateDown(deltaTime);
-	}
+	}*/
 }
 
 // --------------------------------------------------------
@@ -311,20 +321,20 @@ void Game::Draw(float deltaTime, float totalTime)
 	//Looped all the sequences for loading the worldmatrix as well as loading the index and vertex buffers to the 
 	//GPU using a vector of entities.
 	for (int i = 0; i < entityList.size(); i++) {
-		XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(entityList[i]->GetWM()));
+		XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(entityList[i].GetWM()));
 		vertexShader->SetMatrix4x4("world", worldMatrix);
-		vertexShader->SetMatrix4x4("view", camera->GetView());
+		vertexShader->SetMatrix4x4("view", viewMatrix);
 		vertexShader->SetMatrix4x4("projection", projectionMatrix);
 		vertexShader->CopyAllBufferData();
 		vertexShader->SetShader();
 		pixelShader->SetShader();
 		UINT stride = sizeof(Vertex);
 		UINT offset = 0;
-		ID3D11Buffer *v1Buffer = entityList[i]->GetMesh()->GetVertexBuffer();
-		ID3D11Buffer *i1Buffer = entityList[i]->GetMesh()->GetIndexBuffer();
+		ID3D11Buffer *v1Buffer = entityList[i].GetMesh()->GetVertexBuffer();
+		ID3D11Buffer *i1Buffer = entityList[i].GetMesh()->GetIndexBuffer();
 		context->IASetVertexBuffers(0, 1, &v1Buffer, &stride, &offset);
 		context->IASetIndexBuffer(i1Buffer, DXGI_FORMAT_R32_UINT, 0);
-		int indicesCount1 = entityList[i]->GetMesh()->GetIndexCount();
+		int indicesCount1 = entityList[i].GetMesh()->GetIndexCount();
 		context->DrawIndexed(indicesCount1, 0, 0);
 	}
 
@@ -342,7 +352,7 @@ void Game::Draw(float deltaTime, float totalTime)
 void Game::OnMouseDown(WPARAM buttonState, int x, int y)
 {
 	// Add any custom code here...
-	if (buttonState & 0x0001) 
+	/*if (buttonState & 0x0001) 
 	{
 		camera->RotateLeft();
 	}
@@ -350,7 +360,7 @@ void Game::OnMouseDown(WPARAM buttonState, int x, int y)
 	if (buttonState & 0x0002) 
 	{
 		camera->RotateRight();
-	}
+	}*/
 	// Save the previous mouse position, so we have it for the future
 	prevMousePos.x = x;
 	prevMousePos.y = y;

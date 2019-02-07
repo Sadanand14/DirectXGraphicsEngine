@@ -12,11 +12,11 @@ class Camera
 	XMFLOAT4X4 veiwMatrix, projectionMatrix;
 	XMVECTOR view,pos,upUnit;
 	XMFLOAT3 currentPos,cameraDir;
-	float xRot, yRot;
+	float xRot, yRot,delta;
 public:
 	Camera();
 	~Camera();
-	void Update();
+	void Update(float deltaTime);
 	XMFLOAT4X4 GetView() { return veiwMatrix; }
 	XMFLOAT4X4 GetProjection() { return projectionMatrix; }
 	void MoveForward(float deltaTime);

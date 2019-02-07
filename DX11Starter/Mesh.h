@@ -5,7 +5,7 @@
 //creating mesh class
 class Mesh
 {
-	ID3D11Buffer *vertexPointer, *indexPointer;
+	ID3D11Buffer *vertexPointer = nullptr, *indexPointer = nullptr;
 	int indexCount;
 public: 
 
