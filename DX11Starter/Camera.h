@@ -19,14 +19,14 @@ public:
 	void Update(float deltaTime);
 	XMFLOAT4X4 GetView() { return veiwMatrix; }
 	XMFLOAT4X4 GetProjection() { return projectionMatrix; }
-	void MoveForward(float deltaTime);
-	void MoveBackward(float deltaTime);
-	void MoveLeft(float deltaTime);
-	void MoveRight(float deltaTime);
-	void MoveUpward(float deltaTime);
-	void MoveDownward(float deltaTime);
+	void MoveForward();
+	void MoveBackward();
+	void MoveLeft();
+	void MoveRight();
+	void MoveUpward();
+	void MoveDownward();
 	void RotateLeft();
 	void RotateRight();
-	void RotateUp(float deltaTime);
-	void RotateDown(float deltaTime);
+	void RotateUp();
+	void RotateDown();
 };

@@ -18,10 +18,7 @@ Camera::Camera()
 	yRot = 0.0f;
 }
 
-Camera::~Camera() 
-{
-	
-}
+Camera::~Camera() {	}
 
 void Camera::Update(float deltaTime) 
 {
@@ -31,67 +28,60 @@ void Camera::Update(float deltaTime)
 	XMStoreFloat4x4(&veiwMatrix, XMMatrixTranspose(vm));
 }
 
-void Camera::MoveForward(float deltaTime)
+void Camera::MoveForward()
 {
-	pos = XMVectorAdd(pos,XMVector3Normalize(view));
-	
+	XMVECTOR moveDir = XMVectorScale(view, delta*0.0001);
+	pos = XMVectorAdd(pos,XMVector3Normalize(moveDir));
 }
 
-void Camera::MoveBackward(float deltaTime)
+void Camera::MoveBackward()
 {
-	XMVECTOR reverseDir = XMVectorScale(view, (-1));
+	XMVECTOR reverseDir = XMVectorScale(view, (-1 * delta*0.0001));
 	pos = XMVectorAdd(pos, XMVector3Normalize(reverseDir));
-
 }
 
-void Camera::MoveLeft(float deltaTime)
+void Camera::MoveLeft()
 {
 	XMVECTOR cross = XMVector3Cross(upUnit, view);
+	cross = XMVectorScale(cross,delta*0.0001);
 	pos = XMVectorAdd(pos, XMVector3Normalize(cross));
-	
 }
 
-void Camera::MoveRight(float deltaTime)
+void Camera::MoveRight()
 {
 	XMVECTOR cross = XMVector3Cross(view, upUnit);
-	pos = XMVectorAdd(pos, XMVector3Normalize(cross));
-	
+	cross = XMVectorScale(cross, delta*0.0001);
+	pos = XMVectorAdd(XMVector3Normalize(cross), pos);
 }
 
 
-void Camera::MoveUpward(float deltaTime)
+void Camera::MoveUpward()
 {
-	XMVECTOR dir = XMVectorScale(upUnit, deltaTime);
+	XMVECTOR dir = XMVectorScale(upUnit, delta*0.0001);
 	pos = XMVectorAdd(pos, XMVector3Normalize(dir));
-
 }
 
-void Camera::MoveDownward(float deltaTime)
+void Camera::MoveDownward()
 {
-	XMVECTOR reverseDir = XMVectorScale(upUnit, (-1*deltaTime));
+	XMVECTOR reverseDir = XMVectorScale(upUnit, (-1* delta*0.0001));
 	pos = XMVectorAdd(pos, XMVector3Normalize(reverseDir));
-
 }
 
 void Camera::RotateLeft()
 {
-	xRot += 0.1f;
-	
+	xRot += 0.1f*0.01;
 }
 
 void Camera::RotateRight()
 {
-	xRot -= 0.1f;
-	
+	xRot -= 0.1f*0.01;
 }
 
-void Camera::RotateUp(float deltaTime)
+void Camera::RotateUp()
 {
-	yRot += 0.1f*deltaTime;
-
+	yRot += 0.1f*delta*0.0001;
 }
-void Camera::RotateDown(float deltaTime)
+void Camera::RotateDown()
 {
-	yRot -= 0.1f*deltaTime;
-
+	yRot -= 0.1f*delta*0.0001;
 }

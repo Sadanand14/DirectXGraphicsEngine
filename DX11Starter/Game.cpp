@@ -261,43 +261,43 @@ void Game::OnResize()
 // --------------------------------------------------------
 void Game::Update(float deltaTime, float totalTime)
 {
-	//camera->Update();
+	camera->Update(deltaTime);
 	// Quit if the escape key is pressed
 	if (GetAsyncKeyState(VK_ESCAPE))
 		Quit();
 	
-	/*if (GetAsyncKeyState('W')) 
+	if (GetAsyncKeyState('W')) 
 	{
-		camera->MoveForward(deltaTime);
+		camera->MoveForward();
 	}
 	if (GetAsyncKeyState('S'))
 	{
-		camera->MoveBackward(deltaTime);
+		camera->MoveBackward();
 	}
 	if (GetAsyncKeyState('A')) 
 	{
-		camera->MoveLeft(deltaTime);
+		camera->MoveLeft();
 	}
 	if (GetAsyncKeyState('D'))
 	{
-		camera->MoveRight(deltaTime);
+		camera->MoveRight();
 	}
 	if (GetAsyncKeyState(VK_SPACE))
 	{
-		camera->MoveUpward(deltaTime);
+		camera->MoveUpward();
 	}
 	if (GetAsyncKeyState('X'))
 	{
-		camera->MoveDownward(deltaTime);
+		camera->MoveDownward();
 	}
 	if (GetAsyncKeyState('V')) 
 	{
-		camera->RotateUp(deltaTime);
+		camera->RotateUp();
 	}
 	if (GetAsyncKeyState('C')) 
 	{
-		camera->RotateDown(deltaTime);
-	}*/
+		camera->RotateDown();
+	}
 }
 
 // --------------------------------------------------------
@@ -323,7 +323,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	for (int i = 0; i < entityList.size(); i++) {
 		XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(entityList[i].GetWM()));
 		vertexShader->SetMatrix4x4("world", worldMatrix);
-		vertexShader->SetMatrix4x4("view", viewMatrix);
+		vertexShader->SetMatrix4x4("view", camera->GetView());
 		vertexShader->SetMatrix4x4("projection", projectionMatrix);
 		vertexShader->CopyAllBufferData();
 		vertexShader->SetShader();
@@ -352,7 +352,7 @@ void Game::Draw(float deltaTime, float totalTime)
 void Game::OnMouseDown(WPARAM buttonState, int x, int y)
 {
 	// Add any custom code here...
-	/*if (buttonState & 0x0001) 
+	if (buttonState & 0x0001) 
 	{
 		camera->RotateLeft();
 	}
@@ -360,7 +360,7 @@ void Game::OnMouseDown(WPARAM buttonState, int x, int y)
 	if (buttonState & 0x0002) 
 	{
 		camera->RotateRight();
-	}*/
+	}
 	// Save the previous mouse position, so we have it for the future
 	prevMousePos.x = x;
 	prevMousePos.y = y;
