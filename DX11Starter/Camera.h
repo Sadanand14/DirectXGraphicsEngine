@@ -10,7 +10,8 @@ using namespace DirectX;
 class Camera 
 {
 	XMFLOAT4X4 veiwMatrix, projectionMatrix;
-	XMFLOAT3 currentPos, cameraDir;
+	XMVECTOR view,pos,upUnit;
+	XMFLOAT3 currentPos,cameraDir;
 	float xRot, yRot;
 public:
 	Camera();
@@ -18,4 +19,14 @@ public:
 	void Update();
 	XMFLOAT4X4 GetView() { return veiwMatrix; }
 	XMFLOAT4X4 GetProjection() { return projectionMatrix; }
+	void MoveForward(float deltaTime);
+	void MoveBackward(float deltaTime);
+	void MoveLeft(float deltaTime);
+	void MoveRight(float deltaTime);
+	void MoveUpward(float deltaTime);
+	void MoveDownward(float deltaTime);
+	void RotateLeft();
+	void RotateRight();
+	void RotateUp(float deltaTime);
+	void RotateDown(float deltaTime);
 };

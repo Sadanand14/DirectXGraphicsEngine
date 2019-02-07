@@ -3,6 +3,7 @@
 #include "d3d11.h"
 #include "Mesh.h"
 #include <vector>
+#include "Camera.h"
 
 
 // For the DirectX Math library
@@ -27,11 +28,12 @@ Game::Game(HINSTANCE hInstance)
 		true)			// Show extra stats (fps) in title bar?
 {
 	// Initialize fields
+	camera = new Camera();
 	vertexBuffer = 0;
 	indexBuffer = 0;
 	vertexShader = 0;
 	pixelShader = 0;
-
+	
 #if defined(DEBUG) || defined(_DEBUG)
 	// Do we want a console window?  Probably only in debug mode
 	CreateConsoleWindow(500, 120, 32, 120);
@@ -56,6 +58,7 @@ Game::~Game()
 	// will clean up their own internal DirectX stuff
 	delete vertexShader;
 	delete pixelShader;
+	delete camera;
 }
 
 // --------------------------------------------------------
@@ -248,11 +251,43 @@ void Game::OnResize()
 // --------------------------------------------------------
 void Game::Update(float deltaTime, float totalTime)
 {
+	camera->Update();
 	// Quit if the escape key is pressed
 	if (GetAsyncKeyState(VK_ESCAPE))
 		Quit();
-
-	Entity::SetTime(deltaTime, totalTime);
+	
+	if (GetAsyncKeyState('W')) 
+	{
+		camera->MoveForward(deltaTime);
+	}
+	if (GetAsyncKeyState('S'))
+	{
+		camera->MoveBackward(deltaTime);
+	}
+	if (GetAsyncKeyState('A')) 
+	{
+		camera->MoveLeft(deltaTime);
+	}
+	if (GetAsyncKeyState('D'))
+	{
+		camera->MoveRight(deltaTime);
+	}
+	if (GetAsyncKeyState(VK_SPACE))
+	{
+		camera->MoveUpward(deltaTime);
+	}
+	if (GetAsyncKeyState('X'))
+	{
+		camera->MoveDownward(deltaTime);
+	}
+	if (GetAsyncKeyState('V')) 
+	{
+		camera->RotateUp(deltaTime);
+	}
+	if (GetAsyncKeyState('C')) 
+	{
+		camera->RotateDown(deltaTime);
+	}
 }
 
 // --------------------------------------------------------
@@ -278,7 +313,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	for (int i = 0; i < entityList.size(); i++) {
 		XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(entityList[i]->GetWM()));
 		vertexShader->SetMatrix4x4("world", worldMatrix);
-		vertexShader->SetMatrix4x4("view", viewMatrix);
+		vertexShader->SetMatrix4x4("view", camera->GetView());
 		vertexShader->SetMatrix4x4("projection", projectionMatrix);
 		vertexShader->CopyAllBufferData();
 		vertexShader->SetShader();
@@ -307,7 +342,15 @@ void Game::Draw(float deltaTime, float totalTime)
 void Game::OnMouseDown(WPARAM buttonState, int x, int y)
 {
 	// Add any custom code here...
-
+	if (buttonState & 0x0001) 
+	{
+		camera->RotateLeft();
+	}
+	
+	if (buttonState & 0x0002) 
+	{
+		camera->RotateRight();
+	}
 	// Save the previous mouse position, so we have it for the future
 	prevMousePos.x = x;
 	prevMousePos.y = y;

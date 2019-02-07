@@ -6,6 +6,7 @@
 #include "Mesh.h"
 #include <d3d11.h>
 #include "Entity.h"
+#include "Camera.h"
 
 
 class Game 
@@ -15,6 +16,8 @@ class Game
 public:
 	Game(HINSTANCE hInstance);
 	~Game();
+	//Camera instance created
+	Camera* camera;
 	// vector for storing different Entity instances
 	std::vector<Entity*> entityList;
 	//Creating 5 Entity Variables
