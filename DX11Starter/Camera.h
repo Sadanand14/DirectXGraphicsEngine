@@ -14,7 +14,7 @@ class Camera
 	XMFLOAT3 currentPos,cameraDir;
 	float xRot, yRot,delta;
 public:
-	Camera();
+	Camera(float width, float height);
 	~Camera();
 	void Update(float deltaTime);
 	XMFLOAT4X4 GetView() { return veiwMatrix; }

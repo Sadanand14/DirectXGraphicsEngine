@@ -16,6 +16,8 @@ class Game
 public:
 	Game(HINSTANCE hInstance);
 	~Game();
+
+	Materials* material;
 	//Camera instance created
 	Camera* camera;
 	// vector for storing different Entity instances

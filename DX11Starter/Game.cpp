@@ -29,7 +29,7 @@ Game::Game(HINSTANCE hInstance)
 		true)			// Show extra stats (fps) in title bar?
 {
 	// Initialize fields
-	camera = new Camera();
+	camera = new Camera((float)width, (float)height);
 	vertexBuffer = 0;
 	indexBuffer = 0;
 	vertexShader = 0;
@@ -64,6 +64,8 @@ Game::~Game()
 		delete mesh3;
 	if (mesh4 != nullptr)
 		delete mesh4;
+	if (material != nullptr)
+		delete material;
 	// Delete our simple shader objects, which
 	// will clean up their own internal DirectX stuff
 	delete vertexShader;
@@ -205,35 +207,37 @@ void Game::CreateBasicGeometry()
 
 	mesh3 = new Mesh(vertices3, indices3, 4, 6, device);
 
+	material = new Materials(vertexShader, pixelShader);//had to create a dummy material so compiler wont throw an error
+
 	//Defined 5 separate entites making use of the above defined meshes and pushed them into a vector
 	XMMATRIX trans = XMMatrixTranslation(-2.0f, 1.0f, 0.0f);
 	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.2f, 0.0f, 0.0f);
 	XMMATRIX scale = XMMatrixScaling(0.5f,0.5f,0.0f);
 	
-	entityList.push_back(Entity(trans, rot, scale, mesh1));
+	entityList.push_back(Entity(trans, rot, scale, mesh1, material));
 	
 	trans = XMMatrixTranslation(-2.0f, -1.0f, 0.0f);
 	rot = XMMatrixRotationRollPitchYaw(0.0f,-0.2f,0.0f);
 	scale = XMMatrixScaling(0.5f, 1.1f, 0.0f);
-	entityList.push_back(Entity(trans, rot, scale, mesh1));
+	entityList.push_back(Entity(trans, rot, scale, mesh1, material));
 	
 	trans = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
 	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 1.5f); 
 	scale = XMMatrixScaling(0.5f, 2.0f, 0.0f);
 	
-	entityList.push_back(Entity(trans, rot, scale, mesh2));
+	entityList.push_back(Entity(trans, rot, scale, mesh2, material));
 
 	trans = XMMatrixTranslation(3.0f, -1.0f, 0.0f);
 	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 1.3f);
 	scale = XMMatrixScaling(0.4f, 0.3f, 0.0f);
 	
-	entityList.push_back(Entity(trans, rot, scale, mesh2));
+	entityList.push_back(Entity(trans, rot, scale, mesh2, material));
 
 	trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
 	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.25f);
 	scale = XMMatrixScaling(0.5f, 0.8f, 0.0f);
 	
-	entityList.push_back(Entity(trans, rot, scale, mesh3));
+	entityList.push_back(Entity(trans, rot, scale, mesh3, material));
 	std::cout << entityList.size() << std::endl;
 }
 
@@ -324,7 +328,7 @@ void Game::Draw(float deltaTime, float totalTime)
 		XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(entityList[i].GetWM()));
 		vertexShader->SetMatrix4x4("world", worldMatrix);
 		vertexShader->SetMatrix4x4("view", camera->GetView());
-		vertexShader->SetMatrix4x4("projection", projectionMatrix);
+		vertexShader->SetMatrix4x4("projection", camera->GetProjection());
 		vertexShader->CopyAllBufferData();
 		vertexShader->SetShader();
 		pixelShader->SetShader();

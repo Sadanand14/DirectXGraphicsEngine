@@ -1,2 +1,8 @@
 ﻿  Game.cpp
-  DX11Starter.vcxproj -> D:\GGp\Game-Graphics-Programming-Assignment\x64\Debug\DX11Starter.exe
+  Main.cpp
+  Camera.cpp
+  Materials.cpp
+  Entity.cpp
+  Mesh.cpp
+  Generating Code...
+  DX11Starter.vcxproj -> C:\Users\sadan\Desktop\Git Upload\GGP\Game-Graphics-Programming-Assignment\x64\Debug\DX11Starter.exe

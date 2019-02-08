@@ -5,6 +5,7 @@
 #include <DirectXMath.h>
 #include <d3dcompiler.h>
 #include "Game.h"
+#include "Materials.h"
 
 using namespace DirectX;
 //creating an enitity class
@@ -13,21 +14,12 @@ class Entity
 {
 	XMFLOAT4X4 translation, rotation, scaling; // Guess this is pretty obvious
 	Mesh *mesh;
+	Materials* material;
 	//static float dT,tT; //static variables representing delta time and totalt time, respectively, for the all entity objects to use.
 public:
-	Entity(XMMATRIX a, XMMATRIX b, XMMATRIX c, Mesh* d)
-	{
-		XMStoreFloat4x4(&translation, a);
-		XMStoreFloat4x4(&rotation, b);
-		XMStoreFloat4x4(&scaling, c);
-		mesh = d;
-	}
-	~Entity() { mesh = nullptr; }
-	static void SetTime(float a, float b)
-	{
-		/*dT = a;
-		tT = b;*/
-	}
+	Entity(XMMATRIX a, XMMATRIX b, XMMATRIX c, Mesh* d, Materials* e);
+	~Entity();
+	
 	void SetPos(XMMATRIX X) { XMStoreFloat4x4(&translation,X); }
 	void SetRot(XMMATRIX Y) { XMStoreFloat4x4(&rotation,Y); }
 	void SetScale(XMMATRIX Z) { XMStoreFloat4x4(&scaling,Z); }
@@ -35,29 +27,10 @@ public:
 	XMFLOAT4X4 GetRot(){ return rotation; }
 	XMFLOAT4X4 GetScale(){ return scaling; }
 	Mesh* GetMesh() { return mesh; }
-	XMMATRIX GetWM() // returns a world matrix for storing in the worldMatrix variable
-	{
-		XMMATRIX trans, rot, scale, result;
-		trans = XMLoadFloat4x4(&translation);
-		rot = XMLoadFloat4x4(&rotation);
-		scale = XMLoadFloat4x4(&scaling);
-		result = XMMatrixMultiply(XMMatrixMultiply(scale, rot),trans);
-		return result;
-	}
-	/*void AddTranslation(XMMATRIX X) 
-	{
-		XMMATRIX currentTrans = XMLoadFloat4x4(&translation);
-		currentTrans += X;
-		XMStoreFloat4x4(&translation,current)
-	}*/
-	
-	void AddRotaion(XMMATRIX Y) 
-	{
-		XMMATRIX currentRot = XMLoadFloat4x4(&rotation); 
-	}
-	
-	void AddScaling(XMMATRIX Z) 
-	{
-		XMMATRIX currentScale = XMLoadFloat4x4(&scaling); 
-	}
+
+	XMMATRIX GetWM(); // returns a world matrix for storing in the worldMatrix variable
+
+	void AddTranslation(XMMATRIX X); //These 3 functions are for added features and optimisations that I am planning to implement
+	void AddRotaion(XMMATRIX Y);// But I am yet to decide how I wanna do this.
+	void AddScaling(XMMATRIX Z);
 };
