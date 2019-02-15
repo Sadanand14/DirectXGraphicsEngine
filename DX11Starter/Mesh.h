@@ -10,6 +10,7 @@ class Mesh
 public: 
 
 	Mesh(Vertex* vertextArray, int* intArray, int totalVertices, int totalIndices, ID3D11Device* device);
+	Mesh(char*);
 	~Mesh();
 	
 	ID3D11Buffer* GetVertexBuffer() { return vertexPointer; }

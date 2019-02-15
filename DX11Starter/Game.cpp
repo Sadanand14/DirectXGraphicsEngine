@@ -169,11 +169,11 @@ void Game::CreateBasicGeometry()
 	//Defined 3 separate meshes
 	Vertex vertices1[] =
 	{
-		{XMFLOAT3(-1.0f, +1.0f, +0.0f),green},//0
-		{XMFLOAT3(+1.0f, 1.0f, +0.0f),blue},//1
-		{XMFLOAT3(0.0f, 0.0f, +0.0f),red},//2
-		{XMFLOAT3(-1.0f, -1.0f, +0.0f),blue},//3
-		{XMFLOAT3(1.0f, -1.0f, +0.0f),green},//4
+		{XMFLOAT3(-1.0f, +1.0f, +0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//0
+		{XMFLOAT3(+1.0f, 1.0f, +0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//1
+		{XMFLOAT3(0.0f, 0.0f, +0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//2
+		{XMFLOAT3(-1.0f, -1.0f, +0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//3
+		{XMFLOAT3(1.0f, -1.0f, +0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//4
 	};
 
 	int indices1[] = {0,1,2,3,2,4,0,2,3,1,4,2};
@@ -182,13 +182,13 @@ void Game::CreateBasicGeometry()
 
 	Vertex vertices2[] =
 	{
-		{XMFLOAT3(-1.5f, +0.0f, +0.0f),green},//0
-		{XMFLOAT3(-1.0f, +1.0f, +0.0f),green},//1
-		{XMFLOAT3(-0.5f, +0.0f, +0.0f),red},//2
-		{XMFLOAT3(0.0f, -1.0f, +1.0f),blue},//3
-		{XMFLOAT3(0.5f, 0.0f, 0.0f),red},//4
-		{XMFLOAT3(1.0f, +1.0f, +0.0f),green},//5
-		{XMFLOAT3(1.5f, 0.0f, +0.0f),green},//6
+		{XMFLOAT3(-1.5f, +0.0f, +0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//0
+		{XMFLOAT3(-1.0f, +1.0f, +0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//1
+		{XMFLOAT3(-0.5f, +0.0f, +0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//2
+		{XMFLOAT3(0.0f, -1.0f, +1.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//3
+		{XMFLOAT3(0.5f, 0.0f, 0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//4
+		{XMFLOAT3(1.0f, +1.0f, +0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//5
+		{XMFLOAT3(1.5f, 0.0f, +0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//6
 	};
 
 	int indices2[] = { 0,1,2,2,4,3,4,5,6 };
@@ -197,10 +197,10 @@ void Game::CreateBasicGeometry()
 	
 	Vertex vertices3[] =
 	{
-		{XMFLOAT3(-1.0f, 0.0f, 0.0f),red},//0
-		{XMFLOAT3(1.0f, 0.0f, 0.0f),red},//1
-		{XMFLOAT3(0.0f, 3.0f, 0.0f),green},//2
-		{XMFLOAT3(0.0f, -3.0f, 0.0f),blue},//3
+		{XMFLOAT3(-1.0f, 0.0f, 0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//0
+		{XMFLOAT3(1.0f, 0.0f, 0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//1
+		{XMFLOAT3(0.0f, 3.0f, 0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//2
+		{XMFLOAT3(0.0f, -3.0f, 0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//3
 	};
 
 	int indices3[] = { 0,2,1,1,3,0 };
