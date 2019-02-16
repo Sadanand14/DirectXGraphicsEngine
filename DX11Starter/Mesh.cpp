@@ -3,11 +3,11 @@
 #include "Mesh.h"
 #include <vector>
 #include <fstream>
+#include <iostream>
 using namespace DirectX;
-Mesh::Mesh(Vertex* vertextArray, int* intArray, int totalVertices, int totalIndices, ID3D11Device* device)
+
+void Mesh::CreatingBuffer(Vertex* vertextArray, UINT* intArray, int totalVertices, int totalIndices, ID3D11Device* device)
 {
-	indexCount = totalIndices;
-	//creating buffer for the vertices
 	D3D11_BUFFER_DESC vbd;
 	vbd.Usage = D3D11_USAGE_IMMUTABLE;
 	vbd.ByteWidth = sizeof(Vertex) * 7;// I modified this so that I wouldn't need to define 4 separate meshes to create 4 objects      
@@ -32,14 +32,25 @@ Mesh::Mesh(Vertex* vertextArray, int* intArray, int totalVertices, int totalIndi
 	device->CreateBuffer(&ibd, &initialIndexData, &indexPointer);
 }
 
-Mesh::Mesh(char* objFile)
+Mesh::Mesh(Vertex* vertextArray, UINT* intArray, int totalVertices, int totalIndices, ID3D11Device* device)
+{
+	indexCount = totalIndices;
+	//creating buffer for the vertices
+	CreatingBuffer(vertextArray, intArray, totalVertices, totalIndices, device);
+}
+
+Mesh::Mesh(char* objFile, ID3D11Device* device)
 {
 	// File input object
 	std::ifstream obj(objFile);
 
 	// Check for successful open
 	if (!obj.is_open())
+	{
+		std::cout << "File couldn't be opened" << std::endl;
 		return;
+	}
+		
 
 	// Variables used while reading the file
 	std::vector<XMFLOAT3> positions;     // Positions from the file
@@ -189,7 +200,8 @@ Mesh::Mesh(char* objFile)
 
 	// Close the file and create the actual buffers
 	obj.close();
-
+	std::cout << verts.size() << "  " << indices.size() << std::endl;
+	CreatingBuffer(&verts[0], &indices[0], verts.size(), indices.size(), device);
 
 	// - At this point, "verts" is a vector of Vertex structs, and can be used
 	//    directly to create a vertex buffer:  &verts[0] is the address of the first vert
@@ -208,3 +220,4 @@ Mesh::~Mesh()
 	if (vertexPointer) { vertexPointer->Release();}
 	if (indexPointer) { indexPointer->Release();}
 }
+

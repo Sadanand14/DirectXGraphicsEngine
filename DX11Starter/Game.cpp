@@ -176,7 +176,7 @@ void Game::CreateBasicGeometry()
 		{XMFLOAT3(1.0f, -1.0f, +0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//4
 	};
 
-	int indices1[] = {0,1,2,3,2,4,0,2,3,1,4,2};
+	UINT indices1[] = {0,1,2,3,2,4,0,2,3,1,4,2};
 
 	mesh1 = new Mesh(vertices1, indices1, 5, 12, device);
 
@@ -191,7 +191,7 @@ void Game::CreateBasicGeometry()
 		{XMFLOAT3(1.5f, 0.0f, +0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//6
 	};
 
-	int indices2[] = { 0,1,2,2,4,3,4,5,6 };
+	UINT indices2[] = { 0,1,2,2,4,3,4,5,6 };
 
 	mesh2 = new Mesh(vertices2, indices2, 7, 9, device);
 	
@@ -203,42 +203,45 @@ void Game::CreateBasicGeometry()
 		{XMFLOAT3(0.0f, -3.0f, 0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//3
 	};
 
-	int indices3[] = { 0,2,1,1,3,0 };
+	UINT indices3[] = { 0,2,1,1,3,0 };
 
 	mesh3 = new Mesh(vertices3, indices3, 4, 6, device);
 
 	material = new Materials(vertexShader, pixelShader);//had to create a dummy material so compiler wont throw an error
 
 	//Defined 5 separate entites making use of the above defined meshes and pushed them into a vector
-	XMMATRIX trans = XMMatrixTranslation(-2.0f, 1.0f, 0.0f);
-	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.2f, 0.0f, 0.0f);
-	XMMATRIX scale = XMMatrixScaling(0.5f,0.5f,0.0f);
+	XMMATRIX trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
+	XMMATRIX scale = XMMatrixScaling(10.0f,10.0f,10.0f);
 	
-	entityList.push_back(Entity(trans, rot, scale, mesh1, material));
-	
-	trans = XMMatrixTranslation(-2.0f, -1.0f, 0.0f);
-	rot = XMMatrixRotationRollPitchYaw(0.0f,-0.2f,0.0f);
-	scale = XMMatrixScaling(0.5f, 1.1f, 0.0f);
-	entityList.push_back(Entity(trans, rot, scale, mesh1, material));
-	
-	trans = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
-	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 1.5f); 
-	scale = XMMatrixScaling(0.5f, 2.0f, 0.0f);
-	
-	entityList.push_back(Entity(trans, rot, scale, mesh2, material));
+	//entityList.push_back(Entity(trans, rot, scale, mesh1, material));
+	//
+	//trans = XMMatrixTranslation(-2.0f, -1.0f, 0.0f);
+	//rot = XMMatrixRotationRollPitchYaw(0.0f,-0.2f,0.0f);
+	//scale = XMMatrixScaling(0.5f, 1.1f, 0.0f);
+	//entityList.push_back(Entity(trans, rot, scale, mesh1, material));
+	//
+	//trans = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
+	//rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 1.5f); 
+	//scale = XMMatrixScaling(0.5f, 2.0f, 0.0f);
+	//
+	//entityList.push_back(Entity(trans, rot, scale, mesh2, material));
 
-	trans = XMMatrixTranslation(3.0f, -1.0f, 0.0f);
-	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 1.3f);
-	scale = XMMatrixScaling(0.4f, 0.3f, 0.0f);
-	
-	entityList.push_back(Entity(trans, rot, scale, mesh2, material));
+	//trans = XMMatrixTranslation(3.0f, -1.0f, 0.0f);
+	//rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 1.3f);
+	//scale = XMMatrixScaling(0.4f, 0.3f, 0.0f);
+	//
+	//entityList.push_back(Entity(trans, rot, scale, mesh2, material));
 
-	trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
-	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.25f);
-	scale = XMMatrixScaling(0.5f, 0.8f, 0.0f);
-	
-	entityList.push_back(Entity(trans, rot, scale, mesh3, material));
-	std::cout << entityList.size() << std::endl;
+	//trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+	//rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.25f);
+	//scale = XMMatrixScaling(0.5f, 0.8f, 0.0f);
+	//
+	//entityList.push_back(Entity(trans, rot, scale, mesh3, material));
+	////std::cout << entityList.size() << std::endl;
+
+	mesh4 = new Mesh("sphere.obj", device);
+	entityList.push_back(Entity(trans, rot, scale, mesh4, material));
 }
 
 
