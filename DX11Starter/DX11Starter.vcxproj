@@ -125,6 +125,7 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Lights.h" />
     <ClInclude Include="Materials.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="SimpleShader.h" />

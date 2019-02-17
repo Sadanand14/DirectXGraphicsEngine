@@ -7,7 +7,7 @@
 #include <d3d11.h>
 #include "Entity.h"
 #include "Camera.h"
-
+#include "Lights.h"
 
 class Game 
 	: public DXCore
@@ -26,7 +26,9 @@ public:
 	//Entity *entity1, *entity2, *entity3, *entity4, *entity5;
 	//Creating 4 mesh variables
 	Mesh *mesh1 = nullptr, *mesh2 = nullptr, *mesh3 = nullptr, *mesh4 = nullptr;
-	
+
+	//creating Directional light
+	DirectionalLight dL;
 	
 	// Overridden setup and game loop methods, which
 	// will be called automatically

@@ -10,7 +10,10 @@
 // For the DirectX Math library
 using namespace DirectX;
 
+namespace cherno 
+{
 
+}
 
 // --------------------------------------------------------
 // Constructor
@@ -86,6 +89,22 @@ void Game::Init()
 	CreateMatrices();
 	CreateBasicGeometry();
 
+	//intitalizing the directional light structure defined in game.h
+	dL.ambientColor.x = 0.1f;
+	dL.ambientColor.y = 0.1f;
+	dL.ambientColor.z = 0.1f;
+	dL.ambientColor.w = 1.0f;
+
+	dL.diffuseColor.x = 0;
+	dL.diffuseColor.y = 0;
+	dL.diffuseColor.z = 1;
+	dL.diffuseColor.w = 1;
+
+	dL.direction.x = 1;
+	dL.direction.y = -1;
+	dL.direction.x = 0;
+
+	pixelShader->SetData("light", &dL, sizeof(DirectionalLight));
 	// Tell the input assembler stage of the pipeline what kind of
 	// geometric primitives (points, lines or triangles) we want to draw.  
 	// Essentially: "What kind of shape should the GPU draw with our data?"
@@ -212,21 +231,21 @@ void Game::CreateBasicGeometry()
 	//Defined 5 separate entites making use of the above defined meshes and pushed them into a vector
 	XMMATRIX trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
 	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
-	XMMATRIX scale = XMMatrixScaling(10.0f,10.0f,10.0f);
+	XMMATRIX scale = XMMatrixScaling(1.0f,1.0f,1.0f);
 	
-	//entityList.push_back(Entity(trans, rot, scale, mesh1, material));
-	//
-	//trans = XMMatrixTranslation(-2.0f, -1.0f, 0.0f);
-	//rot = XMMatrixRotationRollPitchYaw(0.0f,-0.2f,0.0f);
-	//scale = XMMatrixScaling(0.5f, 1.1f, 0.0f);
-	//entityList.push_back(Entity(trans, rot, scale, mesh1, material));
-	//
-	//trans = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
-	//rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 1.5f); 
-	//scale = XMMatrixScaling(0.5f, 2.0f, 0.0f);
-	//
-	//entityList.push_back(Entity(trans, rot, scale, mesh2, material));
-
+	/*entityList.push_back(Entity(trans, rot, scale, mesh1, material));
+	
+	trans = XMMatrixTranslation(-2.0f, -1.0f, 0.0f);
+	rot = XMMatrixRotationRollPitchYaw(0.0f,-0.2f,0.0f);
+	scale = XMMatrixScaling(0.5f, 1.1f, 0.0f);
+	entityList.push_back(Entity(trans, rot, scale, mesh1, material));
+	
+	trans = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
+	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 1.5f); 
+	scale = XMMatrixScaling(0.5f, 2.0f, 0.0f);
+	
+	entityList.push_back(Entity(trans, rot, scale, mesh2, material));
+*/
 	//trans = XMMatrixTranslation(3.0f, -1.0f, 0.0f);
 	//rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 1.3f);
 	//scale = XMMatrixScaling(0.4f, 0.3f, 0.0f);
@@ -240,7 +259,11 @@ void Game::CreateBasicGeometry()
 	//entityList.push_back(Entity(trans, rot, scale, mesh3, material));
 	////std::cout << entityList.size() << std::endl;
 
-	mesh4 = new Mesh("sphere.obj", device);
+	trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
+	scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
+	
+	mesh4 = new Mesh("cone.obj", device);
 	entityList.push_back(Entity(trans, rot, scale, mesh4, material));
 }
 
