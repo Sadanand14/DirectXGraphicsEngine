@@ -1,2 +1,14 @@
-﻿  Game.cpp
-  DX11Starter.vcxproj -> D:\GGP\Game-Graphics-Programming-Assignment\x64\Debug\DX11Starter.exe
+﻿  compilation object save succeeded; see C:\Users\sadan\Desktop\Git Upload\Game-Graphics-Programming-Assignment\x64\Debug\PixelShader.cso
+C:\Users\sadan\Desktop\Git Upload\Game-Graphics-Programming-Assignment\DX11Starter\VertexShader.hlsl(58,18-45): warning X3578: Output value 'main' is not completely initialized
+  
+  compilation object save succeeded; see C:\Users\sadan\Desktop\Git Upload\Game-Graphics-Programming-Assignment\x64\Debug\VertexShader.cso
+  DXCore.cpp
+  Game.cpp
+  Main.cpp
+  SimpleShader.cpp
+  Camera.cpp
+  Materials.cpp
+  Entity.cpp
+  Mesh.cpp
+  Generating Code...
+  DX11Starter.vcxproj -> C:\Users\sadan\Desktop\Git Upload\Game-Graphics-Programming-Assignment\x64\Debug\DX11Starter.exe

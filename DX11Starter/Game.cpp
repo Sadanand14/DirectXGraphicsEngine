@@ -188,53 +188,6 @@ void Game::CreateMatrices()
 
 void Game::CreateBasicGeometry()
 {
-	// Create some temporary variables to represent colors
-	// - Not necessary, just makes things more readable
-	XMFLOAT4 red = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
-	XMFLOAT4 green = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
-	XMFLOAT4 blue = XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
-
-	//Defined 3 separate meshes
-	Vertex vertices1[] =
-	{
-		{XMFLOAT3(-1.0f, +1.0f, +0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//0
-		{XMFLOAT3(+1.0f, 1.0f, +0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//1
-		{XMFLOAT3(0.0f, 0.0f, +0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//2
-		{XMFLOAT3(-1.0f, -1.0f, +0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//3
-		{XMFLOAT3(1.0f, -1.0f, +0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//4
-	};
-
-	UINT indices1[] = {0,1,2,3,2,4,0,2,3,1,4,2};
-
-	mesh1 = new Mesh(vertices1, indices1, 5, 12, device);
-
-	Vertex vertices2[] =
-	{
-		{XMFLOAT3(-1.5f, +0.0f, +0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//0
-		{XMFLOAT3(-1.0f, +1.0f, +0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//1
-		{XMFLOAT3(-0.5f, +0.0f, +0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//2
-		{XMFLOAT3(0.0f, -1.0f, +1.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//3
-		{XMFLOAT3(0.5f, 0.0f, 0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//4
-		{XMFLOAT3(1.0f, +1.0f, +0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//5
-		{XMFLOAT3(1.5f, 0.0f, +0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//6
-	};
-
-	UINT indices2[] = { 0,1,2,2,4,3,4,5,6 };
-
-	mesh2 = new Mesh(vertices2, indices2, 7, 9, device);
-	
-	Vertex vertices3[] =
-	{
-		{XMFLOAT3(-1.0f, 0.0f, 0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//0
-		{XMFLOAT3(1.0f, 0.0f, 0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//1
-		{XMFLOAT3(0.0f, 3.0f, 0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//2
-		{XMFLOAT3(0.0f, -3.0f, 0.0f),XMFLOAT3(0.0f,0.0f,-1.0f),XMFLOAT2(0.0f,0.0f)},//3
-	};
-
-	UINT indices3[] = { 0,2,1,1,3,0 };
-
-	mesh3 = new Mesh(vertices3, indices3, 4, 6, device);
-
 	material = new Materials(vertexShader, pixelShader);//had to create a dummy material so compiler wont throw an error
 
 	XMMATRIX trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
@@ -243,6 +196,13 @@ void Game::CreateBasicGeometry()
 	
 	mesh4 = new Mesh("helix.obj", device);
 	entityList.push_back(Entity(trans, rot, scale, mesh4, material));
+
+	trans = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
+	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
+	scale = XMMatrixScaling(0.5f, 0.5f, 0.5f);
+
+	mesh3 = new Mesh("torus.obj", device);
+	entityList.push_back(Entity(trans, rot, scale, mesh3, material));
 }
 
 
@@ -271,6 +231,10 @@ void Game::Update(float deltaTime, float totalTime)
 {
 	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f,totalTime, totalTime);
 	entityList[0].SetRot(rot);
+
+	rot = XMMatrixRotationRollPitchYaw(totalTime, 0.0f, totalTime);
+	entityList[1].SetRot(rot);
+	
 	camera->Update(deltaTime);
 	// Quit if the escape key is pressed
 	if (GetAsyncKeyState(VK_ESCAPE))
