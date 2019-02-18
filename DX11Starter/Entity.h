@@ -6,6 +6,7 @@
 #include <d3dcompiler.h>
 #include "Game.h"
 #include "Materials.h"
+#include "Lights.h"
 
 using namespace DirectX;
 //creating an enitity class
@@ -30,7 +31,7 @@ public:
 
 	XMMATRIX GetWM(); // returns a world matrix for storing in the worldMatrix variable
 
-	void AddTranslation(XMMATRIX X); //These 3 functions are for added features and optimisations that I am planning to implement
-	void AddRotaion(XMMATRIX Y);// But I am yet to decide how I wanna do this.
-	void AddScaling(XMMATRIX Z);
+	//void AddTranslation(XMMATRIX X); //These 3 functions are for added features and optimisations that I am planning to implement
+	//void AddRotaion(XMMATRIX Y);// But I am yet to decide how I wanna do this.
+	//void AddScaling(XMMATRIX Z);
 };

@@ -4,8 +4,8 @@
 namespace DirectX {
 	struct DirectionalLight
 	{
-		XMFLOAT4 ambientColor;
-		XMFLOAT4 diffuseColor;
-		XMFLOAT4 direction;
+		XMFLOAT4 AmbientColor;
+		XMFLOAT4 DiffuseColor;
+		XMFLOAT3 Direction;
 	};
 }

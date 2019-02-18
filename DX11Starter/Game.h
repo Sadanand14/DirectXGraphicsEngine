@@ -28,7 +28,7 @@ public:
 	Mesh *mesh1 = nullptr, *mesh2 = nullptr, *mesh3 = nullptr, *mesh4 = nullptr;
 
 	//creating Directional light
-	DirectionalLight dL;
+	DirectionalLight light1,light2;
 	
 	// Overridden setup and game loop methods, which
 	// will be called automatically

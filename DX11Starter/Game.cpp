@@ -5,15 +5,11 @@
 #include <vector>
 #include "Camera.h"
 #include <iostream>
+#include "Lights.h"
 
 
 // For the DirectX Math library
 using namespace DirectX;
-
-namespace cherno 
-{
-
-}
 
 // --------------------------------------------------------
 // Constructor
@@ -90,21 +86,34 @@ void Game::Init()
 	CreateBasicGeometry();
 
 	//intitalizing the directional light structure defined in game.h
-	dL.ambientColor.x = 0.1f;
-	dL.ambientColor.y = 0.1f;
-	dL.ambientColor.z = 0.1f;
-	dL.ambientColor.w = 1.0f;
+	light1.AmbientColor.x = 0.1f;
+	light1.AmbientColor.y = 0.1f;
+	light1.AmbientColor.z = 0.1f;
+	light1.AmbientColor.w = 1.0f;
 
-	dL.diffuseColor.x = 0;
-	dL.diffuseColor.y = 0;
-	dL.diffuseColor.z = 1;
-	dL.diffuseColor.w = 1;
+	light1.DiffuseColor.x = 0.0f;
+	light1.DiffuseColor.y = 0.0f;
+	light1.DiffuseColor.z = 1.0f;
+	light1.DiffuseColor.w = 1.0f;
 
-	dL.direction.x = 1;
-	dL.direction.y = -1;
-	dL.direction.x = 0;
+	light1.Direction.x = 1.0f;
+	light1.Direction.y = -1.0f;
+	light1.Direction.z = 0.0f;
+	
+	light2.AmbientColor.x = 0.1f;
+	light2.AmbientColor.y = 0.1f;
+	light2.AmbientColor.z = 0.1f;
+	light2.AmbientColor.w = 1.0f;
 
-	pixelShader->SetData("light", &dL, sizeof(DirectionalLight));
+	light2.DiffuseColor.x = 1.0f;
+	light2.DiffuseColor.y = 0.0f;
+	light2.DiffuseColor.z = 0.0f;
+	light2.DiffuseColor.w = 1.0f;
+
+	light2.Direction.x = -1.0f;
+	light2.Direction.y = 1.0f;
+	light2.Direction.z = 0.0f;
+
 	// Tell the input assembler stage of the pipeline what kind of
 	// geometric primitives (points, lines or triangles) we want to draw.  
 	// Essentially: "What kind of shape should the GPU draw with our data?"
@@ -228,42 +237,11 @@ void Game::CreateBasicGeometry()
 
 	material = new Materials(vertexShader, pixelShader);//had to create a dummy material so compiler wont throw an error
 
-	//Defined 5 separate entites making use of the above defined meshes and pushed them into a vector
 	XMMATRIX trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
 	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
-	XMMATRIX scale = XMMatrixScaling(1.0f,1.0f,1.0f);
+	XMMATRIX scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
 	
-	/*entityList.push_back(Entity(trans, rot, scale, mesh1, material));
-	
-	trans = XMMatrixTranslation(-2.0f, -1.0f, 0.0f);
-	rot = XMMatrixRotationRollPitchYaw(0.0f,-0.2f,0.0f);
-	scale = XMMatrixScaling(0.5f, 1.1f, 0.0f);
-	entityList.push_back(Entity(trans, rot, scale, mesh1, material));
-	
-	trans = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
-	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 1.5f); 
-	scale = XMMatrixScaling(0.5f, 2.0f, 0.0f);
-	
-	entityList.push_back(Entity(trans, rot, scale, mesh2, material));
-*/
-	//trans = XMMatrixTranslation(3.0f, -1.0f, 0.0f);
-	//rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 1.3f);
-	//scale = XMMatrixScaling(0.4f, 0.3f, 0.0f);
-	//
-	//entityList.push_back(Entity(trans, rot, scale, mesh2, material));
-
-	//trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
-	//rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.25f);
-	//scale = XMMatrixScaling(0.5f, 0.8f, 0.0f);
-	//
-	//entityList.push_back(Entity(trans, rot, scale, mesh3, material));
-	////std::cout << entityList.size() << std::endl;
-
-	trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
-	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
-	scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
-	
-	mesh4 = new Mesh("cone.obj", device);
+	mesh4 = new Mesh("helix.obj", device);
 	entityList.push_back(Entity(trans, rot, scale, mesh4, material));
 }
 
@@ -291,6 +269,8 @@ void Game::OnResize()
 // --------------------------------------------------------
 void Game::Update(float deltaTime, float totalTime)
 {
+	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f,totalTime, totalTime);
+	entityList[0].SetRot(rot);
 	camera->Update(deltaTime);
 	// Quit if the escape key is pressed
 	if (GetAsyncKeyState(VK_ESCAPE))
@@ -355,7 +335,10 @@ void Game::Draw(float deltaTime, float totalTime)
 		vertexShader->SetMatrix4x4("world", worldMatrix);
 		vertexShader->SetMatrix4x4("view", camera->GetView());
 		vertexShader->SetMatrix4x4("projection", camera->GetProjection());
+		pixelShader->SetData("Light1", &light1, sizeof(DirectionalLight));
+		pixelShader->SetData("Light2", &light2, sizeof(DirectionalLight));
 		vertexShader->CopyAllBufferData();
+		pixelShader->CopyAllBufferData();
 		vertexShader->SetShader();
 		pixelShader->SetShader();
 		UINT stride = sizeof(Vertex);

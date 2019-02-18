@@ -9,7 +9,7 @@ using namespace DirectX;
 
 void Mesh::CreatingBuffer(Vertex* vertextArray, unsigned int* intArray, int totalVertices, int totalIndices, ID3D11Device* device)
 {
-	//indexCount = totalIndices;
+	indexCount = totalIndices;
 	D3D11_BUFFER_DESC vbd;
 	vbd.Usage = D3D11_USAGE_IMMUTABLE;
 	vbd.ByteWidth = sizeof(Vertex) * totalVertices;// I modified this so that I wouldn't need to define 4 separate meshes to create 4 objects      
