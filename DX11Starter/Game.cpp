@@ -6,7 +6,7 @@
 #include "Camera.h"
 #include <iostream>
 #include "Lights.h"
-
+#include "WICTextureLoader.h"
 
 // For the DirectX Math library
 using namespace DirectX;
@@ -54,6 +54,8 @@ Game::~Game()
 	// we've made in the Game class
 	if (vertexBuffer) { vertexBuffer->Release(); }
 	if (indexBuffer) { indexBuffer->Release(); }
+	shaderSrv->Release();
+	shaderSampler->Release();
 	//delete mesh1, mesh2, mesh3, mesh4,entity1, entity2, entity3, entity4, entity5, &entityList;
 	if (mesh1 != nullptr)
 		delete mesh1;
@@ -188,20 +190,34 @@ void Game::CreateMatrices()
 
 void Game::CreateBasicGeometry()
 {
-	material = new Materials(vertexShader, pixelShader);//had to create a dummy material so compiler wont throw an error
+	//Generating a texture resource view from the loaded texture
+	CreateWICTextureFromFile(device,context,L"Textures/Tileable3k.png",0,&shaderSrv);
+	samplerStruct = {};
+	
+	samplerStruct.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerStruct.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerStruct.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+
+	samplerStruct.Filter= D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+
+	samplerStruct.MaxLOD = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	
+	device->CreateSamplerState(&samplerStruct, &shaderSampler);
+	
+	material = new Materials(vertexShader, pixelShader, shaderSrv, shaderSampler);//had to create a dummy material so compiler wont throw an error
 
 	XMMATRIX trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
 	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
 	XMMATRIX scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
 	
-	mesh4 = new Mesh("helix.obj", device);
+	mesh4 = new Mesh("Models/helix.obj", device);
 	entityList.push_back(Entity(trans, rot, scale, mesh4, material));
 
 	trans = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
 	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
 	scale = XMMatrixScaling(0.5f, 0.5f, 0.5f);
 
-	mesh3 = new Mesh("torus.obj", device);
+	mesh3 = new Mesh("Models/torus.obj", device);
 	entityList.push_back(Entity(trans, rot, scale, mesh3, material));
 }
 
@@ -292,19 +308,27 @@ void Game::Draw(float deltaTime, float totalTime)
 		1.0f,
 		0);
 
+	//Passing in all the  lighting data to the pixelShader  
+	pixelShader->SetData("Light1", &light1, sizeof(DirectionalLight));
+	pixelShader->SetData("Light2", &light2, sizeof(DirectionalLight));
+	
+	pixelShader->SetSamplerState("Sampler", shaderSampler);
+	pixelShader->SetShaderResourceView("Texture", shaderSrv);
+	pixelShader->CopyAllBufferData();
+	pixelShader->SetShader();
+
 	//Looped all the sequences for loading the worldmatrix as well as loading the index and vertex buffers to the 
 	//GPU using a vector of entities.
 	for (int i = 0; i < entityList.size(); i++) {
 		XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(entityList[i].GetWM()));
-		vertexShader->SetMatrix4x4("world", worldMatrix);
-		vertexShader->SetMatrix4x4("view", camera->GetView());
-		vertexShader->SetMatrix4x4("projection", camera->GetProjection());
-		pixelShader->SetData("Light1", &light1, sizeof(DirectionalLight));
-		pixelShader->SetData("Light2", &light2, sizeof(DirectionalLight));
-		vertexShader->CopyAllBufferData();
-		pixelShader->CopyAllBufferData();
-		vertexShader->SetShader();
-		pixelShader->SetShader();
+
+		//Passing in all the VertexShader Data
+		entityList[i].GetMaterial()->GetVrtxptr()->SetMatrix4x4("world", worldMatrix);
+		entityList[i].GetMaterial()->GetVrtxptr()->SetMatrix4x4("view", camera->GetView());
+		entityList[i].GetMaterial()->GetVrtxptr()->SetMatrix4x4("projection", camera->GetProjection());
+		entityList[i].GetMaterial()->GetVrtxptr()->CopyAllBufferData();
+		entityList[i].GetMaterial()->GetVrtxptr()->SetShader();
+
 		UINT stride = sizeof(Vertex);
 		UINT offset = 0;
 		ID3D11Buffer *v1Buffer = entityList[i].GetMesh()->GetVertexBuffer();

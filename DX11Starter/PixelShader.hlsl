@@ -35,6 +35,9 @@ struct DirectionalLight
 	float3 Direction;
 };
 
+SamplerState Sampler : register(s0);
+Texture2D Texture : register(t0);
+
 cbuffer externalData: register(b0)
 {
 	DirectionalLight Light1;

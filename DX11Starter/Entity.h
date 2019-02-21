@@ -24,10 +24,14 @@ public:
 	void SetPos(XMMATRIX X) { XMStoreFloat4x4(&translation,X); }
 	void SetRot(XMMATRIX Y) { XMStoreFloat4x4(&rotation,Y); }
 	void SetScale(XMMATRIX Z) { XMStoreFloat4x4(&scaling,Z); }
+	void SetMesh(Mesh* a) { mesh = a; }
+	void SetMaterial(Materials* b) { material = b; }
+
 	XMFLOAT4X4 GetPos(){ return translation; }
 	XMFLOAT4X4 GetRot(){ return rotation; }
 	XMFLOAT4X4 GetScale(){ return scaling; }
 	Mesh* GetMesh() { return mesh; }
+	Materials* GetMaterial() { return  material; }
 
 	XMMATRIX GetWM(); // returns a world matrix for storing in the worldMatrix variable
 

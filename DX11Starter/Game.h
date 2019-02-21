@@ -27,6 +27,11 @@ public:
 	//Creating 4 mesh variables
 	Mesh *mesh1 = nullptr, *mesh2 = nullptr, *mesh3 = nullptr, *mesh4 = nullptr;
 
+	//Defining Shader Resources for textures
+	ID3D11ShaderResourceView* shaderSrv;
+	ID3D11SamplerState* shaderSampler;
+	D3D11_SAMPLER_DESC samplerStruct;
+
 	//creating Directional light
 	DirectionalLight light1,light2;
 	

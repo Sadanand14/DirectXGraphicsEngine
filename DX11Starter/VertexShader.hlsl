@@ -82,6 +82,7 @@ VertexToPixel main( VertexShaderInput input )
 	
 	output.Normal = mul(input.Normal,(float3x3)world);
 	
+	output.UV = input.UV;
 	//output.color = input.color;
 	// Whatever we return will make its way through the pipeline to the
 	// next programmable stage we're using (the pixel shader for now)
