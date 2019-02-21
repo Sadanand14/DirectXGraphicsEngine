@@ -36,7 +36,8 @@ struct DirectionalLight
 };
 
 SamplerState Sampler : register(s0);
-Texture2D Texture : register(t0);
+Texture2D Texture1 : register(t0);
+Texture2D Texture2 : register(t1);
 
 cbuffer externalData: register(b0)
 {
@@ -60,9 +61,9 @@ float4 main(VertexToPixel input) : SV_TARGET
 	// - This color (like most values passing through the rasterizer) is 
 	//   interpolated for each pixel between the corresponding vertices 
 	//   of the triangle we're rendering
-
-	float4 finalColor = CalculateLight(Light1,input.Normal) + CalculateLight(Light2,input.Normal);
-	return finalColor;
+	float4 surfaceColor = Texture1.Sample(Sampler,input.UV);
+	float3 finalColor = CalculateLight(Light1,input.Normal)*surfaceColor.rgb + CalculateLight(Light2,input.Normal)*surfaceColor.rgb;
+	return  float4(finalColor,1);
 	
 }
 

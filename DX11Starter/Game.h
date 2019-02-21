@@ -17,7 +17,7 @@ public:
 	Game(HINSTANCE hInstance);
 	~Game();
 
-	Materials* material;
+	Materials* material1,*material2;
 	//Camera instance created
 	Camera* camera;
 	// vector for storing different Entity instances
@@ -28,7 +28,7 @@ public:
 	Mesh *mesh1 = nullptr, *mesh2 = nullptr, *mesh3 = nullptr, *mesh4 = nullptr;
 
 	//Defining Shader Resources for textures
-	ID3D11ShaderResourceView* shaderSrv;
+	ID3D11ShaderResourceView *srv1,*srv2;
 	ID3D11SamplerState* shaderSampler;
 	D3D11_SAMPLER_DESC samplerStruct;
 

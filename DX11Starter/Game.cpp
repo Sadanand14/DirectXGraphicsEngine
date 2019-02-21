@@ -54,7 +54,8 @@ Game::~Game()
 	// we've made in the Game class
 	if (vertexBuffer) { vertexBuffer->Release(); }
 	if (indexBuffer) { indexBuffer->Release(); }
-	shaderSrv->Release();
+	srv1->Release();
+	srv2->Release();
 	shaderSampler->Release();
 	//delete mesh1, mesh2, mesh3, mesh4,entity1, entity2, entity3, entity4, entity5, &entityList;
 	if (mesh1 != nullptr)
@@ -65,8 +66,10 @@ Game::~Game()
 		delete mesh3;
 	if (mesh4 != nullptr)
 		delete mesh4;
-	if (material != nullptr)
-		delete material;
+	if (material1 != nullptr)
+		delete material1;
+	if (material2 != nullptr)
+		delete material2;
 	// Delete our simple shader objects, which
 	// will clean up their own internal DirectX stuff
 	delete vertexShader;
@@ -88,28 +91,28 @@ void Game::Init()
 	CreateBasicGeometry();
 
 	//intitalizing the directional light structure defined in game.h
-	light1.AmbientColor.x = 0.1f;
-	light1.AmbientColor.y = 0.1f;
-	light1.AmbientColor.z = 0.1f;
+	light1.AmbientColor.x = 1.0f;
+	light1.AmbientColor.y = 1.0f;
+	light1.AmbientColor.z = 1.0f;
 	light1.AmbientColor.w = 1.0f;
 
-	light1.DiffuseColor.x = 0.0f;
-	light1.DiffuseColor.y = 0.0f;
-	light1.DiffuseColor.z = 1.0f;
+	light1.DiffuseColor.x = 0.75f;
+	light1.DiffuseColor.y = 0.75f;
+	light1.DiffuseColor.z = 0.75f;
 	light1.DiffuseColor.w = 1.0f;
 
 	light1.Direction.x = 1.0f;
 	light1.Direction.y = -1.0f;
 	light1.Direction.z = 0.0f;
 	
-	light2.AmbientColor.x = 0.1f;
-	light2.AmbientColor.y = 0.1f;
-	light2.AmbientColor.z = 0.1f;
+	light2.AmbientColor.x = 1.0f;
+	light2.AmbientColor.y = 1.0f;
+	light2.AmbientColor.z = 1.0f;
 	light2.AmbientColor.w = 1.0f;
 
-	light2.DiffuseColor.x = 1.0f;
-	light2.DiffuseColor.y = 0.0f;
-	light2.DiffuseColor.z = 0.0f;
+	light2.DiffuseColor.x = 0.75f;
+	light2.DiffuseColor.y = 0.75f;
+	light2.DiffuseColor.z = 0.75f;
 	light2.DiffuseColor.w = 1.0f;
 
 	light2.Direction.x = -1.0f;
@@ -191,34 +194,36 @@ void Game::CreateMatrices()
 void Game::CreateBasicGeometry()
 {
 	//Generating a texture resource view from the loaded texture
-	CreateWICTextureFromFile(device,context,L"Textures/Tileable3k.png",0,&shaderSrv);
+	CreateWICTextureFromFile(device,context,L"Textures/Tileable3k.png",0,&srv1);
+	CreateWICTextureFromFile(device,context,L"Textures/Tileable6k.png",0,&srv2);
 	samplerStruct = {};
 	
 	samplerStruct.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerStruct.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerStruct.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 
-	samplerStruct.Filter= D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerStruct.Filter= D3D11_FILTER_ANISOTROPIC;
 
 	samplerStruct.MaxLOD = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	
 	device->CreateSamplerState(&samplerStruct, &shaderSampler);
 	
-	material = new Materials(vertexShader, pixelShader, shaderSrv, shaderSampler);//had to create a dummy material so compiler wont throw an error
+	material1 = new Materials(vertexShader, pixelShader, srv1, shaderSampler);
+	material2 = new Materials(vertexShader, pixelShader, srv2, shaderSampler);
 
 	XMMATRIX trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
 	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
 	XMMATRIX scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
 	
 	mesh4 = new Mesh("Models/helix.obj", device);
-	entityList.push_back(Entity(trans, rot, scale, mesh4, material));
+	entityList.push_back(Entity(trans, rot, scale, mesh4, material1));
 
 	trans = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
 	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
 	scale = XMMatrixScaling(0.5f, 0.5f, 0.5f);
 
 	mesh3 = new Mesh("Models/torus.obj", device);
-	entityList.push_back(Entity(trans, rot, scale, mesh3, material));
+	entityList.push_back(Entity(trans, rot, scale, mesh3, material2));
 }
 
 
@@ -313,7 +318,8 @@ void Game::Draw(float deltaTime, float totalTime)
 	pixelShader->SetData("Light2", &light2, sizeof(DirectionalLight));
 	
 	pixelShader->SetSamplerState("Sampler", shaderSampler);
-	pixelShader->SetShaderResourceView("Texture", shaderSrv);
+	pixelShader->SetShaderResourceView("Texture1", srv1);
+	pixelShader->SetShaderResourceView("Texture2", srv1);
 	pixelShader->CopyAllBufferData();
 	pixelShader->SetShader();
 
