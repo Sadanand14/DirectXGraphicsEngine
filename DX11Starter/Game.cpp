@@ -216,14 +216,14 @@ void Game::CreateBasicGeometry()
 	XMMATRIX scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
 	
 	mesh4 = new Mesh("Models/helix.obj", device);
-	entityList.push_back(Entity(trans, rot, scale, mesh4, material1));
+	entityList.push_back(Entity(trans, rot, scale, mesh4, material1,light1));
 
 	trans = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
 	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
 	scale = XMMatrixScaling(0.5f, 0.5f, 0.5f);
 
 	mesh3 = new Mesh("Models/torus.obj", device);
-	entityList.push_back(Entity(trans, rot, scale, mesh3, material2));
+	entityList.push_back(Entity(trans, rot, scale, mesh3, material2,light2));
 }
 
 
@@ -329,11 +329,20 @@ void Game::Draw(float deltaTime, float totalTime)
 		XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(entityList[i].GetWM()));
 
 		//Passing in all the VertexShader Data
-		entityList[i].GetMaterial()->GetVrtxptr()->SetMatrix4x4("world", worldMatrix);
-		entityList[i].GetMaterial()->GetVrtxptr()->SetMatrix4x4("view", camera->GetView());
-		entityList[i].GetMaterial()->GetVrtxptr()->SetMatrix4x4("projection", camera->GetProjection());
-		entityList[i].GetMaterial()->GetVrtxptr()->CopyAllBufferData();
-		entityList[i].GetMaterial()->GetVrtxptr()->SetShader();
+		SimpleVertexShader* vPointer= entityList[i].GetMaterial()->GetVrtxptr();
+		vPointer->SetMatrix4x4("world", worldMatrix);
+		vPointer->SetMatrix4x4("view", camera->GetView());
+		vPointer->SetMatrix4x4("projection", camera->GetProjection());
+		vPointer->CopyAllBufferData();
+		vPointer->SetShader();
+
+		//Passing data into the pixel Shader
+		/*SimplePixelShader* pPointer = entityList[i].GetMaterial()->GetPxlptr();
+		pPointer->SetData("Light"+i,&entityList[i].GetLight(), sizeof(DirectionalLight));
+		pPointer->SetSamplerState("Sampler"+i, entityList[i].GetMaterial()->GetSamplerState());
+		pPointer->SetShaderResourceView("Texture"+i, entityList[i].GetMaterial()->GetSRV());
+		pPointer->CopyAllBufferData();
+		pPointer->SetShader();*/
 
 		UINT stride = sizeof(Vertex);
 		UINT offset = 0;

@@ -5,7 +5,7 @@
 #include <DirectXMath.h>
 #include <d3dcompiler.h>
 #include "Game.h"
-
+#include "Lights.h"
 class Materials 
 {
 	SimpleVertexShader* vShader = nullptr;

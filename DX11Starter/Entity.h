@@ -16,9 +16,10 @@ class Entity
 	XMFLOAT4X4 translation, rotation, scaling; // Guess this is pretty obvious
 	Mesh *mesh;
 	Materials* material;
+	DirectionalLight light;
 	//static float dT,tT; //static variables representing delta time and totalt time, respectively, for the all entity objects to use.
 public:
-	Entity(XMMATRIX a, XMMATRIX b, XMMATRIX c, Mesh* d, Materials* e);
+	Entity(XMMATRIX a, XMMATRIX b, XMMATRIX c, Mesh* d, Materials* e, DirectionalLight f);
 	~Entity();
 	
 	void SetPos(XMMATRIX X) { XMStoreFloat4x4(&translation,X); }
@@ -26,12 +27,14 @@ public:
 	void SetScale(XMMATRIX Z) { XMStoreFloat4x4(&scaling,Z); }
 	void SetMesh(Mesh* a) { mesh = a; }
 	void SetMaterial(Materials* b) { material = b; }
+	void SetLight(DirectionalLight lit) { light = lit; }
 
 	XMFLOAT4X4 GetPos(){ return translation; }
 	XMFLOAT4X4 GetRot(){ return rotation; }
 	XMFLOAT4X4 GetScale(){ return scaling; }
 	Mesh* GetMesh() { return mesh; }
 	Materials* GetMaterial() { return  material; }
+	DirectionalLight GetLight() { return light; }
 
 	XMMATRIX GetWM(); // returns a world matrix for storing in the worldMatrix variable
 
