@@ -83,41 +83,17 @@ Game::~Game()
 // --------------------------------------------------------
 void Game::Init()
 {
+
 	// Helper methods for loading shaders, creating some basic
 	// geometry to draw and some simple camera matrices.
 	//  - You'll be expanding and/or replacing these later
 	LoadShaders();
 	CreateMatrices();
+	Setmodels();
 	CreateBasicGeometry();
 
 	//intitalizing the directional light structure defined in game.h
-	light1.AmbientColor.x = 0.1f;
-	light1.AmbientColor.y = 0.1f;
-	light1.AmbientColor.z = 0.1f;
-	light1.AmbientColor.w = 1.0f;
-
-	light1.DiffuseColor.x = 1.0f;
-	light1.DiffuseColor.y = 1.0f;
-	light1.DiffuseColor.z = 1.0f;
-	light1.DiffuseColor.w = 1.0f;
-
-	light1.Direction.x = 1.0f;
-	light1.Direction.y = -1.0f;
-	light1.Direction.z = 0.0f;
 	
-	light2.AmbientColor.x = 0.1f;
-	light2.AmbientColor.y = 0.1f;
-	light2.AmbientColor.z = 0.1f;
-	light2.AmbientColor.w = 1.0f;
-
-	light2.DiffuseColor.x = 0.0f;
-	light2.DiffuseColor.y = 0.0f;
-	light2.DiffuseColor.z = 1.0f;
-	light2.DiffuseColor.w = 1.0f;
-
-	light2.Direction.x = -1.0f;
-	light2.Direction.y = 1.0f;
-	light2.Direction.z = 0.0f;
 
 	// Tell the input assembler stage of the pipeline what kind of
 	// geometric primitives (points, lines or triangles) we want to draw.  
@@ -185,32 +161,63 @@ void Game::CreateMatrices()
 }
 
 
-// --------------------------------------------------------
-// Creates the geometry we're going to draw - a single triangle for now
-// --------------------------------------------------------
 
-//Doing linear interpolation between
 
-void Game::CreateBasicGeometry()
+void Game::Setmodels() 
 {
+	light1.AmbientColor.x = 0.1f;
+	light1.AmbientColor.y = 0.1f;
+	light1.AmbientColor.z = 0.1f;
+	light1.AmbientColor.w = 1.0f;
+
+	light1.DiffuseColor.x = 1.0f;
+	light1.DiffuseColor.y = 1.0f;
+	light1.DiffuseColor.z = 1.0f;
+	light1.DiffuseColor.w = 1.0f;
+
+	light1.Direction.x = 1.0f;
+	light1.Direction.y = -1.0f;
+	light1.Direction.z = 0.0f;
+
+	light2.AmbientColor.x = 0.1f;
+	light2.AmbientColor.y = 0.1f;
+	light2.AmbientColor.z = 0.1f;
+	light2.AmbientColor.w = 1.0f;
+
+	light2.DiffuseColor.x = 0.0f;
+	light2.DiffuseColor.y = 0.0f;
+	light2.DiffuseColor.z = 1.0f;
+	light2.DiffuseColor.w = 1.0f;
+
+	light2.Direction.x = -1.0f;
+	light2.Direction.y = 1.0f;
+	light2.Direction.z = 0.0f;
+
 	//Generating a texture resource view from the loaded texture
-	CreateWICTextureFromFile(device,context,L"Textures/Image1.JPG",0,&srv1);
-	CreateWICTextureFromFile(device,context,L"Textures/Image2.JPG",0,&srv2);
+	CreateWICTextureFromFile(device, context, L"Textures/Image1.JPG", 0, &srv1);
+	CreateWICTextureFromFile(device, context, L"Textures/Image2.JPG", 0, &srv2);
 	samplerStruct = {};
-	
+
 	samplerStruct.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerStruct.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerStruct.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 
-	samplerStruct.Filter= D3D11_FILTER_ANISOTROPIC;
+	samplerStruct.Filter = D3D11_FILTER_ANISOTROPIC;
 
 	samplerStruct.MaxLOD = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	
+
 	device->CreateSamplerState(&samplerStruct, &shaderSampler);
-	
+
 	material1 = new Materials(vertexShader, pixelShader, srv1, shaderSampler);
 	material2 = new Materials(vertexShader, pixelShader, srv2, shaderSampler);
+}
 
+// --------------------------------------------------------
+// Creates the geometry we're going to draw - a single triangle for now
+// --------------------------------------------------------
+
+void Game::CreateBasicGeometry()
+{
 	XMMATRIX trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
 	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
 	XMMATRIX scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
@@ -313,16 +320,7 @@ void Game::Draw(float deltaTime, float totalTime)
 		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
 		1.0f,
 		0);
-
-	//Passing in all the  lighting data to the pixelShader  
-	
-	//pixelShader->SetData("Light", &light1, sizeof(DirectionalLight));
-	
-	//pixelShader->SetSamplerState("Sampler", shaderSampler);
-	//pixelShader->SetShaderResourceView("Texture", srv1);
-	//pixelShader->CopyAllBufferData();
-	//pixelShader->SetShader();
-
+	 
 	//Looped all the sequences for loading the worldmatrix as well as loading the index and vertex buffers to the 
 	//GPU using a vector of entities.
 
@@ -339,10 +337,9 @@ void Game::Draw(float deltaTime, float totalTime)
 
 		//Passing data into the pixel Shader
 		SimplePixelShader* pPointer = entityList[i].GetMaterial()->GetPxlptr();
-		DirectionalLight* tempLight = entityList[i].GetLight();
 		ID3D11SamplerState* sampler = entityList[i].GetMaterial()->GetSamplerState();
 		ID3D11ShaderResourceView* srv = entityList[i].GetMaterial()->GetSRV();
-		pPointer->SetData("Light",tempLight, sizeof(DirectionalLight));
+		pPointer->SetData("Light",&entityList[i].GetLight(), sizeof(DirectionalLight));
 		pPointer->SetSamplerState("Sampler", sampler);
 		pPointer->SetShaderResourceView("Texture", srv);
 		pPointer->CopyAllBufferData();

@@ -34,7 +34,7 @@ public:
 	inline XMFLOAT4X4 GetScale(){ return scaling; }
 	inline Mesh* GetMesh() { return mesh; }
 	inline Materials* GetMaterial() {return material; }
-	inline DirectionalLight* GetLight() { return &light; }
+	inline DirectionalLight GetLight() { return light; }
 
 	XMMATRIX GetWM(); // returns a world matrix for storing in the worldMatrix variable
 
