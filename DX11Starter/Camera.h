@@ -17,8 +17,8 @@ public:
 	Camera(float width, float height);
 	~Camera();
 	void Update(float deltaTime);
-	XMFLOAT4X4 GetView() { return veiwMatrix; }
-	XMFLOAT4X4 GetProjection() { return projectionMatrix; }
+	inline XMFLOAT4X4 GetView() { return veiwMatrix; }
+	inline XMFLOAT4X4 GetProjection() { return projectionMatrix; }
 	void MoveForward();
 	void MoveBackward();
 	void MoveLeft();

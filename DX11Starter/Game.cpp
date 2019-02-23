@@ -91,28 +91,28 @@ void Game::Init()
 	CreateBasicGeometry();
 
 	//intitalizing the directional light structure defined in game.h
-	light1.AmbientColor.x = 1.0f;
-	light1.AmbientColor.y = 1.0f;
-	light1.AmbientColor.z = 1.0f;
+	light1.AmbientColor.x = 0.1f;
+	light1.AmbientColor.y = 0.1f;
+	light1.AmbientColor.z = 0.1f;
 	light1.AmbientColor.w = 1.0f;
 
-	light1.DiffuseColor.x = 0.75f;
-	light1.DiffuseColor.y = 0.75f;
-	light1.DiffuseColor.z = 0.75f;
+	light1.DiffuseColor.x = 1.0f;
+	light1.DiffuseColor.y = 1.0f;
+	light1.DiffuseColor.z = 1.0f;
 	light1.DiffuseColor.w = 1.0f;
 
 	light1.Direction.x = 1.0f;
 	light1.Direction.y = -1.0f;
 	light1.Direction.z = 0.0f;
 	
-	light2.AmbientColor.x = 1.0f;
-	light2.AmbientColor.y = 1.0f;
-	light2.AmbientColor.z = 1.0f;
+	light2.AmbientColor.x = 0.1f;
+	light2.AmbientColor.y = 0.1f;
+	light2.AmbientColor.z = 0.1f;
 	light2.AmbientColor.w = 1.0f;
 
-	light2.DiffuseColor.x = 0.75f;
-	light2.DiffuseColor.y = 0.75f;
-	light2.DiffuseColor.z = 0.75f;
+	light2.DiffuseColor.x = 0.0f;
+	light2.DiffuseColor.y = 0.0f;
+	light2.DiffuseColor.z = 1.0f;
 	light2.DiffuseColor.w = 1.0f;
 
 	light2.Direction.x = -1.0f;
@@ -194,8 +194,8 @@ void Game::CreateMatrices()
 void Game::CreateBasicGeometry()
 {
 	//Generating a texture resource view from the loaded texture
-	CreateWICTextureFromFile(device,context,L"Textures/Tileable3k.png",0,&srv1);
-	CreateWICTextureFromFile(device,context,L"Textures/Tileable6k.png",0,&srv2);
+	CreateWICTextureFromFile(device,context,L"Textures/Image1.JPG",0,&srv1);
+	CreateWICTextureFromFile(device,context,L"Textures/Image2.JPG",0,&srv2);
 	samplerStruct = {};
 	
 	samplerStruct.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -224,6 +224,7 @@ void Game::CreateBasicGeometry()
 
 	mesh3 = new Mesh("Models/torus.obj", device);
 	entityList.push_back(Entity(trans, rot, scale, mesh3, material2,light2));
+
 }
 
 
@@ -314,17 +315,17 @@ void Game::Draw(float deltaTime, float totalTime)
 		0);
 
 	//Passing in all the  lighting data to the pixelShader  
-	pixelShader->SetData("Light1", &light1, sizeof(DirectionalLight));
-	pixelShader->SetData("Light2", &light2, sizeof(DirectionalLight));
 	
-	pixelShader->SetSamplerState("Sampler", shaderSampler);
-	pixelShader->SetShaderResourceView("Texture1", srv1);
-	pixelShader->SetShaderResourceView("Texture2", srv1);
-	pixelShader->CopyAllBufferData();
-	pixelShader->SetShader();
+	//pixelShader->SetData("Light", &light1, sizeof(DirectionalLight));
+	
+	//pixelShader->SetSamplerState("Sampler", shaderSampler);
+	//pixelShader->SetShaderResourceView("Texture", srv1);
+	//pixelShader->CopyAllBufferData();
+	//pixelShader->SetShader();
 
 	//Looped all the sequences for loading the worldmatrix as well as loading the index and vertex buffers to the 
 	//GPU using a vector of entities.
+
 	for (int i = 0; i < entityList.size(); i++) {
 		XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(entityList[i].GetWM()));
 
@@ -337,12 +338,15 @@ void Game::Draw(float deltaTime, float totalTime)
 		vPointer->SetShader();
 
 		//Passing data into the pixel Shader
-		/*SimplePixelShader* pPointer = entityList[i].GetMaterial()->GetPxlptr();
-		pPointer->SetData("Light"+i,&entityList[i].GetLight(), sizeof(DirectionalLight));
-		pPointer->SetSamplerState("Sampler"+i, entityList[i].GetMaterial()->GetSamplerState());
-		pPointer->SetShaderResourceView("Texture"+i, entityList[i].GetMaterial()->GetSRV());
+		SimplePixelShader* pPointer = entityList[i].GetMaterial()->GetPxlptr();
+		DirectionalLight* tempLight = entityList[i].GetLight();
+		ID3D11SamplerState* sampler = entityList[i].GetMaterial()->GetSamplerState();
+		ID3D11ShaderResourceView* srv = entityList[i].GetMaterial()->GetSRV();
+		pPointer->SetData("Light",tempLight, sizeof(DirectionalLight));
+		pPointer->SetSamplerState("Sampler", sampler);
+		pPointer->SetShaderResourceView("Texture", srv);
 		pPointer->CopyAllBufferData();
-		pPointer->SetShader();*/
+		pPointer->SetShader();
 
 		UINT stride = sizeof(Vertex);
 		UINT offset = 0;

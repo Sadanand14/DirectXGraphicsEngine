@@ -22,19 +22,19 @@ public:
 	Entity(XMMATRIX a, XMMATRIX b, XMMATRIX c, Mesh* d, Materials* e, DirectionalLight f);
 	~Entity();
 	
-	void SetPos(XMMATRIX X) { XMStoreFloat4x4(&translation,X); }
-	void SetRot(XMMATRIX Y) { XMStoreFloat4x4(&rotation,Y); }
-	void SetScale(XMMATRIX Z) { XMStoreFloat4x4(&scaling,Z); }
-	void SetMesh(Mesh* a) { mesh = a; }
-	void SetMaterial(Materials* b) { material = b; }
-	void SetLight(DirectionalLight lit) { light = lit; }
+	inline void SetPos(XMMATRIX X) { XMStoreFloat4x4(&translation,X); }
+	inline void SetRot(XMMATRIX Y) { XMStoreFloat4x4(&rotation,Y); }
+	inline void SetScale(XMMATRIX Z) { XMStoreFloat4x4(&scaling,Z); }
+	inline void SetMesh(Mesh* a) { mesh = a; }
+	inline void SetMaterial(Materials* b) { material = b; }
+	inline void SetLight(DirectionalLight lit) { light = lit; }
 
-	XMFLOAT4X4 GetPos(){ return translation; }
-	XMFLOAT4X4 GetRot(){ return rotation; }
-	XMFLOAT4X4 GetScale(){ return scaling; }
-	Mesh* GetMesh() { return mesh; }
-	Materials* GetMaterial() { return  material; }
-	DirectionalLight GetLight() { return light; }
+	inline XMFLOAT4X4 GetPos(){ return translation; }
+	inline XMFLOAT4X4 GetRot(){ return rotation; }
+	inline XMFLOAT4X4 GetScale(){ return scaling; }
+	inline Mesh* GetMesh() { return mesh; }
+	inline Materials* GetMaterial() {return material; }
+	inline DirectionalLight* GetLight() { return &light; }
 
 	XMMATRIX GetWM(); // returns a world matrix for storing in the worldMatrix variable
 

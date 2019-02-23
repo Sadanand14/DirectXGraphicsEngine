@@ -8,21 +8,21 @@
 #include "Lights.h"
 class Materials 
 {
-	SimpleVertexShader* vShader = nullptr;
-	SimplePixelShader* pShader = nullptr;
-	ID3D11ShaderResourceView* sRVpointer = nullptr;
-	ID3D11SamplerState* samplerState = nullptr;
+	SimpleVertexShader* vShader;
+	SimplePixelShader* pShader;
+	ID3D11ShaderResourceView* sRVpointer;
+	ID3D11SamplerState* samplerState;
 public:
 	Materials(SimpleVertexShader* , SimplePixelShader* , ID3D11ShaderResourceView*, ID3D11SamplerState*);
-	virtual ~Materials();
+	~Materials();
 
-	void SetVrtxptr(SimpleVertexShader* vsh) { vShader = vsh; }
-	void SetPxlptr(SimplePixelShader* psh) { pShader = psh; }
-	void SetSRV(ID3D11ShaderResourceView* srv) { sRVpointer = srv; }
-	void SetSamplerState(ID3D11SamplerState* state) { samplerState = state; }
+	inline void SetVrtxptr(SimpleVertexShader* vsh) { vShader = vsh; }
+	inline void SetPxlptr(SimplePixelShader* psh) { pShader = psh; }
+	inline void SetSRV(ID3D11ShaderResourceView* srv) { sRVpointer = srv; }
+	inline void SetSamplerState(ID3D11SamplerState* state) { samplerState = state; }
 
-	SimpleVertexShader* GetVrtxptr() { return vShader; }
-	SimplePixelShader* GetPxlptr() { return pShader; }
-	ID3D11ShaderResourceView* GetSRV() { return sRVpointer; }
-	ID3D11SamplerState* GetSamplerState() { return samplerState; }
+	inline SimpleVertexShader* GetVrtxptr() {return vShader; }
+	inline SimplePixelShader* GetPxlptr() {return pShader; }
+	inline ID3D11ShaderResourceView* GetSRV() {return sRVpointer;}
+	inline ID3D11SamplerState* GetSamplerState() { return samplerState; }
 };

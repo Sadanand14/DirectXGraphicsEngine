@@ -1,2 +1,7 @@
-﻿  Game.cpp
+﻿  Camera.cpp
+  Entity.cpp
+  Game.cpp
+  Main.cpp
+  Materials.cpp
+  Generating Code...
   DX11Starter.vcxproj -> D:\GGP\Game-Graphics-Programming-Assignment\x64\Debug\DX11Starter.exe
