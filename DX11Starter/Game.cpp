@@ -165,33 +165,15 @@ void Game::CreateMatrices()
 
 void Game::Setmodels() 
 {
-	light1.AmbientColor.x = 0.1f;
-	light1.AmbientColor.y = 0.1f;
-	light1.AmbientColor.z = 0.1f;
-	light1.AmbientColor.w = 1.0f;
+	light1.AmbientColor = XMFLOAT4(1.0f,1.0f,1.0f,1.0f);
+	light1.DiffuseColor = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+	light1.Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
 
-	light1.DiffuseColor.x = 1.0f;
-	light1.DiffuseColor.y = 1.0f;
-	light1.DiffuseColor.z = 1.0f;
-	light1.DiffuseColor.w = 1.0f;
 
-	light1.Direction.x = 1.0f;
-	light1.Direction.y = -1.0f;
-	light1.Direction.z = 0.0f;
-
-	light2.AmbientColor.x = 0.1f;
-	light2.AmbientColor.y = 0.1f;
-	light2.AmbientColor.z = 0.1f;
-	light2.AmbientColor.w = 1.0f;
-
-	light2.DiffuseColor.x = 0.0f;
-	light2.DiffuseColor.y = 0.0f;
-	light2.DiffuseColor.z = 1.0f;
-	light2.DiffuseColor.w = 1.0f;
-
-	light2.Direction.x = -1.0f;
-	light2.Direction.y = 1.0f;
-	light2.Direction.z = 0.0f;
+	light2.AmbientColor = XMFLOAT4(1.0f, 1.0f,1.0f, 1.0f);
+	light2.DiffuseColor = XMFLOAT4(0.0f, 0.6f, 0.0f, 1.0f);
+	light2.Direction = XMFLOAT3(-1.0f, 1.0f, 0.0f);
+	
 
 	//Generating a texture resource view from the loaded texture
 	CreateWICTextureFromFile(device, context, L"Textures/Image1.JPG", 0, &srv1);
@@ -293,14 +275,6 @@ void Game::Update(float deltaTime, float totalTime)
 	{
 		camera->MoveDownward();
 	}
-	if (GetAsyncKeyState('V')) 
-	{
-		camera->RotateUp();
-	}
-	if (GetAsyncKeyState('C')) 
-	{
-		camera->RotateDown();
-	}
 }
 
 // --------------------------------------------------------
@@ -369,15 +343,8 @@ void Game::Draw(float deltaTime, float totalTime)
 void Game::OnMouseDown(WPARAM buttonState, int x, int y)
 {
 	// Add any custom code here...
-	if (buttonState & 0x0001) 
-	{
-		camera->RotateLeft();
-	}
 	
-	if (buttonState & 0x0002) 
-	{
-		camera->RotateRight();
-	}
+	
 	// Save the previous mouse position, so we have it for the future
 	prevMousePos.x = x;
 	prevMousePos.y = y;
@@ -408,7 +375,10 @@ void Game::OnMouseUp(WPARAM buttonState, int x, int y)
 void Game::OnMouseMove(WPARAM buttonState, int x, int y)
 {
 	// Add any custom code here...
-
+	if (buttonState & 0x0001)
+	{
+		camera->MouseLook((x- prevMousePos.x),(y- prevMousePos.y));
+	}
 	// Save the previous mouse position, so we have it for the future
 	prevMousePos.x = x;
 	prevMousePos.y = y;

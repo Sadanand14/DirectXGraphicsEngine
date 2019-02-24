@@ -12,6 +12,7 @@ class Camera
 	XMFLOAT4X4 veiwMatrix, projectionMatrix;
 	XMVECTOR view,pos,upUnit;
 	XMFLOAT3 currentPos,cameraDir;
+	XMFLOAT4 rotation;
 	float xRot, yRot,delta;
 public:
 	Camera(float width, float height);
@@ -25,8 +26,5 @@ public:
 	void MoveRight();
 	void MoveUpward();
 	void MoveDownward();
-	void RotateLeft();
-	void RotateRight();
-	void RotateUp();
-	void RotateDown();
+	void MouseLook(float, float);
 };

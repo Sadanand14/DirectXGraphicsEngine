@@ -1,14 +1,3 @@
-﻿C:\Users\sadan\Desktop\Git Upload\Game-Graphics-Programming-Assignment\DX11Starter\PixelShader.hlsl(63,22-72): warning X3206: implicit truncation of vector type
-  
-  compilation object save succeeded; see C:\Users\sadan\Desktop\Git Upload\Game-Graphics-Programming-Assignment\x64\Debug\PixelShader.cso
-  compilation object save succeeded; see C:\Users\sadan\Desktop\Git Upload\Game-Graphics-Programming-Assignment\x64\Debug\VertexShader.cso
-  Camera.cpp
-  DXCore.cpp
-  Entity.cpp
-  Game.cpp
-  Main.cpp
-  Materials.cpp
-  Mesh.cpp
-  SimpleShader.cpp
-  Generating Code...
-  DX11Starter.vcxproj -> C:\Users\sadan\Desktop\Git Upload\Game-Graphics-Programming-Assignment\x64\Debug\DX11Starter.exe
+﻿  Game.cpp
+d:\ggp\game-graphics-programming-assignment\dx11starter\game.cpp(380): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+  DX11Starter.vcxproj -> D:\GGp\Game-Graphics-Programming-Assignment\x64\Debug\DX11Starter.exe
