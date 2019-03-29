@@ -56,6 +56,7 @@ Game::~Game()
 	if (indexBuffer) { indexBuffer->Release(); }
 	srv1->Release();
 	srv2->Release();
+	srv3->Release();
 	shaderSampler->Release();
 	//delete mesh1, mesh2, mesh3, mesh4,entity1, entity2, entity3, entity4, entity5, &entityList;
 	if (mesh1 != nullptr)
@@ -70,6 +71,8 @@ Game::~Game()
 		delete material1;
 	if (material2 != nullptr)
 		delete material2;
+	if (material3 != nullptr)
+		delete material3;
 	// Delete our simple shader objects, which
 	// will clean up their own internal DirectX stuff
 	delete vertexShader;
@@ -90,6 +93,7 @@ void Game::Init()
 	LoadShaders();
 	CreateMatrices();
 	Setmodels();
+	SetLights();
 	CreateBasicGeometry();
 
 	//intitalizing the directional light structure defined in game.h
@@ -162,22 +166,28 @@ void Game::CreateMatrices()
 
 
 
-
-void Game::Setmodels() 
+void Game::SetLights() 
 {
-	light1.AmbientColor = XMFLOAT4(1.0f,1.0f,1.0f,1.0f);
+	light1.AmbientColor = XMFLOAT4(0.0f, 0.2f, 0.2f, 1.0f);
 	light1.DiffuseColor = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
 	light1.Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
 
 
-	light2.AmbientColor = XMFLOAT4(1.0f, 1.0f,1.0f, 1.0f);
+	light2.AmbientColor = XMFLOAT4(0.4f, 0.4f, 0.0f, 1.0f);
 	light2.DiffuseColor = XMFLOAT4(0.0f, 0.6f, 0.0f, 1.0f);
 	light2.Direction = XMFLOAT3(-1.0f, 1.0f, 0.0f);
-	
 
+	light3.Colour = XMFLOAT3(0, 0, 1);
+	light3.Position = XMFLOAT3(-1,0 , 0);
+}
+
+void Game::Setmodels() 
+{
 	//Generating a texture resource view from the loaded texture
 	CreateWICTextureFromFile(device, context, L"Textures/Image1.JPG", 0, &srv1);
 	CreateWICTextureFromFile(device, context, L"Textures/Image2.JPG", 0, &srv2);
+	CreateWICTextureFromFile(device, context, L"Textures/Hex_D.jpg", 0, &srv3);
+
 	samplerStruct = {};
 
 	samplerStruct.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -192,6 +202,7 @@ void Game::Setmodels()
 
 	material1 = new Materials(vertexShader, pixelShader, srv1, shaderSampler);
 	material2 = new Materials(vertexShader, pixelShader, srv2, shaderSampler);
+	material3 = new Materials(vertexShader, pixelShader, srv3, shaderSampler);
 }
 
 // --------------------------------------------------------
@@ -207,13 +218,19 @@ void Game::CreateBasicGeometry()
 	mesh4 = new Mesh("Models/helix.obj", device);
 	entityList.push_back(Entity(trans, rot, scale, mesh4, material1,light1));
 
-	trans = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
+	trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
 	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
 	scale = XMMatrixScaling(0.5f, 0.5f, 0.5f);
 
 	mesh3 = new Mesh("Models/torus.obj", device);
 	entityList.push_back(Entity(trans, rot, scale, mesh3, material2,light2));
 
+	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
+	scale = XMMatrixScaling(0.5f, 0.5f, 0.5f);
+	trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+
+	mesh2 = new Mesh("Models/shpere.obj", device);
+	entityList.push_back(Entity(trans, rot, scale, mesh2, material3, light1));
 }
 
 
@@ -314,6 +331,8 @@ void Game::Draw(float deltaTime, float totalTime)
 		ID3D11SamplerState* sampler = entityList[i].GetMaterial()->GetSamplerState();
 		ID3D11ShaderResourceView* srv = entityList[i].GetMaterial()->GetSRV();
 		pPointer->SetData("Light",&entityList[i].GetLight(), sizeof(DirectionalLight));
+		pPointer->SetData("pointLight", &light3, sizeof(PointLight));
+		pPointer->SetFloat3("cameraPosition", XMFLOAT3(0, 0, -5));
 		pPointer->SetSamplerState("Sampler", sampler);
 		pPointer->SetShaderResourceView("Texture", srv);
 		pPointer->CopyAllBufferData();
