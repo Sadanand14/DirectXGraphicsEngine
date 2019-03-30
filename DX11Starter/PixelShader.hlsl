@@ -37,8 +37,8 @@ struct DirectionalLight
 
 struct PointLight 
 {
-	float3 Position;
-	float3 Color;
+	float4 Position;
+	float4 Color;
 };
 
 SamplerState Sampler: register(s0);
@@ -84,18 +84,18 @@ float4 main(VertexToPixel input) : SV_TARGET
 	input.Normal = normalize(input.Normal);
 
 	// Requirements for lighting...
-	float3 surfaceColorPL = float3(1, 0, 1);
-	float shininess = 32.0f; // Arbitrary surface shininess value
+	float3 surfaceColorPL = float3(1, 1, 1);
+	float shininess = 64.0f; // Arbitrary surface shininess value
 
 	float3 dirToCamera = normalize(cameraPosition - input.position);
-	float3 dirToPointLight = normalize(pointLight.Position - input.position);
+	float3 dirToPointLight = normalize(pointLight.Position.xyz - input.position);
 
 	float3 pointNdotL = dot(input.Normal, dirToPointLight);
 	pointNdotL = saturate(pointNdotL);
 
 	float3 pointReflec = reflect(-dirToPointLight, input.Normal);
 	float pointSpec = pow(saturate(dot(pointReflec, dirToCamera)), shininess);
-	float3 finalPointLight = surfaceColorPL * pointLight.Color*pointNdotL + pointSpec.rrr;
+	float3 finalPointLight = surfaceColorPL * pointLight.Color.xyz*pointNdotL + pointSpec.rrr;
 	// Just return the input color
 	// - This color (like most values passing through the rasterizer) is 
 	//   interpolated for each pixel between the corresponding vertices 

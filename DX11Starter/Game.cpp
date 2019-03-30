@@ -177,8 +177,8 @@ void Game::SetLights()
 	light2.DiffuseColor = XMFLOAT4(0.0f, 0.6f, 0.0f, 1.0f);
 	light2.Direction = XMFLOAT3(-1.0f, 1.0f, 0.0f);
 
-	light3.Colour = XMFLOAT3(0, 0, 1);
-	light3.Position = XMFLOAT3(-1,0 , 0);
+	light3.Colour = XMFLOAT4(0, 0, 1,0);
+	light3.Position = XMFLOAT4(0, 4 ,0,0);
 }
 
 void Game::Setmodels() 
@@ -211,14 +211,14 @@ void Game::Setmodels()
 
 void Game::CreateBasicGeometry()
 {
-	XMMATRIX trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+	XMMATRIX trans = XMMatrixTranslation(-2.0f, 0.0f, 0.0f);
 	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
 	XMMATRIX scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
 	
 	mesh4 = new Mesh("Models/helix.obj", device);
 	entityList.push_back(Entity(trans, rot, scale, mesh4, material1,light1));
 
-	trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+	trans = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
 	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
 	scale = XMMatrixScaling(0.5f, 0.5f, 0.5f);
 
@@ -226,10 +226,10 @@ void Game::CreateBasicGeometry()
 	entityList.push_back(Entity(trans, rot, scale, mesh3, material2,light2));
 
 	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
-	scale = XMMatrixScaling(0.5f, 0.5f, 0.5f);
+	scale = XMMatrixScaling(1.5f, 1.5f, 1.5f);
 	trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
 
-	mesh2 = new Mesh("Models/shpere.obj", device);
+	mesh2 = new Mesh("Models/sphere.obj", device);
 	entityList.push_back(Entity(trans, rot, scale, mesh2, material3, light1));
 }
 
