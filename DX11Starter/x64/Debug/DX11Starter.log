@@ -1,13 +1,7 @@
-﻿D:\GIt\Game-Graphics-Programming-Assignment\DX11Starter\PixelShader.hlsl(90,33-63): warning X3206: implicit truncation of vector type
-D:\GIt\Game-Graphics-Programming-Assignment\DX11Starter\PixelShader.hlsl(91,37-76): warning X3206: implicit truncation of vector type
-D:\GIt\Game-Graphics-Programming-Assignment\DX11Starter\PixelShader.hlsl(104,22-72): warning X3206: implicit truncation of vector type
+﻿C:\Users\sadan\Desktop\Git Upload\Game-Graphics-Programming-Assignment\DX11Starter\PixelShader.hlsl(64,9-78): warning X3206: implicit truncation of vector type
+C:\Users\sadan\Desktop\Git Upload\Game-Graphics-Programming-Assignment\DX11Starter\PixelShader.hlsl(80,37-58): warning X3206: implicit truncation of vector type
+C:\Users\sadan\Desktop\Git Upload\Game-Graphics-Programming-Assignment\DX11Starter\PixelShader.hlsl(84,27-59): warning X3206: implicit truncation of vector type
+C:\Users\sadan\Desktop\Git Upload\Game-Graphics-Programming-Assignment\DX11Starter\PixelShader.hlsl(84,27-82): warning X3206: implicit truncation of vector type
   
-  compilation object save succeeded; see D:\GIt\Game-Graphics-Programming-Assignment\x64\Debug\PixelShader.cso
-  Camera.cpp
-  Entity.cpp
-  Game.cpp
-d:\git\game-graphics-programming-assignment\dx11starter\game.cpp(399): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
-  Main.cpp
-  Materials.cpp
-  Generating Code...
-  DX11Starter.vcxproj -> D:\GIt\Game-Graphics-Programming-Assignment\x64\Debug\DX11Starter.exe
+  compilation object save succeeded; see C:\Users\sadan\Desktop\Git Upload\Game-Graphics-Programming-Assignment\x64\Debug\PixelShader.cso
+  DX11Starter.vcxproj -> C:\Users\sadan\Desktop\Git Upload\Game-Graphics-Programming-Assignment\x64\Debug\DX11Starter.exe

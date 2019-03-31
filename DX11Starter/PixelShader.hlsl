@@ -16,7 +16,8 @@ struct VertexToPixel
 	float4 position		: SV_POSITION;
 	//float4 color		: COLOR;
 	float3 Normal		: NORMAL;
-	float2 UV           : TEXCOORD;
+	float3 worldPos     : POSITION;
+	float2 UV			: TEXCOORD;
 };
 
 // --------------------------------------------------------
@@ -38,7 +39,8 @@ struct DirectionalLight
 struct PointLight 
 {
 	float4 Position;
-	float4 Color;
+	float4 AmbientColor;
+	float4 SourceColor;
 };
 
 SamplerState Sampler: register(s0);
@@ -46,62 +48,57 @@ Texture2D Texture : register(t0);
 
 cbuffer externalData: register(b0)
 {
-	DirectionalLight Light;
+	DirectionalLight directionalLight;
 	PointLight pointLight;
-	float3 cameraPosition;
+	float4 cameraPosition; 
 }
 
-//helper function for calculating directional light from each light on the surface
-float4 CalculateLight(DirectionalLight dL, float3 normal)
+//DIRECTIONAL LIGHT 
+float3 GetDirLight(DirectionalLight dL, float4 surfaceColor,float3 cameraDir, float3 normal, float shine)
 {
+	//Directional Light part
 	normal = normalize(normal);
-	float3 nlight = normalize(dL.Direction*(-1));
-	float dotproduct = saturate(dot(normal, nlight));
-	float4 finalColor = dotproduct * dL.DiffuseColor + dL.AmbientColor;
+	float3 normalizedDir = normalize(dL.Direction);
+	float dirNdotL = dot(normal, -normalizedDir);
+	dirNdotL = saturate(dirNdotL);
+	float3 finalColor = surfaceColor * dL.DiffuseColor*dirNdotL + dL.AmbientColor;
 	return finalColor;
 }
 
-//float4 CalculatePointLight(PointLight pl, float3 normal)
-//{
-//	input.normal = normalize(input.normal);
-//
-//	// Requirements for lighting...
-//	float3 surfaceColor = float3(1,	0, 1);
-//	float shininess = 32.0f; // Arbitrary surface shininess value
-//
-//	float3 dirToCamera = normalize(CameraPosition - input.worldPos);
-//	float3 dirToPointLight = normalize(pointLight.Position - input.worldPos);
-//
-//	float3 pointNdotL = dot(intput.normal, dirToPointLight);
-//	pointNdotL = saturate(pointNdotL);
-//	
-//	float3 pointReflec = reflect(-dirToPointLight, input.normal);
-//	float pointSpec = pow(saturate(dot(pointReflec, dirToCamera)), shininess);
-//	float 3 finalPointLight = surfaceColor * PointLightColor*pointNdotL + pointSpec.rrr;
-//}
+//SPECULAR REFLECTION
+float3 GetSpec(float3 lightDirection, float3 cameraDir, float3 normal,float shine)
+{
+	lightDirection = normalize(lightDirection);
+	float3 pointReflec = reflect(-lightDirection, normal);
+	float3 pointSpec = pow(saturate(dot(pointReflec, cameraDir)), shine);
+	return pointSpec.rrr;
+}
+
+//POINTLIGHT
+float3 GetPointLight(PointLight pl, float4 color, float3 pixelPos, float3 cameraDir, float3 normal, float shine)
+{
+	float3 dirToPointLight = normalize(pl.Position - pixelPos);
+	float3 pointNdotL = dot(normal, dirToPointLight);
+	pointNdotL = saturate(pointNdotL);
+	float3 spec1 = GetSpec(dirToPointLight, cameraDir, normal, shine);
+	float3 finalPointLight = color * pl.SourceColor*pointNdotL+spec1+ pl.AmbientColor;
+	return finalPointLight;
+}
+
+
+
 float4 main(VertexToPixel input) : SV_TARGET
 {
-	input.Normal = normalize(input.Normal);
-
 	// Requirements for lighting...
-	float3 surfaceColorPL = float3(1, 1, 1);
-	float shininess = 64.0f; // Arbitrary surface shininess value
+	input.Normal = normalize(input.Normal);
+	float4 surfaceColor = Texture.Sample(Sampler, input.UV);
+	float shine = 64.0f;
+	float3 dirToCamera = normalize(cameraPosition.xyz - input.worldPos);
 
-	float3 dirToCamera = normalize(cameraPosition - input.position);
-	float3 dirToPointLight = normalize(pointLight.Position.xyz - input.position);
-
-	float3 pointNdotL = dot(input.Normal, dirToPointLight);
-	pointNdotL = saturate(pointNdotL);
-
-	float3 pointReflec = reflect(-dirToPointLight, input.Normal);
-	float pointSpec = pow(saturate(dot(pointReflec, dirToCamera)), shininess);
-	float3 finalPointLight = surfaceColorPL * pointLight.Color.xyz*pointNdotL + pointSpec.rrr;
-	// Just return the input color
-	// - This color (like most values passing through the rasterizer) is 
-	//   interpolated for each pixel between the corresponding vertices 
-	//   of the triangle we're rendering
-	float4 surfaceColor = Texture.Sample(Sampler,input.UV);
-	float3 finalColor = CalculateLight(Light,input.Normal)*surfaceColor.rgb;
-	return  float4(finalColor+finalPointLight, 1);
+	//float3 finalDirLight = GetDirLight(directionalLight, surfaceColor, dirToCamera, input.Normal, shine);
+	float3 finalPointLight = GetPointLight(pointLight, surfaceColor, input.worldPos, dirToCamera, input.Normal, shine);
+	
+	
+	return  float4(finalPointLight, 1);
 }
 

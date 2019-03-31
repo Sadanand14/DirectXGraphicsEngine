@@ -18,6 +18,11 @@ public:
 	Camera(float width, float height);
 	~Camera();
 	void Update(float deltaTime);
+	inline XMFLOAT4 GetPos() {
+		XMFLOAT4 POS;
+		XMStoreFloat4(&POS, pos);
+		return POS; 
+	}
 	inline XMFLOAT4X4 GetView() { return veiwMatrix; }
 	inline XMFLOAT4X4 GetProjection() { return projectionMatrix; }
 	void MoveForward();

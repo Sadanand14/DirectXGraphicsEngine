@@ -54,11 +54,11 @@ Game::~Game()
 	// we've made in the Game class
 	if (vertexBuffer) { vertexBuffer->Release(); }
 	if (indexBuffer) { indexBuffer->Release(); }
-	srv1->Release();
-	srv2->Release();
-	srv3->Release();
+	if(srv1)srv1->Release();
+	if(srv2)srv2->Release();
+
 	shaderSampler->Release();
-	//delete mesh1, mesh2, mesh3, mesh4,entity1, entity2, entity3, entity4, entity5, &entityList;
+	
 	if (mesh1 != nullptr)
 		delete mesh1;
 	if (mesh2 != nullptr)
@@ -96,12 +96,6 @@ void Game::Init()
 	SetLights();
 	CreateBasicGeometry();
 
-	//intitalizing the directional light structure defined in game.h
-	
-
-	// Tell the input assembler stage of the pipeline what kind of
-	// geometric primitives (points, lines or triangles) we want to draw.  
-	// Essentially: "What kind of shape should the GPU draw with our data?"
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
@@ -128,22 +122,11 @@ void Game::LoadShaders()
 // --------------------------------------------------------
 void Game::CreateMatrices()
 {
-	// Set up world matrix
-	// - In an actual game, each object will need one of these and they should
-	//    update when/if the object moves (every frame)
-	// - You'll notice a "transpose" happening below, which is redundant for
-	//    an identity matrix.  This is just to show that HLSL expects a different
-	//    matrix (column major vs row major) than the DirectX Math library
+
 	XMMATRIX W = XMMatrixIdentity();
 	XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(W)); // Transpose for HLSL!
 
-	// Create the View matrix
-	// - In an actual game, recreate this matrix every time the camera 
-	//    moves (potentially every frame)
-	// - We're using the LOOK TO function, which takes the position of the
-	//    camera and the direction vector along which to look (as well as "up")
-	// - Another option is the LOOK AT function, to look towards a specific
-	//    point in 3D space
+
 	XMVECTOR pos = XMVectorSet(0, 0, -5, 0);
 	XMVECTOR dir = XMVectorSet(0, 0, 1, 0);
 	XMVECTOR up = XMVectorSet(0, 1, 0, 0);
@@ -153,9 +136,7 @@ void Game::CreateMatrices()
 		up);     // "Up" direction in 3D space (prevents roll)
 	XMStoreFloat4x4(&viewMatrix, XMMatrixTranspose(V)); // Transpose for HLSL!
 
-	// Create the Projection matrix
-	// - This should match the window's aspect ratio, and also update anytime
-	//    the window resizes (which is already happening in OnResize() below)
+
 	XMMATRIX P = XMMatrixPerspectiveFovLH(
 		0.25f * 3.1415926535f,		// Field of View Angle
 		(float)width / height,		// Aspect ratio
@@ -170,24 +151,17 @@ void Game::SetLights()
 {
 	light1.AmbientColor = XMFLOAT4(0.0f, 0.2f, 0.2f, 1.0f);
 	light1.DiffuseColor = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
-	light1.Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
+	light1.Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
 
-
-	light2.AmbientColor = XMFLOAT4(0.4f, 0.4f, 0.0f, 1.0f);
-	light2.DiffuseColor = XMFLOAT4(0.0f, 0.6f, 0.0f, 1.0f);
-	light2.Direction = XMFLOAT3(-1.0f, 1.0f, 0.0f);
-
-	light3.Colour = XMFLOAT4(0, 0, 1,0);
-	light3.Position = XMFLOAT4(0, 4 ,0,0);
+	light2.Position = XMFLOAT4(0,5,0, 0);
+	light2.ambientColor = XMFLOAT4(0.0f, 0.2f, 0.2f,0);
+	light2.sourceColor = XMFLOAT4(1.0f, 0.0f, 0.0f, 0);
+	
 }
 
 void Game::Setmodels() 
 {
 	//Generating a texture resource view from the loaded texture
-	CreateWICTextureFromFile(device, context, L"Textures/Image1.JPG", 0, &srv1);
-	CreateWICTextureFromFile(device, context, L"Textures/Image2.JPG", 0, &srv2);
-	CreateWICTextureFromFile(device, context, L"Textures/Hex_D.jpg", 0, &srv3);
-
 	samplerStruct = {};
 
 	samplerStruct.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -200,9 +174,12 @@ void Game::Setmodels()
 
 	device->CreateSamplerState(&samplerStruct, &shaderSampler);
 
+	CreateWICTextureFromFile(device, context, L"Textures/Hex_N.jpg", 0, &srv1);
 	material1 = new Materials(vertexShader, pixelShader, srv1, shaderSampler);
+
+
+	CreateWICTextureFromFile(device, context, L"Textures/Hex_D.jpg", 0, &srv2);
 	material2 = new Materials(vertexShader, pixelShader, srv2, shaderSampler);
-	material3 = new Materials(vertexShader, pixelShader, srv3, shaderSampler);
 }
 
 // --------------------------------------------------------
@@ -215,22 +192,22 @@ void Game::CreateBasicGeometry()
 	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
 	XMMATRIX scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
 	
-	mesh4 = new Mesh("Models/helix.obj", device);
-	entityList.push_back(Entity(trans, rot, scale, mesh4, material1,light1));
+	/*mesh4 = new Mesh("Models/helix.obj", device);
+	entityList.push_back(Entity(trans, rot, scale, mesh4, material1));
 
 	trans = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
 	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
-	scale = XMMatrixScaling(0.5f, 0.5f, 0.5f);
+	scale = XMMatrixScaling(0.5f, 0.5f, 0.5f);*/
 
 	mesh3 = new Mesh("Models/torus.obj", device);
-	entityList.push_back(Entity(trans, rot, scale, mesh3, material2,light2));
+	entityList.push_back(Entity(trans, rot, scale, mesh3, material1));
 
 	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
 	scale = XMMatrixScaling(1.5f, 1.5f, 1.5f);
 	trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
 
 	mesh2 = new Mesh("Models/sphere.obj", device);
-	entityList.push_back(Entity(trans, rot, scale, mesh2, material3, light1));
+	entityList.push_back(Entity(trans, rot, scale, mesh2, material2));
 }
 
 
@@ -302,9 +279,6 @@ void Game::Draw(float deltaTime, float totalTime)
 	// Background color (Cornflower Blue in this case) for clearing
 	const float color[4] = { 0.4f, 0.6f, 0.75f, 0.0f };
 
-	// Clear the render target and depth buffer (erases what's on the screen)
-	//  - Do this ONCE PER FRAME
-	//  - At the beginning of Draw (before drawing *anything*)
 	context->ClearRenderTargetView(backBufferRTV, color);
 	context->ClearDepthStencilView(
 		depthStencilView,
@@ -330,9 +304,10 @@ void Game::Draw(float deltaTime, float totalTime)
 		SimplePixelShader* pPointer = entityList[i].GetMaterial()->GetPxlptr();
 		ID3D11SamplerState* sampler = entityList[i].GetMaterial()->GetSamplerState();
 		ID3D11ShaderResourceView* srv = entityList[i].GetMaterial()->GetSRV();
-		pPointer->SetData("Light",&entityList[i].GetLight(), sizeof(DirectionalLight));
-		pPointer->SetData("pointLight", &light3, sizeof(PointLight));
-		pPointer->SetFloat3("cameraPosition", XMFLOAT3(0, 0, -5));
+		
+		pPointer->SetData("directionalLight", &light1, sizeof(DirectionalLight));
+		pPointer->SetData("pointLight", &light2, sizeof(PointLight));
+		pPointer->SetFloat4("cameraPosition", camera->GetPos());
 		pPointer->SetSamplerState("Sampler", sampler);
 		pPointer->SetShaderResourceView("Texture", srv);
 		pPointer->CopyAllBufferData();
@@ -354,11 +329,7 @@ void Game::Draw(float deltaTime, float totalTime)
 
 #pragma region Mouse Input
 
-// --------------------------------------------------------
-// Helper method for mouse clicking.  We get this information
-// from the OS-level messages anyway, so these helpers have
-// been created to provide basic mouse input if you want it.
-// --------------------------------------------------------
+
 void Game::OnMouseDown(WPARAM buttonState, int x, int y)
 {
 	// Add any custom code here...
@@ -368,46 +339,29 @@ void Game::OnMouseDown(WPARAM buttonState, int x, int y)
 	prevMousePos.x = x;
 	prevMousePos.y = y;
 
-	// Caputure the mouse so we keep getting mouse move
-	// events even if the mouse leaves the window.  we'll be
-	// releasing the capture once a mouse button is released
 	SetCapture(hWnd);
 }
 
-// --------------------------------------------------------
-// Helper method for mouse release
-// --------------------------------------------------------
+
 void Game::OnMouseUp(WPARAM buttonState, int x, int y)
 {
-	// Add any custom code here...
 
-	// We don't care about the tracking the cursor outside
-	// the window anymore (we're not dragging if the mouse is up)
 	ReleaseCapture();
 }
 
-// --------------------------------------------------------
-// Helper method for mouse movement.  We only get this message
-// if the mouse is currently over the window, or if we're 
-// currently capturing the mouse.
-// --------------------------------------------------------
+
 void Game::OnMouseMove(WPARAM buttonState, int x, int y)
 {
-	// Add any custom code here...
+
 	if (buttonState & 0x0001)
 	{
 		camera->MouseLook((x- prevMousePos.x),(y- prevMousePos.y));
 	}
-	// Save the previous mouse position, so we have it for the future
+
 	prevMousePos.x = x;
 	prevMousePos.y = y;
 }
 
-// --------------------------------------------------------
-// Helper method for mouse wheel scrolling.  
-// WheelDelta may be positive or negative, depending 
-// on the direction of the scroll
-// --------------------------------------------------------
 void Game::OnMouseWheel(float wheelDelta, int x, int y)
 {
 	// Add any custom code here...
