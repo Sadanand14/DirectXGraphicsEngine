@@ -173,13 +173,11 @@ void Game::Setmodels()
 	samplerStruct.MaxLOD = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 
 	device->CreateSamplerState(&samplerStruct, &shaderSampler);
+ 	
+	CreateWICTextureFromFile(device, context, L"Textures/Hex_D.jpg", 0, &srv1);// colour map
+	CreateWICTextureFromFile(device, context, L"Textures/Hex_N.jpg", 0, &srv2);// normal map
 
-	CreateWICTextureFromFile(device, context, L"Textures/Hex_N.jpg", 0, &srv1);
-	material1 = new Materials(vertexShader, pixelShader, srv1, shaderSampler);
-
-
-	CreateWICTextureFromFile(device, context, L"Textures/Hex_D.jpg", 0, &srv2);
-	material2 = new Materials(vertexShader, pixelShader, srv2, shaderSampler);
+	material1 = new DefaultMaterials(vertexShader, pixelShader, srv1, srv2, shaderSampler);
 }
 
 // --------------------------------------------------------
@@ -207,7 +205,7 @@ void Game::CreateBasicGeometry()
 	trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
 
 	mesh2 = new Mesh("Models/sphere.obj", device);
-	entityList.push_back(Entity(trans, rot, scale, mesh2, material2));
+	entityList.push_back(Entity(trans, rot, scale, mesh2, material1));
 }
 
 
@@ -303,13 +301,15 @@ void Game::Draw(float deltaTime, float totalTime)
 		//Passing data into the pixel Shader
 		SimplePixelShader* pPointer = entityList[i].GetMaterial()->GetPxlptr();
 		ID3D11SamplerState* sampler = entityList[i].GetMaterial()->GetSamplerState();
-		ID3D11ShaderResourceView* srv = entityList[i].GetMaterial()->GetSRV();
+		ID3D11ShaderResourceView* srvColor = entityList[i].GetMaterial()->GetSRVColor();
+		ID3D11ShaderResourceView* srvNormal = entityList[i].GetMaterial()->GetSRVNormal();
 		
 		pPointer->SetData("directionalLight", &light1, sizeof(DirectionalLight));
 		pPointer->SetData("pointLight", &light2, sizeof(PointLight));
 		pPointer->SetFloat4("cameraPosition", camera->GetPos());
 		pPointer->SetSamplerState("Sampler", sampler);
-		pPointer->SetShaderResourceView("Texture", srv);
+		pPointer->SetShaderResourceView("Texture1", srvColor);
+		pPointer->SetShaderResourceView("NormalMap1", srvNormal);
 		pPointer->CopyAllBufferData();
 		pPointer->SetShader();
 

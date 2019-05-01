@@ -17,7 +17,7 @@ public:
 	Game(HINSTANCE hInstance);
 	~Game();
 
-	Materials* material1=nullptr,*material2=nullptr,*material3=nullptr;
+	DefaultMaterials* material1=nullptr,*material2=nullptr,*material3=nullptr;
 	//Camera instance created
 	Camera* camera;
 	// vector for storing different Entity instances

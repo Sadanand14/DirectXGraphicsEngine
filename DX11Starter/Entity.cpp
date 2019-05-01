@@ -4,7 +4,7 @@
 #include "Game.h"
 #include "Materials.h"
 
-Entity::Entity(XMMATRIX a, XMMATRIX b, XMMATRIX c, Mesh* d, Materials* e)
+Entity::Entity(XMMATRIX a, XMMATRIX b, XMMATRIX c, Mesh* d, DefaultMaterials* e)
 {
 	XMStoreFloat4x4(&translation, a);
 	XMStoreFloat4x4(&rotation, b);

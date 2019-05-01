@@ -7,11 +7,10 @@ class Mesh
 {
 	ID3D11Buffer *vertexPointer = nullptr, *indexPointer = nullptr;
 	int indexCount=NULL;
-	//Vertex*VertexArr=nullptr;
-	//unsigned int* indexarr=nullptr;
+	void CalculateTangents(Vertex* , int , unsigned int* , int);
 public: 
 
-	Mesh(Vertex* vertextArray, UINT* intArray, int totalVertices, int totalIndices, ID3D11Device* device);
+	Mesh(Vertex* vertextArray, unsigned int* intArray, int totalVertices, int totalIndices, ID3D11Device* device);
 	Mesh(char* objFile, ID3D11Device* device);
 	~Mesh();
 	

@@ -14,8 +14,8 @@ struct VertexToPixel
 	//  |    |                |
 	//  v    v                v
 	float4 position		: SV_POSITION;
-	//float4 color		: COLOR;
 	float3 Normal		: NORMAL;
+	float3 Tangent		: TANGENT;
 	float3 worldPos     : POSITION;
 	float2 UV			: TEXCOORD;
 };
@@ -43,8 +43,9 @@ struct PointLight
 	float4 SourceColor;
 };
 
-SamplerState Sampler: register(s0);
-Texture2D Texture : register(t0);
+SamplerState Sampler  : register(s0);
+Texture2D Texture1    : register(t0);
+Texture2D NormalMap1  : register(t1);
 
 cbuffer externalData: register(b0)
 {
@@ -89,16 +90,28 @@ float3 GetPointLight(PointLight pl, float4 color, float3 pixelPos, float3 camera
 
 float4 main(VertexToPixel input) : SV_TARGET
 {
+	input.Tangent = normalize(input.Tangent);
+	input.Normal = normalize(input.Normal);
+
+	float3 NormalFromMap = NormalMap1.Sample(Sampler, input.UV);
+
+	float3 N = input.Normal;
+	float3 T = normalize(input.Tangent - N * dot(input.Tangent, N));
+	float3 B = cross(T, N);
+	float3x3 TBN = float3x3(T, B, N);
+
+	input.Normal = normalize(mul(NormalFromMap, TBN));
+
 	// Requirements for lighting...
 	input.Normal = normalize(input.Normal);
-	float4 surfaceColor = Texture.Sample(Sampler, input.UV);
+	float4 surfaceColor = Texture1.Sample(Sampler, input.UV);
 	float shine = 64.0f;
 	float3 dirToCamera = normalize(cameraPosition.xyz - input.worldPos);
 
-	//float3 finalDirLight = GetDirLight(directionalLight, surfaceColor, dirToCamera, input.Normal, shine);
+	float3 finalDirLight = GetDirLight(directionalLight, surfaceColor, dirToCamera, input.Normal, shine);
 	float3 finalPointLight = GetPointLight(pointLight, surfaceColor, input.worldPos, dirToCamera, input.Normal, shine);
 	
 	
-	return  float4(finalPointLight, 1);
+	return  float4(finalPointLight + finalDirLight, 1);
 }
 

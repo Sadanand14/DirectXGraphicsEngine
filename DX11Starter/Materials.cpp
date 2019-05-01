@@ -5,14 +5,16 @@
 #include <vector>
 #include "Materials.h"
 
-Materials::Materials(SimpleVertexShader* a, SimplePixelShader* b, ID3D11ShaderResourceView* c, ID3D11SamplerState*d)
+DefaultMaterials::DefaultMaterials(SimpleVertexShader* a, SimplePixelShader* b, ID3D11ShaderResourceView* c, ID3D11ShaderResourceView* d, ID3D11SamplerState* e)
 {
 	vShader = a;
 	pShader = b;
-	sRVpointer = c;
-	samplerState = d;
+	sRVPtrColor = c;
+	sRVPtrNormal = d;
+	samplerState = e;
 }
 
-Materials::~Materials() 
+DefaultMaterials::~DefaultMaterials() 
 {
+
 }
