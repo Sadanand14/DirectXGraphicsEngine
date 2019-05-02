@@ -95,6 +95,7 @@ void Game::Init()
 	Setmodels();
 	SetLights();
 	CreateBasicGeometry();
+	//CreateDDS(device, L"Textures/Test.dds",0,&skySRV);
 
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
@@ -161,6 +162,8 @@ void Game::SetLights()
 
 void Game::Setmodels() 
 {
+	
+
 	//Generating a texture resource view from the loaded texture
 	samplerStruct = {};
 
