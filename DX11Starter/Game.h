@@ -31,6 +31,9 @@ public:
 	ID3D11ShaderResourceView *srv1,*srv2, *skySRV;
 	ID3D11SamplerState* shaderSampler;
 	D3D11_SAMPLER_DESC samplerStruct;
+	ID3D11RasterizerState* skyRaster;
+	ID3D11DepthStencilState* SkyDepthStencil;
+
 
 	//creating Directional light
 	DirectionalLight light1;
@@ -43,6 +46,7 @@ public:
 	void Draw(float deltaTime, float totalTime);
 	void Setmodels();
 	void SetLights();
+	void DrawSky();
 	// Overridden mouse input helper methods
 	void OnMouseDown (WPARAM buttonState, int x, int y);
 	void OnMouseUp	 (WPARAM buttonState, int x, int y);
@@ -62,6 +66,8 @@ private:
 	// Wrappers for DirectX shaders to provide simplified functionality
 	SimpleVertexShader* vertexShader;
 	SimplePixelShader* pixelShader;
+	SimplePixelShader* skyboxPS;
+	SimpleVertexShader* skyboxVS;
 
 	// The matrices to go from model space to screen space
 	DirectX::XMFLOAT4X4 worldMatrix;

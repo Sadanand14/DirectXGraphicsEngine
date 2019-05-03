@@ -7,7 +7,7 @@
 #include <iostream>
 #include "Lights.h"
 #include "WICTextureLoader.h"
-
+#include "DDSTextureLoader.h"
 // For the DirectX Math library
 using namespace DirectX;
 
@@ -56,6 +56,11 @@ Game::~Game()
 	if (indexBuffer) { indexBuffer->Release(); }
 	if(srv1)srv1->Release();
 	if(srv2)srv2->Release();
+	if (skySRV)skySRV->Release();
+	if (SkyDepthStencil)SkyDepthStencil->Release();
+	if (skyRaster)skyRaster->Release();
+	if (skyboxPS) delete skyboxPS;
+	if (skyboxVS) delete skyboxVS;
 
 	shaderSampler->Release();
 	
@@ -95,7 +100,7 @@ void Game::Init()
 	Setmodels();
 	SetLights();
 	CreateBasicGeometry();
-	//CreateDDS(device, L"Textures/Test.dds",0,&skySRV);
+	CreateDDSTextureFromFile(device, L"Textures/Test.dds",0,&skySRV);
 
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
@@ -113,6 +118,12 @@ void Game::LoadShaders()
 
 	pixelShader = new SimplePixelShader(device, context);
 	pixelShader->LoadShaderFile(L"PixelShader.cso");
+
+	skyboxVS = new SimpleVertexShader(device, context);
+	skyboxVS->LoadShaderFile(L"SkyBoxVS.cso");
+
+	skyboxPS = new SimplePixelShader(device, context);
+	skyboxPS->LoadShaderFile(L"SkyBoxPS.cso");
 }
 
 
@@ -209,6 +220,9 @@ void Game::CreateBasicGeometry()
 
 	mesh2 = new Mesh("Models/sphere.obj", device);
 	entityList.push_back(Entity(trans, rot, scale, mesh2, material1));
+
+	mesh3 = new Mesh("Models/cube.obj", device);
+	entityList.push_back(Entity(trans, rot, scale, mesh3, material1));
 }
 
 
@@ -290,7 +304,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	//Looped all the sequences for loading the worldmatrix as well as loading the index and vertex buffers to the 
 	//GPU using a vector of entities.
 
-	for (int i = 0; i < entityList.size(); i++) {
+	for (int i = 0; i < 2; i++) {
 		XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(entityList[i].GetWM()));
 
 		//Passing in all the VertexShader Data
@@ -329,6 +343,26 @@ void Game::Draw(float deltaTime, float totalTime)
 	swapChain->Present(0, 0);
 }
 
+void Game::DrawSky() 
+{
+	skyboxVS->SetShader();
+	skyboxVS->SetMatrix4x4("view", camera->GetView());
+	skyboxVS->SetMatrix4x4("projection", camera->GetProjection());
+	skyboxVS->CopyAllBufferData();
+
+	skyboxPS->SetShader();
+
+	skyboxPS->CopyAllBufferData();
+
+	UINT stride = sizeof(Vertex);
+	UINT offset = 0;
+	ID3D11Buffer *v1Buffer = entityList[2].GetMesh()->GetVertexBuffer();
+	ID3D11Buffer *i1Buffer = entityList[2].GetMesh()->GetIndexBuffer();
+	context->IASetVertexBuffers(0, 1, &v1Buffer, &stride, &offset);
+	context->IASetIndexBuffer(i1Buffer, DXGI_FORMAT_R32_UINT, 0);
+	int indicesCount1 = entityList[2].GetMesh()->GetIndexCount();
+	context->DrawIndexed(indicesCount1, 0, 0);
+}
 
 #pragma region Mouse Input
 

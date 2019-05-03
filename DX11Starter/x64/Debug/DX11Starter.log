@@ -1,8 +1,10 @@
-﻿C:\Users\sadan\Desktop\Git Upload\Game-Graphics-Programming-Assignment\DX11Starter\PixelShader.hlsl(65,9-78): warning X3206: implicit truncation of vector type
-C:\Users\sadan\Desktop\Git Upload\Game-Graphics-Programming-Assignment\DX11Starter\PixelShader.hlsl(81,37-58): warning X3206: implicit truncation of vector type
-C:\Users\sadan\Desktop\Git Upload\Game-Graphics-Programming-Assignment\DX11Starter\PixelShader.hlsl(85,27-59): warning X3206: implicit truncation of vector type
-C:\Users\sadan\Desktop\Git Upload\Game-Graphics-Programming-Assignment\DX11Starter\PixelShader.hlsl(85,27-82): warning X3206: implicit truncation of vector type
-C:\Users\sadan\Desktop\Git Upload\Game-Graphics-Programming-Assignment\DX11Starter\PixelShader.hlsl(96,9-60): warning X3206: implicit truncation of vector type
+﻿D:\Profiles\san2889\Downloads\DirectXGraphicsEngine\DX11Starter\PixelShader.hlsl(65,9-78): warning X3206: implicit truncation of vector type
+D:\Profiles\san2889\Downloads\DirectXGraphicsEngine\DX11Starter\PixelShader.hlsl(81,37-58): warning X3206: implicit truncation of vector type
+D:\Profiles\san2889\Downloads\DirectXGraphicsEngine\DX11Starter\PixelShader.hlsl(85,27-59): warning X3206: implicit truncation of vector type
+D:\Profiles\san2889\Downloads\DirectXGraphicsEngine\DX11Starter\PixelShader.hlsl(85,27-82): warning X3206: implicit truncation of vector type
+D:\Profiles\san2889\Downloads\DirectXGraphicsEngine\DX11Starter\PixelShader.hlsl(96,9-60): warning X3206: implicit truncation of vector type
   
-  compilation object save succeeded; see C:\Users\sadan\Desktop\Git Upload\Game-Graphics-Programming-Assignment\x64\Debug\PixelShader.cso
-  DX11Starter.vcxproj -> C:\Users\sadan\Desktop\Git Upload\Game-Graphics-Programming-Assignment\x64\Debug\DX11Starter.exe
+  compilation object save succeeded; see D:\Profiles\san2889\Downloads\DirectXGraphicsEngine\x64\Debug\PixelShader.cso
+FXC : error X3501: 'main': entrypoint not found
+  
+  compilation failed; no code produced
