@@ -1,10 +1,4 @@
-﻿D:\Profiles\san2889\Downloads\DirectXGraphicsEngine\DX11Starter\PixelShader.hlsl(65,9-78): warning X3206: implicit truncation of vector type
-D:\Profiles\san2889\Downloads\DirectXGraphicsEngine\DX11Starter\PixelShader.hlsl(81,37-58): warning X3206: implicit truncation of vector type
-D:\Profiles\san2889\Downloads\DirectXGraphicsEngine\DX11Starter\PixelShader.hlsl(85,27-59): warning X3206: implicit truncation of vector type
-D:\Profiles\san2889\Downloads\DirectXGraphicsEngine\DX11Starter\PixelShader.hlsl(85,27-82): warning X3206: implicit truncation of vector type
-D:\Profiles\san2889\Downloads\DirectXGraphicsEngine\DX11Starter\PixelShader.hlsl(96,9-60): warning X3206: implicit truncation of vector type
-  
-  compilation object save succeeded; see D:\Profiles\san2889\Downloads\DirectXGraphicsEngine\x64\Debug\PixelShader.cso
-FXC : error X3501: 'main': entrypoint not found
-  
-  compilation failed; no code produced
+﻿  Game.cpp
+C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(400,43): warning C4244:  'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(400,23): warning C4244:  'argument': conversion from 'LONG' to 'float', possible loss of data
+  DX11Starter.vcxproj -> C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\x64\Debug\DX11Starter.exe

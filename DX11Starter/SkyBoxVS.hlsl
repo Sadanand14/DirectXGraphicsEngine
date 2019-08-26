@@ -20,13 +20,20 @@ struct Input
 
 VertexToPixel main(Input input)
 {
-	VertextToPixel output;
+	VertexToPixel output;
 
-	matrix viewNOtrans = view;
+	matrix viewNotrans = view;
 	viewNotrans._41 = 0;
 	viewNotrans._42 = 0;
 	viewNotrans._43 = 0;
 
 	matrix vp = mul(viewNotrans, projection);
-	output.position = mul(float)
+
+	output.position = mul(float4(input.Position, 1.0f), vp);
+
+	output.position.z = output.position.w;
+
+	output.direction = input.Position;
+
+	return output;
 }

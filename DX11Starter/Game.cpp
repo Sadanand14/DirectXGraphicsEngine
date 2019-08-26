@@ -57,8 +57,8 @@ Game::~Game()
 	if(srv1)srv1->Release();
 	if(srv2)srv2->Release();
 	if (skySRV)skySRV->Release();
-	if (SkyDepthStencil)SkyDepthStencil->Release();
-	if (skyRaster)skyRaster->Release();
+	//if (SkyDepthStencil)SkyDepthStencil->Release();
+	//if (skyRaster)skyRaster->Release();
 	if (skyboxPS) delete skyboxPS;
 	if (skyboxVS) delete skyboxVS;
 
@@ -188,7 +188,7 @@ void Game::Setmodels()
 
 	device->CreateSamplerState(&samplerStruct, &shaderSampler);
  	
-	CreateWICTextureFromFile(device, context, L"Textures/Hex_D.jpg", 0, &srv1);// colour map
+	CreateWICTextureFromFile(device, context, L"Textures/Test.dds", 0, &srv1);// colour map
 	CreateWICTextureFromFile(device, context, L"Textures/Hex_N.jpg", 0, &srv2);// normal map
 
 	material1 = new DefaultMaterials(vertexShader, pixelShader, srv1, srv2, shaderSampler);
@@ -300,7 +300,9 @@ void Game::Draw(float deltaTime, float totalTime)
 		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
 		1.0f,
 		0);
-	 
+	
+
+
 	//Looped all the sequences for loading the worldmatrix as well as loading the index and vertex buffers to the 
 	//GPU using a vector of entities.
 
@@ -340,6 +342,8 @@ void Game::Draw(float deltaTime, float totalTime)
 		context->DrawIndexed(indicesCount1, 0, 0);
 	}
 
+	DrawSky();
+
 	swapChain->Present(0, 0);
 }
 
@@ -351,7 +355,8 @@ void Game::DrawSky()
 	skyboxVS->CopyAllBufferData();
 
 	skyboxPS->SetShader();
-
+	skyboxPS->SetShaderResourceView("tex", material1->GetSRVColor());
+	skyboxPS->SetSamplerState("Sampler", shaderSampler);
 	skyboxPS->CopyAllBufferData();
 
 	UINT stride = sizeof(Vertex);

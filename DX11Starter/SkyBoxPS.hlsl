@@ -10,5 +10,5 @@ struct VertexToPixel
 
 float4 main(VertexToPixel input) : SV_TARGET
 {
-	
+	return tex.Sample(Sampler, input.direction);
 }
