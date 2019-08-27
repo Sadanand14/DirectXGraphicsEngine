@@ -6,12 +6,12 @@
 
 std::vector<Mesh> Entity::m_meshList;
 
-Entity::Entity(XMMATRIX a, XMMATRIX b, XMMATRIX c, unsigned int d, Materials* e)
+Entity::Entity(XMMATRIX a, XMMATRIX b, XMMATRIX c, std::string d, Materials* e)
 {
 	XMStoreFloat4x4(&m_translation, a);
 	XMStoreFloat4x4(&m_rotation, b);
 	XMStoreFloat4x4(&m_scaling, c);
-	m_meshoffset = d;
+	m_modelTitle = d;
 	material = e;
 }
 

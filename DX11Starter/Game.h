@@ -2,13 +2,15 @@
 
 #include "DXCore.h"
 #include "SimpleShader.h"
-#include <DirectXMath.h>
 #include "Mesh.h"
-#include <d3d11.h>
 #include "Entity.h"
 #include "Camera.h"
 #include "Lights.h"
+#include "Textures.h"
 
+
+#include <DirectXMath.h>
+#include <d3d11.h>
 #include <map>
 
 class Game 
@@ -25,6 +27,7 @@ public:
 	
 	std::vector<Entity> entityList;
 	std::map<std::string, Mesh*> meshMap;
+	std::map<std::string, Texture*> texMap;
 
 	//creating Directional light
 	DirectionalLight light1,light2;
@@ -47,7 +50,8 @@ private:
 	void LoadShaders(); 
 	void CreateMatrices();
 	void CreateBasicGeometry();
-	void LoadModels();
+	void LoadModelDirectory();
+	void LoadTextureDirectory();
 	void AddLighting();
 
 	// Buffers to hold actual geometry data

@@ -2,13 +2,13 @@
 #include "Vertex.h"
 #include "d3d11.h"
 #include "Mesh.h"
-#include <vector>
 #include "Camera.h"
 #include <iostream>
 #include "Lights.h"
 
 #include <filesystem>
 #include <sstream>
+#include <vector>
 
 // For the DirectX Math library
 using namespace DirectX;
@@ -60,6 +60,7 @@ Game::~Game()
 	//delete mesh1, mesh2, mesh3, mesh4,entity1, entity2, entity3, entity4, entity5, &entityList;
 
 	for (auto&& m : meshMap) { delete m.second; }
+	for (auto&& m : texMap) { delete m.second; }
 	// Delete our simple shader objects, which
 	// will clean up their own internal DirectX stuff
 	delete vertexShader;
@@ -77,7 +78,8 @@ void Game::Init()
 	// geometry to draw and some simple camera matrices.
 	//  - You'll be expanding and/or replacing these later
 	LoadShaders();
-	LoadModels();
+	LoadModelDirectory();
+	LoadTextureDirectory();
 	CreateMatrices();
 	CreateBasicGeometry();
 	AddLighting();
@@ -136,7 +138,7 @@ void Game::LoadShaders()
 	pixelShader->LoadShaderFile(L"PixelShader.cso");
 }
 
-void Game::LoadModels() 
+void Game::LoadModelDirectory() 
 {
 	std::stringstream ss;
 	std::string s,path;
@@ -157,9 +159,29 @@ void Game::LoadModels()
 		ss.clear();
 	}
 
-	for (auto it = meshMap.begin(); it != meshMap.end(); it++) 
+	/*for (auto it = meshMap.begin(); it != meshMap.end(); it++) 
 	{
 		std::cout << it->first << std::endl;
+	}*/
+}
+
+void Game::LoadTextureDirectory() 
+{
+	std::stringstream ss;
+	std::string s, path;
+	std::string texturePath = "Textures";
+	unsigned int strlength = texturePath.length();
+	for(const auto& entry : fs::directory_iterator(texturePath))
+	{
+		ss << entry.path();
+		s = ss.str();
+		ss.str(std::string());
+		ss.clear();
+		path = s.substr(strlength);
+		ss << texturePath << "/" << path;
+		texMap[path.substr(0, path.find("."))] = new Texture(ss.str(), device, context);
+		ss.str(std::string());
+		ss.clear();
 	}
 }
 
@@ -200,11 +222,14 @@ void Game::CreateBasicGeometry()
 	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
 	XMMATRIX scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
 	
+	entityList.push_back(Entity(trans, rot, scale, "cube", material));
+
 	trans = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
 	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
 	scale = XMMatrixScaling(0.5f, 0.5f, 0.5f);
 
-	//mesh3 = new Mesh("torus.obj", device);
+	entityList.push_back(Entity(trans, rot, scale, "sphere", material));
+
 }
 
 

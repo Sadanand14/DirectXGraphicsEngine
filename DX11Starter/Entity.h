@@ -9,7 +9,7 @@
 #include "Lights.h"
 
 #include <vector>
-
+#include <string>
 using namespace DirectX;
 //creating an enitity class
 
@@ -18,7 +18,7 @@ class Entity
 
 
 	XMFLOAT4X4 m_translation, m_rotation, m_scaling; // Guess this is pretty obvious
-	unsigned int m_meshoffset;
+	std::string m_modelTitle;
 	Materials* material;
 
 
@@ -26,7 +26,7 @@ class Entity
 public:
 	static std::vector<Mesh> m_meshList;
 
-	Entity(XMMATRIX a, XMMATRIX b, XMMATRIX c, unsigned int d, Materials* e);
+	Entity(XMMATRIX a, XMMATRIX b, XMMATRIX c, std::string, Materials* e);
 	~Entity();
 	
 	void SetPos(XMMATRIX X) { XMStoreFloat4x4(&m_translation,X); }
@@ -35,7 +35,7 @@ public:
 	XMFLOAT4X4 GetPos(){ return m_translation; }
 	XMFLOAT4X4 GetRot(){ return m_rotation; }
 	XMFLOAT4X4 GetScale(){ return m_scaling; }
-	unsigned int GetOffset() { return m_meshoffset; }
+	std::string GetOffset() { return m_modelTitle; }
 
 	XMMATRIX GetWM(); // returns a world matrix for storing in the worldMatrix variable
 };
