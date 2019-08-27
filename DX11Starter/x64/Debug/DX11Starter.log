@@ -1,4 +1,0 @@
-﻿  Game.cpp
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(400,43): warning C4244:  'argument': conversion from 'LONG' to 'float', possible loss of data
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(400,23): warning C4244:  'argument': conversion from 'LONG' to 'float', possible loss of data
-  DX11Starter.vcxproj -> C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\x64\Debug\DX11Starter.exe

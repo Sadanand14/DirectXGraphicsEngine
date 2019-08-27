@@ -1,21 +1,23 @@
 #pragma once
 #include <d3d11.h>
 #include "Vertex.h"
+#include <string>
 
 //creating mesh class
 class Mesh
 {
 	ID3D11Buffer *vertexPointer = nullptr, *indexPointer = nullptr;
 	int indexCount=NULL;
-	void CalculateTangents(Vertex* , int , unsigned int* , int);
+	//Vertex*VertexArr=nullptr;
+	//unsigned int* indexarr=nullptr;
 public: 
 
-	Mesh(Vertex* vertextArray, unsigned int* intArray, int totalVertices, int totalIndices, ID3D11Device* device);
-	Mesh(char* objFile, ID3D11Device* device);
+	Mesh(Vertex* vertextArray, UINT* intArray, int totalVertices, int totalIndices, ID3D11Device* device);
+	Mesh(const char* objFile, ID3D11Device* device);
 	~Mesh();
 	
-	inline ID3D11Buffer* GetVertexBuffer() { return vertexPointer; }
-	inline ID3D11Buffer* GetIndexBuffer() { return indexPointer; }
-	inline int GetIndexCount() { return indexCount; }
+	ID3D11Buffer* GetVertexBuffer() { return vertexPointer; }
+	ID3D11Buffer* GetIndexBuffer() { return indexPointer; }
+	int GetIndexCount() { return indexCount; }
 	void Mesh::CreatingBuffer(Vertex* vertextArray, unsigned int* intArray, int totalVertices, int totalIndices, ID3D11Device* device);
 };

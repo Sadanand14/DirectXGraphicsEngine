@@ -9,6 +9,8 @@
 #include "Camera.h"
 #include "Lights.h"
 
+#include <map>
+
 class Game 
 	: public DXCore
 {
@@ -17,36 +19,23 @@ public:
 	Game(HINSTANCE hInstance);
 	~Game();
 
-	DefaultMaterials* material1=nullptr,*material2=nullptr,*material3=nullptr;
-	//Camera instance created
+	Materials* material;
+	
 	Camera* camera;
-	// vector for storing different Entity instances
+	
 	std::vector<Entity> entityList;
-	//Creating 5 Entity Variables
-	//Entity *entity1, *entity2, *entity3, *entity4, *entity5;
-	//Creating 4 mesh variables
-	Mesh *mesh1 = nullptr, *mesh2 = nullptr, *mesh3 = nullptr, *mesh4 = nullptr;
-
-	//Defining Shader Resources for textures
-	ID3D11ShaderResourceView *srv1,*srv2, *skySRV;
-	ID3D11SamplerState* shaderSampler;
-	D3D11_SAMPLER_DESC samplerStruct;
-	ID3D11RasterizerState* skyRaster;
-	ID3D11DepthStencilState* SkyDepthStencil;
-
+	std::map<std::string, Mesh*> meshMap;
 
 	//creating Directional light
-	DirectionalLight light1;
-	PointLight light2;
+	DirectionalLight light1,light2;
+	
 	// Overridden setup and game loop methods, which
 	// will be called automatically
 	void Init();
 	void OnResize();
 	void Update(float deltaTime, float totalTime);
 	void Draw(float deltaTime, float totalTime);
-	void Setmodels();
-	void SetLights();
-	void DrawSky();
+
 	// Overridden mouse input helper methods
 	void OnMouseDown (WPARAM buttonState, int x, int y);
 	void OnMouseUp	 (WPARAM buttonState, int x, int y);
@@ -58,6 +47,8 @@ private:
 	void LoadShaders(); 
 	void CreateMatrices();
 	void CreateBasicGeometry();
+	void LoadModels();
+	void AddLighting();
 
 	// Buffers to hold actual geometry data
 	ID3D11Buffer* vertexBuffer;
@@ -66,8 +57,6 @@ private:
 	// Wrappers for DirectX shaders to provide simplified functionality
 	SimpleVertexShader* vertexShader;
 	SimplePixelShader* pixelShader;
-	SimplePixelShader* skyboxPS;
-	SimpleVertexShader* skyboxVS;
 
 	// The matrices to go from model space to screen space
 	DirectX::XMFLOAT4X4 worldMatrix;

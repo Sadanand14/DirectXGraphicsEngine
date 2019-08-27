@@ -8,11 +8,4 @@ namespace DirectX {
 		XMFLOAT4 DiffuseColor;
 		XMFLOAT3 Direction;
 	};
-
-	struct PointLight 
-	{
-		XMFLOAT4 Position;
-		XMFLOAT4 ambientColor;
-		XMFLOAT4 sourceColor;
-	};
 }

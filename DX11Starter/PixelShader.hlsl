@@ -14,10 +14,9 @@ struct VertexToPixel
 	//  |    |                |
 	//  v    v                v
 	float4 position		: SV_POSITION;
+	//float4 color		: COLOR;
 	float3 Normal		: NORMAL;
-	float3 Tangent		: TANGENT;
-	float3 worldPos     : POSITION;
-	float2 UV			: TEXCOORD;
+	float2 UV           : TEXCOORD;
 };
 
 // --------------------------------------------------------
@@ -36,82 +35,31 @@ struct DirectionalLight
 	float3 Direction;
 };
 
-struct PointLight 
-{
-	float4 Position;
-	float4 AmbientColor;
-	float4 SourceColor;
-};
-
-SamplerState Sampler  : register(s0);
-Texture2D Texture1    : register(t0);
-Texture2D NormalMap1  : register(t1);
-
 cbuffer externalData: register(b0)
 {
-	DirectionalLight directionalLight;
-	PointLight pointLight;
-	float4 cameraPosition; 
+	DirectionalLight Light1;
+	DirectionalLight Light2;
 }
 
-//DIRECTIONAL LIGHT 
-float3 GetDirLight(DirectionalLight dL, float4 surfaceColor,float3 cameraDir, float3 normal, float shine)
+//helper function for calculating directional light from each light on the surface
+float4 CalculateLight(DirectionalLight dL, float3 normal)
 {
-	//Directional Light part
 	normal = normalize(normal);
-	float3 normalizedDir = normalize(dL.Direction);
-	float dirNdotL = dot(normal, -normalizedDir);
-	dirNdotL = saturate(dirNdotL);
-	float3 finalColor = surfaceColor * dL.DiffuseColor*dirNdotL + dL.AmbientColor;
+	float3 nlight = normalize(dL.Direction*(-1));
+	float dotproduct = saturate(dot(normal, nlight));
+	float4 finalColor = dotproduct * dL.DiffuseColor + dL.AmbientColor;
 	return finalColor;
 }
 
-//SPECULAR REFLECTION
-float3 GetSpec(float3 lightDirection, float3 cameraDir, float3 normal,float shine)
-{
-	lightDirection = normalize(lightDirection);
-	float3 pointReflec = reflect(-lightDirection, normal);
-	float3 pointSpec = pow(saturate(dot(pointReflec, cameraDir)), shine);
-	return pointSpec.rrr;
-}
-
-//POINTLIGHT
-float3 GetPointLight(PointLight pl, float4 color, float3 pixelPos, float3 cameraDir, float3 normal, float shine)
-{
-	float3 dirToPointLight = normalize(pl.Position - pixelPos);
-	float3 pointNdotL = dot(normal, dirToPointLight);
-	pointNdotL = saturate(pointNdotL);
-	float3 spec1 = GetSpec(dirToPointLight, cameraDir, normal, shine);
-	float3 finalPointLight = color * pl.SourceColor*pointNdotL+spec1+ pl.AmbientColor;
-	return finalPointLight;
-}
-
-
-
 float4 main(VertexToPixel input) : SV_TARGET
 {
-	input.Tangent = normalize(input.Tangent);
-	input.Normal = normalize(input.Normal);
+	// Just return the input color
+	// - This color (like most values passing through the rasterizer) is 
+	//   interpolated for each pixel between the corresponding vertices 
+	//   of the triangle we're rendering
 
-	float3 NormalFromMap = NormalMap1.Sample(Sampler, input.UV);
-
-	float3 N = input.Normal;
-	float3 T = normalize(input.Tangent - N * dot(input.Tangent, N));
-	float3 B = cross(T, N);
-	float3x3 TBN = float3x3(T, B, N);
-
-	input.Normal = normalize(mul(NormalFromMap, TBN));
-
-	// Requirements for lighting...
-	input.Normal = normalize(input.Normal);
-	float4 surfaceColor = Texture1.Sample(Sampler, input.UV);
-	float shine = 64.0f;
-	float3 dirToCamera = normalize(cameraPosition.xyz - input.worldPos);
-
-	float3 finalDirLight = GetDirLight(directionalLight, surfaceColor, dirToCamera, input.Normal, shine);
-	float3 finalPointLight = GetPointLight(pointLight, surfaceColor, input.worldPos, dirToCamera, input.Normal, shine);
+	float4 finalColor = CalculateLight(Light1,input.Normal) + CalculateLight(Light2,input.Normal);
+	return finalColor;
 	
-	
-	return  float4(finalPointLight + finalDirLight, 1);
 }
 

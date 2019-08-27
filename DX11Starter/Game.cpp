@@ -6,10 +6,13 @@
 #include "Camera.h"
 #include <iostream>
 #include "Lights.h"
-#include "WICTextureLoader.h"
-#include "DDSTextureLoader.h"
+
+#include <filesystem>
+#include <sstream>
+
 // For the DirectX Math library
 using namespace DirectX;
+namespace fs = std::experimental::filesystem;
 
 // --------------------------------------------------------
 // Constructor
@@ -54,30 +57,9 @@ Game::~Game()
 	// we've made in the Game class
 	if (vertexBuffer) { vertexBuffer->Release(); }
 	if (indexBuffer) { indexBuffer->Release(); }
-	if(srv1)srv1->Release();
-	if(srv2)srv2->Release();
-	if (skySRV)skySRV->Release();
-	//if (SkyDepthStencil)SkyDepthStencil->Release();
-	//if (skyRaster)skyRaster->Release();
-	if (skyboxPS) delete skyboxPS;
-	if (skyboxVS) delete skyboxVS;
+	//delete mesh1, mesh2, mesh3, mesh4,entity1, entity2, entity3, entity4, entity5, &entityList;
 
-	shaderSampler->Release();
-	
-	if (mesh1 != nullptr)
-		delete mesh1;
-	if (mesh2 != nullptr)
-		delete mesh2;
-	if (mesh3 != nullptr)
-		delete mesh3;
-	if (mesh4 != nullptr)
-		delete mesh4;
-	if (material1 != nullptr)
-		delete material1;
-	if (material2 != nullptr)
-		delete material2;
-	if (material3 != nullptr)
-		delete material3;
+	for (auto&& m : meshMap) { delete m.second; }
 	// Delete our simple shader objects, which
 	// will clean up their own internal DirectX stuff
 	delete vertexShader;
@@ -91,19 +73,53 @@ Game::~Game()
 // --------------------------------------------------------
 void Game::Init()
 {
-
 	// Helper methods for loading shaders, creating some basic
 	// geometry to draw and some simple camera matrices.
 	//  - You'll be expanding and/or replacing these later
 	LoadShaders();
+	LoadModels();
 	CreateMatrices();
-	Setmodels();
-	SetLights();
 	CreateBasicGeometry();
-	CreateDDSTextureFromFile(device, L"Textures/Test.dds",0,&skySRV);
+	AddLighting();
 
+	// Tell the input assembler stage of the pipeline what kind of
+	// geometric primitives (points, lines or triangles) we want to draw.  
+	// Essentially: "What kind of shape should the GPU draw with our data?"
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
+
+void Game::AddLighting() 
+{
+	//intitalizing the directional light structure defined in game.h
+	light1.AmbientColor.x = 0.1f;
+	light1.AmbientColor.y = 0.1f;
+	light1.AmbientColor.z = 0.1f;
+	light1.AmbientColor.w = 1.0f;
+
+	light1.DiffuseColor.x = 0.0f;
+	light1.DiffuseColor.y = 0.0f;
+	light1.DiffuseColor.z = 1.0f;
+	light1.DiffuseColor.w = 1.0f;
+
+	light1.Direction.x = 1.0f;
+	light1.Direction.y = -1.0f;
+	light1.Direction.z = 0.0f;
+
+	light2.AmbientColor.x = 0.1f;
+	light2.AmbientColor.y = 0.1f;
+	light2.AmbientColor.z = 0.1f;
+	light2.AmbientColor.w = 1.0f;
+
+	light2.DiffuseColor.x = 1.0f;
+	light2.DiffuseColor.y = 0.0f;
+	light2.DiffuseColor.z = 0.0f;
+	light2.DiffuseColor.w = 1.0f;
+
+	light2.Direction.x = -1.0f;
+	light2.Direction.y = 1.0f;
+	light2.Direction.z = 0.0f;
+}
+
 
 // --------------------------------------------------------
 // Loads shaders from compiled shader object (.cso) files using
@@ -118,14 +134,34 @@ void Game::LoadShaders()
 
 	pixelShader = new SimplePixelShader(device, context);
 	pixelShader->LoadShaderFile(L"PixelShader.cso");
-
-	skyboxVS = new SimpleVertexShader(device, context);
-	skyboxVS->LoadShaderFile(L"SkyBoxVS.cso");
-
-	skyboxPS = new SimplePixelShader(device, context);
-	skyboxPS->LoadShaderFile(L"SkyBoxPS.cso");
 }
 
+void Game::LoadModels() 
+{
+	std::stringstream ss;
+	std::string s,path;
+	std::string ModelPath = "Models";
+	unsigned int strlength = ModelPath.length();
+	strlength++;
+	for (const auto& entry : fs::directory_iterator(ModelPath)) 
+	{
+		//std::cout << entry.path() << std::endl;
+		ss << entry.path();
+		s = ss.str();
+		ss.str(std::string());
+		ss.clear();
+		path = s.substr(strlength);
+		ss << ModelPath << "/" << path;
+		meshMap[path.substr(0, path.find("."))] =new Mesh(ss.str().c_str(), device);
+		ss.str(std::string());
+		ss.clear();
+	}
+
+	for (auto it = meshMap.begin(); it != meshMap.end(); it++) 
+	{
+		std::cout << it->first << std::endl;
+	}
+}
 
 
 // --------------------------------------------------------
@@ -134,7 +170,6 @@ void Game::LoadShaders()
 // --------------------------------------------------------
 void Game::CreateMatrices()
 {
-
 	XMMATRIX W = XMMatrixIdentity();
 	XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(W)); // Transpose for HLSL!
 
@@ -148,7 +183,6 @@ void Game::CreateMatrices()
 		up);     // "Up" direction in 3D space (prevents roll)
 	XMStoreFloat4x4(&viewMatrix, XMMatrixTranspose(V)); // Transpose for HLSL!
 
-
 	XMMATRIX P = XMMatrixPerspectiveFovLH(
 		0.25f * 3.1415926535f,		// Field of View Angle
 		(float)width / height,		// Aspect ratio
@@ -158,71 +192,19 @@ void Game::CreateMatrices()
 }
 
 
-
-void Game::SetLights() 
-{
-	light1.AmbientColor = XMFLOAT4(0.0f, 0.2f, 0.2f, 1.0f);
-	light1.DiffuseColor = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
-	light1.Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
-
-	light2.Position = XMFLOAT4(0,5,0, 0);
-	light2.ambientColor = XMFLOAT4(0.0f, 0.2f, 0.2f,0);
-	light2.sourceColor = XMFLOAT4(1.0f, 0.0f, 0.0f, 0);
-	
-}
-
-void Game::Setmodels() 
-{
-	
-
-	//Generating a texture resource view from the loaded texture
-	samplerStruct = {};
-
-	samplerStruct.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerStruct.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerStruct.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-
-	samplerStruct.Filter = D3D11_FILTER_ANISOTROPIC;
-
-	samplerStruct.MaxLOD = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-
-	device->CreateSamplerState(&samplerStruct, &shaderSampler);
- 	
-	CreateWICTextureFromFile(device, context, L"Textures/Test.dds", 0, &srv1);// colour map
-	CreateWICTextureFromFile(device, context, L"Textures/Hex_N.jpg", 0, &srv2);// normal map
-
-	material1 = new DefaultMaterials(vertexShader, pixelShader, srv1, srv2, shaderSampler);
-}
-
-// --------------------------------------------------------
-// Creates the geometry we're going to draw - a single triangle for now
-// --------------------------------------------------------
-
 void Game::CreateBasicGeometry()
 {
-	XMMATRIX trans = XMMatrixTranslation(-2.0f, 0.0f, 0.0f);
+	material = new Materials(vertexShader, pixelShader);//had to create a dummy material so compiler wont throw an error
+
+	XMMATRIX trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
 	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
 	XMMATRIX scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
 	
-	/*mesh4 = new Mesh("Models/helix.obj", device);
-	entityList.push_back(Entity(trans, rot, scale, mesh4, material1));
-
 	trans = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
 	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
-	scale = XMMatrixScaling(0.5f, 0.5f, 0.5f);*/
+	scale = XMMatrixScaling(0.5f, 0.5f, 0.5f);
 
-	mesh3 = new Mesh("Models/torus.obj", device);
-	entityList.push_back(Entity(trans, rot, scale, mesh3, material1));
-
-	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
-	scale = XMMatrixScaling(1.5f, 1.5f, 1.5f);
-	trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
-
-	mesh2 = new Mesh("Models/sphere.obj", device);
-	entityList.push_back(Entity(trans, rot, scale, mesh2, material1));
-
-	mesh3 = new Mesh("Models/cube.obj", device);
-	entityList.push_back(Entity(trans, rot, scale, mesh3, material1));
+	//mesh3 = new Mesh("torus.obj", device);
 }
 
 
@@ -250,10 +232,10 @@ void Game::OnResize()
 void Game::Update(float deltaTime, float totalTime)
 {
 	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f,totalTime, totalTime);
-	entityList[0].SetRot(rot);
+	//entityList[0].SetRot(rot);
 
 	rot = XMMatrixRotationRollPitchYaw(totalTime, 0.0f, totalTime);
-	entityList[1].SetRot(rot);
+	//entityList[1].SetRot(rot);
 	
 	camera->Update(deltaTime);
 	// Quit if the escape key is pressed
@@ -284,6 +266,14 @@ void Game::Update(float deltaTime, float totalTime)
 	{
 		camera->MoveDownward();
 	}
+	if (GetAsyncKeyState('V')) 
+	{
+		camera->RotateUp();
+	}
+	if (GetAsyncKeyState('C')) 
+	{
+		camera->RotateDown();
+	}
 }
 
 // --------------------------------------------------------
@@ -294,44 +284,29 @@ void Game::Draw(float deltaTime, float totalTime)
 	// Background color (Cornflower Blue in this case) for clearing
 	const float color[4] = { 0.4f, 0.6f, 0.75f, 0.0f };
 
+	// Clear the render target and depth buffer (erases what's on the screen)
+	//  - Do this ONCE PER FRAME
+	//  - At the beginning of Draw (before drawing *anything*)
 	context->ClearRenderTargetView(backBufferRTV, color);
 	context->ClearDepthStencilView(
 		depthStencilView,
 		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
 		1.0f,
 		0);
-	
-
 
 	//Looped all the sequences for loading the worldmatrix as well as loading the index and vertex buffers to the 
 	//GPU using a vector of entities.
-
-	for (int i = 0; i < 2; i++) {
+	/*for (int i = 0; i < entityList.size(); i++) {
 		XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(entityList[i].GetWM()));
-
-		//Passing in all the VertexShader Data
-		SimpleVertexShader* vPointer= entityList[i].GetMaterial()->GetVrtxptr();
-		vPointer->SetMatrix4x4("world", worldMatrix);
-		vPointer->SetMatrix4x4("view", camera->GetView());
-		vPointer->SetMatrix4x4("projection", camera->GetProjection());
-		vPointer->CopyAllBufferData();
-		vPointer->SetShader();
-
-		//Passing data into the pixel Shader
-		SimplePixelShader* pPointer = entityList[i].GetMaterial()->GetPxlptr();
-		ID3D11SamplerState* sampler = entityList[i].GetMaterial()->GetSamplerState();
-		ID3D11ShaderResourceView* srvColor = entityList[i].GetMaterial()->GetSRVColor();
-		ID3D11ShaderResourceView* srvNormal = entityList[i].GetMaterial()->GetSRVNormal();
-		
-		pPointer->SetData("directionalLight", &light1, sizeof(DirectionalLight));
-		pPointer->SetData("pointLight", &light2, sizeof(PointLight));
-		pPointer->SetFloat4("cameraPosition", camera->GetPos());
-		pPointer->SetSamplerState("Sampler", sampler);
-		pPointer->SetShaderResourceView("Texture1", srvColor);
-		pPointer->SetShaderResourceView("NormalMap1", srvNormal);
-		pPointer->CopyAllBufferData();
-		pPointer->SetShader();
-
+		vertexShader->SetMatrix4x4("world", worldMatrix);
+		vertexShader->SetMatrix4x4("view", camera->GetView());
+		vertexShader->SetMatrix4x4("projection", camera->GetProjection());
+		pixelShader->SetData("Light1", &light1, sizeof(DirectionalLight));
+		pixelShader->SetData("Light2", &light2, sizeof(DirectionalLight));
+		vertexShader->CopyAllBufferData();
+		pixelShader->CopyAllBufferData();
+		vertexShader->SetShader();
+		pixelShader->SetShader();
 		UINT stride = sizeof(Vertex);
 		UINT offset = 0;
 		ID3D11Buffer *v1Buffer = entityList[i].GetMesh()->GetVertexBuffer();
@@ -340,70 +315,72 @@ void Game::Draw(float deltaTime, float totalTime)
 		context->IASetIndexBuffer(i1Buffer, DXGI_FORMAT_R32_UINT, 0);
 		int indicesCount1 = entityList[i].GetMesh()->GetIndexCount();
 		context->DrawIndexed(indicesCount1, 0, 0);
-	}
-
-	DrawSky();
+	}*/
 
 	swapChain->Present(0, 0);
 }
 
-void Game::DrawSky() 
-{
-	skyboxVS->SetShader();
-	skyboxVS->SetMatrix4x4("view", camera->GetView());
-	skyboxVS->SetMatrix4x4("projection", camera->GetProjection());
-	skyboxVS->CopyAllBufferData();
-
-	skyboxPS->SetShader();
-	skyboxPS->SetShaderResourceView("tex", material1->GetSRVColor());
-	skyboxPS->SetSamplerState("Sampler", shaderSampler);
-	skyboxPS->CopyAllBufferData();
-
-	UINT stride = sizeof(Vertex);
-	UINT offset = 0;
-	ID3D11Buffer *v1Buffer = entityList[2].GetMesh()->GetVertexBuffer();
-	ID3D11Buffer *i1Buffer = entityList[2].GetMesh()->GetIndexBuffer();
-	context->IASetVertexBuffers(0, 1, &v1Buffer, &stride, &offset);
-	context->IASetIndexBuffer(i1Buffer, DXGI_FORMAT_R32_UINT, 0);
-	int indicesCount1 = entityList[2].GetMesh()->GetIndexCount();
-	context->DrawIndexed(indicesCount1, 0, 0);
-}
 
 #pragma region Mouse Input
 
-
+// --------------------------------------------------------
+// Helper method for mouse clicking.  We get this information
+// from the OS-level messages anyway, so these helpers have
+// been created to provide basic mouse input if you want it.
+// --------------------------------------------------------
 void Game::OnMouseDown(WPARAM buttonState, int x, int y)
 {
 	// Add any custom code here...
+	if (buttonState & 0x0001) 
+	{
+		camera->RotateLeft();
+	}
 	
-	
+	if (buttonState & 0x0002) 
+	{
+		camera->RotateRight();
+	}
 	// Save the previous mouse position, so we have it for the future
 	prevMousePos.x = x;
 	prevMousePos.y = y;
 
+	// Caputure the mouse so we keep getting mouse move
+	// events even if the mouse leaves the window.  we'll be
+	// releasing the capture once a mouse button is released
 	SetCapture(hWnd);
 }
 
-
+// --------------------------------------------------------
+// Helper method for mouse release
+// --------------------------------------------------------
 void Game::OnMouseUp(WPARAM buttonState, int x, int y)
 {
+	// Add any custom code here...
 
+	// We don't care about the tracking the cursor outside
+	// the window anymore (we're not dragging if the mouse is up)
 	ReleaseCapture();
 }
 
-
+// --------------------------------------------------------
+// Helper method for mouse movement.  We only get this message
+// if the mouse is currently over the window, or if we're 
+// currently capturing the mouse.
+// --------------------------------------------------------
 void Game::OnMouseMove(WPARAM buttonState, int x, int y)
 {
+	// Add any custom code here...
 
-	if (buttonState & 0x0001)
-	{
-		camera->MouseLook((x- prevMousePos.x),(y- prevMousePos.y));
-	}
-
+	// Save the previous mouse position, so we have it for the future
 	prevMousePos.x = x;
 	prevMousePos.y = y;
 }
 
+// --------------------------------------------------------
+// Helper method for mouse wheel scrolling.  
+// WheelDelta may be positive or negative, depending 
+// on the direction of the scroll
+// --------------------------------------------------------
 void Game::OnMouseWheel(float wheelDelta, int x, int y)
 {
 	// Add any custom code here...

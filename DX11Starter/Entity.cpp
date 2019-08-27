@@ -4,26 +4,27 @@
 #include "Game.h"
 #include "Materials.h"
 
-Entity::Entity(XMMATRIX a, XMMATRIX b, XMMATRIX c, Mesh* d, DefaultMaterials* e)
+std::vector<Mesh> Entity::m_meshList;
+
+Entity::Entity(XMMATRIX a, XMMATRIX b, XMMATRIX c, unsigned int d, Materials* e)
 {
-	XMStoreFloat4x4(&translation, a);
-	XMStoreFloat4x4(&rotation, b);
-	XMStoreFloat4x4(&scaling, c);
-	mesh = d;
+	XMStoreFloat4x4(&m_translation, a);
+	XMStoreFloat4x4(&m_rotation, b);
+	XMStoreFloat4x4(&m_scaling, c);
+	m_meshoffset = d;
 	material = e;
 }
 
 Entity::~Entity() 
 {
-	mesh = nullptr; 
 }
 
 XMMATRIX Entity::GetWM()
 {
 	XMMATRIX trans, rot, scale, result;
-	trans = XMLoadFloat4x4(&translation);
-	rot = XMLoadFloat4x4(&rotation);
-	scale = XMLoadFloat4x4(&scaling);
+	trans = XMLoadFloat4x4(&m_translation);
+	rot = XMLoadFloat4x4(&m_rotation);
+	scale = XMLoadFloat4x4(&m_scaling);
 	result = XMMatrixMultiply(XMMatrixMultiply(scale, rot), trans);
 	return result;
 }

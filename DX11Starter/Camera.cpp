@@ -18,9 +18,10 @@ Camera::Camera(float width,float height)
 	view = XMVectorSet(0,0,1,0);
 	pos = XMVectorSet(0,0,-5,0);
 	upUnit = XMVectorSet(0, 1, 0, 0);
+	XMMATRIX vm = XMMatrixLookToLH(pos, view, upUnit);
+	XMStoreFloat4x4(&veiwMatrix,XMMatrixTranspose(vm));
 	xRot = 0.0f;
 	yRot = 0.0f;
-	XMStoreFloat4(&rotation, XMQuaternionIdentity());
 }
 
 Camera::~Camera() {	}
@@ -28,8 +29,23 @@ Camera::~Camera() {	}
 void Camera::Update(float deltaTime)
 {
 	delta = deltaTime;
-
-	view = XMVector3Rotate(XMVectorSet(0,0,1,0), XMLoadFloat4(&rotation) );
+	if (xRot > 0)
+	{
+		xRot -= 0.0001f*delta;
+	}
+	if (xRot < 0)
+	{
+		xRot += 0.0001f*delta;
+	}
+	if (yRot > 0) 
+	{
+		yRot -= 0.0001f*delta;
+	}
+	if (yRot < 0)
+	{
+		yRot += 0.0001f*delta;
+	}
+	view = XMVector3Rotate(view, XMQuaternionRotationRollPitchYaw(xRot, yRot, 0.0f));
 	XMMATRIX vm = XMMatrixLookToLH(pos,view, upUnit);
 	XMStoreFloat4x4(&veiwMatrix, XMMatrixTranspose(vm));
 }
@@ -74,10 +90,21 @@ void Camera::MoveDownward()
 	pos = XMVectorAdd(pos, reverseDir);
 }
 
-void Camera::MouseLook(float x, float y) 
+void Camera::RotateLeft()
 {
-	xRot += y*0.002f;
-	yRot += x*0.002f;
-	xRot = max(min(xRot, XM_PIDIV2), -XM_PIDIV2);
-	XMStoreFloat4(&rotation, XMQuaternionRotationRollPitchYaw(xRot, yRot, 0.0f));
+	yRot -= 0.5f*delta;
+}
+
+void Camera::RotateRight()
+{
+	yRot += 0.5f*delta;
+}
+
+void Camera::RotateUp()
+{
+	xRot += 0.001f*delta;
+}
+void Camera::RotateDown()
+{
+	xRot -= 0.001f*delta;
 }
