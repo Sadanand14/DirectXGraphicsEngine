@@ -7,9 +7,8 @@
 #include "Game.h"
 #include "Materials.h"
 #include "Lights.h"
+#include "types.h"
 
-#include <vector>
-#include <string>
 using namespace DirectX;
 //creating an enitity class
 

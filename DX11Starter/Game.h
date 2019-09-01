@@ -8,10 +8,7 @@
 #include "Lights.h"
 #include "Textures.h"
 
-
-#include <DirectXMath.h>
-#include <d3d11.h>
-#include <map>
+#include "types.h"
 
 class Game 
 	: public DXCore
@@ -25,7 +22,7 @@ public:
 	
 	Camera* camera;
 	
-	std::vector<Entity> entityList;
+	std::vector<Entity*> entityList;
 	std::map<std::string, Mesh*> meshMap;
 	std::map<std::string, Texture*> texMap;
 

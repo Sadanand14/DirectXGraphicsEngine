@@ -131,6 +131,7 @@
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="SimpleShader.h" />
     <ClInclude Include="Textures.h" />
+    <ClInclude Include="types.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>

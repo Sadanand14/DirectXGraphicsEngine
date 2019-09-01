@@ -5,6 +5,8 @@
 #include <DirectXMath.h>
 #include <d3dcompiler.h>
 #include "Game.h"
+#include "types.h"
+
 
 class Materials 
 {

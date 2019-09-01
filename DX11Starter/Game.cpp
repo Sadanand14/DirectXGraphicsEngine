@@ -59,6 +59,7 @@ Game::~Game()
 	if (indexBuffer) { indexBuffer->Release(); }
 	//delete mesh1, mesh2, mesh3, mesh4,entity1, entity2, entity3, entity4, entity5, &entityList;
 
+	for (auto& m : entityList) { delete m; }
 	for (auto&& m : meshMap) { delete m.second; }
 	for (auto&& m : texMap) { delete m.second; }
 	// Delete our simple shader objects, which
@@ -143,8 +144,7 @@ void Game::LoadModelDirectory()
 	std::stringstream ss;
 	std::string s,path;
 	std::string ModelPath = "Models";
-	unsigned int strlength = ModelPath.length();
-	strlength++;
+	unsigned int strlength = ModelPath.length() + 1;
 	for (const auto& entry : fs::directory_iterator(ModelPath)) 
 	{
 		//std::cout << entry.path() << std::endl;
@@ -170,7 +170,7 @@ void Game::LoadTextureDirectory()
 	std::stringstream ss;
 	std::string s, path;
 	std::string texturePath = "Textures";
-	unsigned int strlength = texturePath.length();
+	unsigned int strlength = texturePath.length()+1;
 	for(const auto& entry : fs::directory_iterator(texturePath))
 	{
 		ss << entry.path();
@@ -222,13 +222,13 @@ void Game::CreateBasicGeometry()
 	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
 	XMMATRIX scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
 	
-	entityList.push_back(Entity(trans, rot, scale, "cube", material));
+	entityList.push_back(new Entity(trans, rot, scale, "cube", material));
 
 	trans = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
 	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
 	scale = XMMatrixScaling(0.5f, 0.5f, 0.5f);
 
-	entityList.push_back(Entity(trans, rot, scale, "sphere", material));
+	entityList.push_back(new Entity(trans, rot, scale, "sphere", material));
 
 }
 
@@ -321,26 +321,29 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	//Looped all the sequences for loading the worldmatrix as well as loading the index and vertex buffers to the 
 	//GPU using a vector of entities.
-	/*for (int i = 0; i < entityList.size(); i++) {
-		XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(entityList[i].GetWM()));
+
+	for (int i = 0; i < entityList.size(); i++) {
+		XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(entityList[i]->GetWM()));
 		vertexShader->SetMatrix4x4("world", worldMatrix);
 		vertexShader->SetMatrix4x4("view", camera->GetView());
 		vertexShader->SetMatrix4x4("projection", camera->GetProjection());
 		pixelShader->SetData("Light1", &light1, sizeof(DirectionalLight));
 		pixelShader->SetData("Light2", &light2, sizeof(DirectionalLight));
+		pixelShader->SetShaderResourceView("Texture", texMap["crate"]->GetSRV());
+		pixelShader->SetSamplerState("BasicSampler",Texture::m_sampler);
 		vertexShader->CopyAllBufferData();
 		pixelShader->CopyAllBufferData();
 		vertexShader->SetShader();
 		pixelShader->SetShader();
 		UINT stride = sizeof(Vertex);
 		UINT offset = 0;
-		ID3D11Buffer *v1Buffer = entityList[i].GetMesh()->GetVertexBuffer();
-		ID3D11Buffer *i1Buffer = entityList[i].GetMesh()->GetIndexBuffer();
+		ID3D11Buffer *v1Buffer = meshMap[entityList[i]->GetOffset()]->GetVertexBuffer();
+		ID3D11Buffer *i1Buffer = meshMap[entityList[i]->GetOffset()]->GetIndexBuffer();
 		context->IASetVertexBuffers(0, 1, &v1Buffer, &stride, &offset);
 		context->IASetIndexBuffer(i1Buffer, DXGI_FORMAT_R32_UINT, 0);
-		int indicesCount1 = entityList[i].GetMesh()->GetIndexCount();
+		int indicesCount1 = meshMap[entityList[i]->GetOffset()]->GetIndexCount();
 		context->DrawIndexed(indicesCount1, 0, 0);
-	}*/
+	}
 
 	swapChain->Present(0, 0);
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <DirectXMath.h>
+#include "types.h"
 
 // --------------------------------------------------------
 // A custom vertex definition

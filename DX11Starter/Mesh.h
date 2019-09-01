@@ -1,7 +1,6 @@
 #pragma once
-#include <d3d11.h>
 #include "Vertex.h"
-#include <string>
+#include "types.h"
 
 //creating mesh class
 class Mesh

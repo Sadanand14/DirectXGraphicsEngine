@@ -1,6 +1,7 @@
 #pragma once
 #include "d3d11.h"
-#include <DirectXMath.h>
+#include "types.h"
+
 namespace DirectX {
 	struct DirectionalLight
 	{
