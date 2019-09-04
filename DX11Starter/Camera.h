@@ -9,24 +9,19 @@
 using namespace DirectX;
 class Camera 
 {
-	XMFLOAT4X4 veiwMatrix, projectionMatrix;
-	XMVECTOR view,pos,upUnit;
-	XMFLOAT3 currentPos,cameraDir;
+	XMFLOAT4X4 viewMatrix, projectionMatrix;
+	XMVECTOR upUnit;
+	XMFLOAT3 currentPos;
+	XMFLOAT4 rotation;
 	float xRot, yRot,delta;
 public:
 	Camera(float width, float height);
 	~Camera();
 	void Update(float deltaTime);
-	XMFLOAT4X4 GetView() { return veiwMatrix; }
+	XMFLOAT4X4 GetView() { return viewMatrix; }
 	XMFLOAT4X4 GetProjection() { return projectionMatrix; }
-	void MoveForward();
-	void MoveBackward();
-	void MoveLeft();
-	void MoveRight();
-	void MoveUpward();
-	void MoveDownward();
-	void RotateLeft();
-	void RotateRight();
-	void RotateUp();
-	void RotateDown();
+	void UpdateViewMatrix();
+	void Rotate(float x , float y);
+	void MoveRelative(float x, float y, float z);
+	void MoveAbsolute(float x, float y, float z);
 };

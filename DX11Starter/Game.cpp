@@ -22,6 +22,9 @@ namespace fs = std::experimental::filesystem;
 //
 // hInstance - the application's OS-level handle (unique ID)
 // --------------------------------------------------------
+
+std::wstring stringStream2wstring(std::stringstream& strs);
+
 Game::Game(HINSTANCE hInstance)
 	: DXCore(
 		hInstance,		// The application's handle
@@ -165,10 +168,13 @@ void Game::LoadModelDirectory()
 	}*/
 }
 
+
+
 void Game::LoadTextureDirectory() 
 {
 	std::stringstream ss;
 	std::string s, path;
+	std::wstring ws;
 	std::string texturePath = "Textures";
 	unsigned int strlength = texturePath.length()+1;
 	for(const auto& entry : fs::directory_iterator(texturePath))
@@ -179,7 +185,7 @@ void Game::LoadTextureDirectory()
 		ss.clear();
 		path = s.substr(strlength);
 		ss << texturePath << "/" << path;
-		texMap[path.substr(0, path.find("."))] = new Texture(ss.str(), device, context);
+		texMap[path.substr(0, path.find("."))] = new Texture(stringStream2wstring(ss), device, context);
 		ss.str(std::string());
 		ss.clear();
 	}
@@ -267,38 +273,7 @@ void Game::Update(float deltaTime, float totalTime)
 	if (GetAsyncKeyState(VK_ESCAPE))
 		Quit();
 	
-	if (GetAsyncKeyState('W')) 
-	{
-		camera->MoveForward();
-	}
-	if (GetAsyncKeyState('S'))
-	{
-		camera->MoveBackward();
-	}
-	if (GetAsyncKeyState('A')) 
-	{
-		camera->MoveLeft();
-	}
-	if (GetAsyncKeyState('D'))
-	{
-		camera->MoveRight();
-	}
-	if (GetAsyncKeyState(VK_SPACE))
-	{
-		camera->MoveUpward();
-	}
-	if (GetAsyncKeyState('X'))
-	{
-		camera->MoveDownward();
-	}
-	if (GetAsyncKeyState('V')) 
-	{
-		camera->RotateUp();
-	}
-	if (GetAsyncKeyState('C')) 
-	{
-		camera->RotateDown();
-	}
+	camera->Update(deltaTime);
 }
 
 // --------------------------------------------------------
@@ -359,15 +334,7 @@ void Game::Draw(float deltaTime, float totalTime)
 void Game::OnMouseDown(WPARAM buttonState, int x, int y)
 {
 	// Add any custom code here...
-	if (buttonState & 0x0001) 
-	{
-		camera->RotateLeft();
-	}
 	
-	if (buttonState & 0x0002) 
-	{
-		camera->RotateRight();
-	}
 	// Save the previous mouse position, so we have it for the future
 	prevMousePos.x = x;
 	prevMousePos.y = y;
@@ -398,7 +365,12 @@ void Game::OnMouseUp(WPARAM buttonState, int x, int y)
 void Game::OnMouseMove(WPARAM buttonState, int x, int y)
 {
 	// Add any custom code here...
-
+	if (buttonState & 0x0001)
+	{
+		float xDiff = (x - prevMousePos.x) * 0.005f;
+		float yDiff = (y - prevMousePos.y) * 0.005f;
+		camera->Rotate(yDiff, xDiff);
+	}
 	// Save the previous mouse position, so we have it for the future
 	prevMousePos.x = x;
 	prevMousePos.y = y;
@@ -412,5 +384,13 @@ void Game::OnMouseMove(WPARAM buttonState, int x, int y)
 void Game::OnMouseWheel(float wheelDelta, int x, int y)
 {
 	// Add any custom code here...
+}
+
+std::wstring stringStream2wstring(std::stringstream& strs)
+{
+	std::string str = strs.str();
+	typedef std::codecvt_utf8<wchar_t> convert_type;
+	std::wstring_convert<convert_type, wchar_t> converter;
+	return converter.from_bytes(str);
 }
 #pragma endregion

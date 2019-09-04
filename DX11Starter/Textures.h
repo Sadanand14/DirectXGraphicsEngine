@@ -9,7 +9,7 @@ private:
 
 public:
 	static ID3D11SamplerState* m_sampler;
-	Texture(std::string, ID3D11Device* , ID3D11DeviceContext*);
+	Texture(std::wstring, ID3D11Device* , ID3D11DeviceContext*);
 
 	inline ID3D11ShaderResourceView* GetSRV()const { return m_srv; }
 

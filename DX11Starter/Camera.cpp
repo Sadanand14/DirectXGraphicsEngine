@@ -15,96 +15,74 @@ Camera::Camera(float width,float height)
 		0.1f,						// Near clip plane distance
 		100.0f);					// Far clip plane distance
 	XMStoreFloat4x4(&projectionMatrix, XMMatrixTranspose(P));
-	view = XMVectorSet(0,0,1,0);
-	pos = XMVectorSet(0,0,-5,0);
 	upUnit = XMVectorSet(0, 1, 0, 0);
-	XMMATRIX vm = XMMatrixLookToLH(pos, view, upUnit);
-	XMStoreFloat4x4(&veiwMatrix,XMMatrixTranspose(vm));
-	xRot = 0.0f;
-	yRot = 0.0f;
+	XMStoreFloat3(&currentPos, XMVectorSet(0, 0, -5, 0));
+	xRot = 0;
+	yRot = 0;
+	XMStoreFloat4(&rotation, XMQuaternionIdentity());
 }
 
 Camera::~Camera() {	}
 
-void Camera::Update(float deltaTime)
+void Camera::Update(float dt)
 {
-	delta = deltaTime;
-	if (xRot > 0)
+	float speed = dt * 3;
+
+	if (GetAsyncKeyState(VK_SHIFT)) { speed *= 5; }
+	if (GetAsyncKeyState(VK_CONTROL)) { speed *= 0.1f; }
+
+	// Movement
+	if (GetAsyncKeyState('W') & 0x8000) { MoveRelative(0, 0, speed); }
+	if (GetAsyncKeyState('S') & 0x8000) { MoveRelative(0, 0, -speed); }
+	if (GetAsyncKeyState('A') & 0x8000) { MoveRelative(-speed, 0, 0); }
+	if (GetAsyncKeyState('D') & 0x8000) { MoveRelative(speed, 0, 0); }
+	if (GetAsyncKeyState('X') & 0x8000) { MoveAbsolute(0, -speed, 0); }
+	if (GetAsyncKeyState(' ') & 0x8000) { MoveAbsolute(0, speed, 0); }
+
+	// Check for reset
+	if (GetAsyncKeyState('R') & 0x8000)
 	{
-		xRot -= 0.0001f*delta;
+		XMStoreFloat3(&currentPos, XMVectorSet(0, 0, -5, 0));
+		xRot = 0;
+		yRot = 0;
+		XMStoreFloat4(&rotation, XMQuaternionIdentity());
 	}
-	if (xRot < 0)
-	{
-		xRot += 0.0001f*delta;
-	}
-	if (yRot > 0) 
-	{
-		yRot -= 0.0001f*delta;
-	}
-	if (yRot < 0)
-	{
-		yRot += 0.0001f*delta;
-	}
-	view = XMVector3Rotate(view, XMQuaternionRotationRollPitchYaw(xRot, yRot, 0.0f));
-	XMMATRIX vm = XMMatrixLookToLH(pos,view, upUnit);
-	XMStoreFloat4x4(&veiwMatrix, XMMatrixTranspose(vm));
-}
 
-void Camera::MoveForward()
-{
-	XMVECTOR moveDir = XMVectorScale(view, delta);
-	pos = XMVectorAdd(pos,moveDir);
-}
-
-void Camera::MoveBackward()
-{
-	XMVECTOR reverseDir = XMVectorScale(view, (-1 * delta));
-	pos = XMVectorAdd(pos, reverseDir);
-}
-
-void Camera::MoveLeft()
-{
-	XMVECTOR cross = XMVector3Cross(view, upUnit);
-	cross = XMVectorScale(cross, delta);
-	pos = XMVectorAdd(pos, cross);
-}
-
-void Camera::MoveRight()
-{
-	XMVECTOR cross = XMVector3Cross(upUnit, view);
-	cross = XMVectorScale(cross, delta);
-	pos = XMVectorAdd(cross, pos);
+	// Update the view every frame - could be optimized
+	UpdateViewMatrix();
 }
 
 
-void Camera::MoveUpward()
+void Camera::UpdateViewMatrix() 
 {
-	XMVECTOR dir = XMVectorScale(upUnit, delta);
+	XMVECTOR direction = XMVector3Rotate(XMVectorSet(0, 0, 1, 0), XMLoadFloat4(&rotation));
 
-	pos = XMVectorAdd(pos, dir);
+	XMMATRIX view = XMMatrixLookToLH(XMLoadFloat3(&currentPos), direction,upUnit);
+
+	XMStoreFloat4x4(&viewMatrix, XMMatrixTranspose(view));
 }
 
-void Camera::MoveDownward()
+void Camera::Rotate(float x, float y) 
 {
-	XMVECTOR reverseDir = XMVectorScale(upUnit, (-1* delta));
-	pos = XMVectorAdd(pos, reverseDir);
+	xRot += x;
+	yRot += y;
+
+	xRot = max(min(xRot, XM_PIDIV2), -XM_PIDIV2);
+
+	XMStoreFloat4(&rotation, XMQuaternionRotationRollPitchYaw(xRot, yRot, 0.0f));
 }
 
-void Camera::RotateLeft()
+void Camera::MoveRelative(float x, float y, float z)
 {
-	yRot -= 0.5f*delta;
+	XMVECTOR direction = XMVector3Rotate(XMVectorSet(x, y, z, 0), XMLoadFloat4(&rotation));
+
+	XMStoreFloat3(&currentPos, XMLoadFloat3(&currentPos) + direction);
 }
 
-void Camera::RotateRight()
+void Camera::MoveAbsolute(float x, float y, float z)
 {
-	yRot += 0.5f*delta;
-}
+	currentPos.x += x;
+	currentPos.y += y;
+	currentPos.z += z;
 
-void Camera::RotateUp()
-{
-	xRot += 0.001f*delta;
-}
-void Camera::RotateDown()
-{
-	xRot -= 0.001f*delta;
 }

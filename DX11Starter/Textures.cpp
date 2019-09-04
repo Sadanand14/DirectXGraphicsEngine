@@ -4,9 +4,9 @@
 
 ID3D11SamplerState*  Texture::m_sampler;
 
-Texture::Texture(std::string path, ID3D11Device* device, ID3D11DeviceContext* context)
+Texture::Texture(std::wstring path, ID3D11Device* device, ID3D11DeviceContext* context)
 {
-	DirectX::CreateWICTextureFromFile(device, context, (wchar_t*)path.c_str(), 0, &m_srv);
+	DirectX::CreateWICTextureFromFile(device, context, path.c_str(), 0, &m_srv);
 
 	if (!m_sampler) 
 	{
@@ -24,5 +24,5 @@ Texture::Texture(std::string path, ID3D11Device* device, ID3D11DeviceContext* co
 
 Texture::~Texture()
 {
-	m_srv->Release();
+	if(m_srv)m_srv->Release();
 }
