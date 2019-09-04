@@ -70,6 +70,12 @@ Game::~Game()
 	delete vertexShader;
 	delete pixelShader;
 	delete camera;
+
+	//if (SkyVS)delete SkyVS;
+	//if (SkyPS)delete SkyPS;
+	//if (pixelShader)delete pixelShader;
+	//if (vertexShader)delete vertexShader;
+
 }
 
 // --------------------------------------------------------
@@ -88,6 +94,18 @@ void Game::Init()
 	CreateBasicGeometry();
 	AddLighting();
 
+	D3D11_RASTERIZER_DESC rd = {};
+	rd.CullMode = D3D11_CULL_FRONT;
+	rd.FillMode = D3D11_FILL_SOLID;
+	rd.DepthClipEnable = true;
+	device->CreateRasterizerState(&rd, &skyRS);
+
+	D3D11_DEPTH_STENCIL_DESC dd = {};
+	dd.DepthEnable = true;
+	dd.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	dd.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+	device->CreateDepthStencilState(&dd, &skyDS);
+	
 	// Tell the input assembler stage of the pipeline what kind of
 	// geometric primitives (points, lines or triangles) we want to draw.  
 	// Essentially: "What kind of shape should the GPU draw with our data?"
@@ -126,13 +144,6 @@ void Game::AddLighting()
 	light2.Direction.z = 0.0f;
 }
 
-
-// --------------------------------------------------------
-// Loads shaders from compiled shader object (.cso) files using
-// my SimpleShader wrapper for DirectX shader manipulation.
-// - SimpleShader provides helpful methods for sending
-//   data to individual variables on the GPU
-// --------------------------------------------------------
 void Game::LoadShaders()
 {
 	vertexShader = new SimpleVertexShader(device, context);
@@ -140,6 +151,12 @@ void Game::LoadShaders()
 
 	pixelShader = new SimplePixelShader(device, context);
 	pixelShader->LoadShaderFile(L"PixelShader.cso");
+
+	SkyVS = new SimpleVertexShader(device, context);
+	SkyVS->LoadShaderFile(L"SkyboxVS.cso");
+
+	SkyPS = new SimplePixelShader(device, context);
+	SkyPS->LoadShaderFile(L"SkyboxPS.cso");
 }
 
 void Game::LoadModelDirectory() 
@@ -150,7 +167,6 @@ void Game::LoadModelDirectory()
 	unsigned int strlength = ModelPath.length() + 1;
 	for (const auto& entry : fs::directory_iterator(ModelPath)) 
 	{
-		//std::cout << entry.path() << std::endl;
 		ss << entry.path();
 		s = ss.str();
 		ss.str(std::string());
@@ -162,10 +178,6 @@ void Game::LoadModelDirectory()
 		ss.clear();
 	}
 
-	/*for (auto it = meshMap.begin(); it != meshMap.end(); it++) 
-	{
-		std::cout << it->first << std::endl;
-	}*/
 }
 
 
@@ -320,9 +332,41 @@ void Game::Draw(float deltaTime, float totalTime)
 		context->DrawIndexed(indicesCount1, 0, 0);
 	}
 
+	RenderSky();
+
 	swapChain->Present(0, 0);
 }
 
+
+void Game::RenderSky() 
+{
+	Mesh* skymesh = meshMap["cube"];
+	ID3D11Buffer* vb = skymesh->GetVertexBuffer();
+	ID3D11Buffer* ib = skymesh->GetIndexBuffer();
+
+	UINT stride = sizeof(Vertex);
+	UINT offset = 0;
+	context->IASetVertexBuffers(0, 1, &vb, &stride, &offset);
+	context->IASetIndexBuffer(ib, DXGI_FORMAT_R32_UINT, 0);
+
+	SkyVS->SetMatrix4x4("view", camera->GetView());
+	SkyVS->SetMatrix4x4("projection", camera->GetProjection());
+	SkyVS->CopyAllBufferData();
+	SkyVS->SetShader();
+	
+	SkyPS->SetShaderResourceView("sky",texMap["SunnyCubeMap"]->GetSRV());
+	SkyPS->SetSamplerState("BasicSampler", Texture::m_sampler);
+	SkyPS->CopyAllBufferData();
+	SkyPS->SetShader();
+
+	context->RSSetState(skyRS);
+	context->OMSetDepthStencilState(skyDS, 0);
+
+	context->DrawIndexed(skymesh->GetIndexCount(), 0, 0);
+
+	context->RSSetState(0);
+	context->OMSetDepthStencilState(0, 0);
+}
 
 #pragma region Mouse Input
 

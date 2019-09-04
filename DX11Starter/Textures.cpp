@@ -1,12 +1,16 @@
 #include "Textures.h"
 #include "WICTextureLoader.h"
-//#include <wstring>
+#include "DDSTextureLoader.h"
 
 ID3D11SamplerState*  Texture::m_sampler;
 
-Texture::Texture(std::wstring path, ID3D11Device* device, ID3D11DeviceContext* context)
+Texture::Texture(std::wstring path, ID3D11Device* device, ID3D11DeviceContext* context):m_srv(nullptr)
 {
-	DirectX::CreateWICTextureFromFile(device, context, path.c_str(), 0, &m_srv);
+	std::wstring ws= path.substr(path.find('.') + 1, path.length());
+	if (ws == L"png")
+		DirectX::CreateWICTextureFromFile(device, context, path.c_str(), 0, &m_srv);
+	else if (ws == L"dds")
+		DirectX::CreateDDSTextureFromFile(device, path.c_str(), 0, &m_srv);
 
 	if (!m_sampler) 
 	{

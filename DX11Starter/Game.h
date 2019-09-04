@@ -50,12 +50,15 @@ private:
 	void LoadModelDirectory();
 	void LoadTextureDirectory();
 	void AddLighting();
+	void RenderSky();
 
 	// Buffers to hold actual geometry data
 	ID3D11Buffer* vertexBuffer;
 	ID3D11Buffer* indexBuffer;
 
 	// Wrappers for DirectX shaders to provide simplified functionality
+	SimpleVertexShader* SkyVS;
+	SimplePixelShader* SkyPS;
 	SimpleVertexShader* vertexShader;
 	SimplePixelShader* pixelShader;
 
@@ -63,6 +66,12 @@ private:
 	DirectX::XMFLOAT4X4 worldMatrix;
 	DirectX::XMFLOAT4X4 viewMatrix;
 	DirectX::XMFLOAT4X4 projectionMatrix;
+
+	//RasterStates
+	ID3D11RasterizerState* skyRS;
+
+	//DepthStates
+	ID3D11DepthStencilState* skyDS;
 
 	// Keeps track of the old mouse position.  Useful for 
 	// determining how far the mouse moved in a single frame.

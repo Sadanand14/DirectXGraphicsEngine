@@ -4,7 +4,7 @@ struct VertexToPixel
 {
 	float4 position		: SV_POSITION;
 	//float4 color		: COLOR;
-	float4 Normal		: NORMAL;
+	float3 Normal		: NORMAL;
 	float2 UV           : TEXCOORD;
 };
 
