@@ -90,6 +90,7 @@ void Game::Init()
 	LoadShaders();
 	LoadModelDirectory();
 	LoadTextureDirectory();
+	CreateWaterMesh();
 	CreateMatrices();
 	CreateBasicGeometry();
 	AddLighting();
@@ -157,6 +158,12 @@ void Game::LoadShaders()
 
 	SkyPS = new SimplePixelShader(device, context);
 	SkyPS->LoadShaderFile(L"SkyboxPS.cso");
+
+	waterShaderVS = new SimpleVertexShader(device, context);
+	waterShaderVS->LoadShaderFile(L"WaterShaderVS.cso");
+
+	waterShaderPS = new SimplePixelShader(device, context);
+	waterShaderPS->LoadShaderFile(L"WaterShaderPS.cso");
 }
 
 void Game::LoadModelDirectory() 
@@ -180,7 +187,55 @@ void Game::LoadModelDirectory()
 
 }
 
+void Game::CreateWaterMesh() 
+{
+	WaterVertex* vbw = new WaterVertex[400 * 400];
+	for (unsigned int i = 0; i < 400; i++) 
+	{	
+		for (unsigned int j = 0; j < 400; j++) 
+		{
+			vbw[i * 400 + j].Position = XMFLOAT3(i, -20, j);
+		}
+	}
 
+	UINT* ibw = new UINT[6*399*399];
+	for (unsigned int i = 0; i < 399; i++)
+	{
+		for (unsigned int j = 0; j < 399; j++)
+		{
+			ibw[i * 399 + j * 6] = i*400 + j ;
+			ibw[i * 399 + j * 6 + 1] = i*400 + (j+1);
+			ibw[i * 399 + j * 6 + 2] = (i+1)*400 + j ;
+			ibw[i * 399 + j * 6 + 3] = i * 400 + (j + 1);
+			ibw[i * 399 + j * 6 + 4] = (i+1)*400 + (j+1);
+			ibw[i * 399 + j * 6 + 5] = (i + 1) * 400 + j;
+		}
+	}
+
+	
+	D3D11_BUFFER_DESC vbd;
+	vbd.Usage = D3D11_USAGE_IMMUTABLE;
+	vbd.ByteWidth = sizeof(WaterVertex) * 400*400;// I modified this so that I wouldn't need to define 4 separate meshes to create 4 objects      
+	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vbd.CPUAccessFlags = 0;
+	vbd.MiscFlags = 0;
+	vbd.StructureByteStride = 0;
+	D3D11_SUBRESOURCE_DATA initialVertexData;
+	initialVertexData.pSysMem = vbw;
+	device->CreateBuffer(&vbd, &initialVertexData, &WaterVertexBuffer);
+
+	//creating buffer for the indices
+	D3D11_BUFFER_DESC ibd;
+	ibd.Usage = D3D11_USAGE_IMMUTABLE;
+	ibd.ByteWidth = sizeof(UINT) * 6*399*399;// I modified this so that I wouldn't need to define 4 separate meshes to create 4 objects         
+	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	ibd.CPUAccessFlags = 0;
+	ibd.MiscFlags = 0;
+	ibd.StructureByteStride = 0;
+	D3D11_SUBRESOURCE_DATA initialIndexData;
+	initialIndexData.pSysMem = ibw;
+	device->CreateBuffer(&ibd, &initialIndexData, &WaterIndexBuffer);
+}
 
 void Game::LoadTextureDirectory() 
 {
@@ -331,12 +386,26 @@ void Game::Draw(float deltaTime, float totalTime)
 		int indicesCount1 = meshMap[entityList[i]->GetOffset()]->GetIndexCount();
 		context->DrawIndexed(indicesCount1, 0, 0);
 	}
+	DrawWater();
 
 	RenderSky();
-
+	
 	swapChain->Present(0, 0);
 }
 
+
+void Game::DrawWater()
+{
+	UINT stride = sizeof(WaterVertex);
+	UINT offset = 0;
+	context->IAGetVertexBuffers(0, 1, &WaterVertexBuffer, &stride, &offset);
+	context->IASetIndexBuffer(WaterIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+	SkyVS->SetMatrix4x4("view", camera->GetView());
+	SkyVS->SetMatrix4x4("projection", camera->GetProjection());
+	SkyVS->CopyAllBufferData();
+	SkyVS->SetShader();
+}
 
 void Game::RenderSky() 
 {
@@ -367,6 +436,7 @@ void Game::RenderSky()
 	context->RSSetState(0);
 	context->OMSetDepthStencilState(0, 0);
 }
+
 
 #pragma region Mouse Input
 

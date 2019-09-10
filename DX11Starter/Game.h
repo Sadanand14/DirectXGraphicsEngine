@@ -19,7 +19,8 @@ public:
 	~Game();
 
 	Materials* material;
-	
+	ID3D11Buffer* WaterVertexBuffer;
+	ID3D11Buffer* WaterIndexBuffer;
 	Camera* camera;
 	
 	std::vector<Entity*> entityList;
@@ -41,8 +42,8 @@ public:
 	void OnMouseUp	 (WPARAM buttonState, int x, int y);
 	void OnMouseMove (WPARAM buttonState, int x, int y);
 	void OnMouseWheel(float wheelDelta,   int x, int y);
-private:
 
+private:
 	// Initialization helper methods - feel free to customize, combine, etc.
 	void LoadShaders(); 
 	void CreateMatrices();
@@ -51,6 +52,8 @@ private:
 	void LoadTextureDirectory();
 	void AddLighting();
 	void RenderSky();
+	void CreateWaterMesh();
+	void DrawWater();
 
 	// Buffers to hold actual geometry data
 	ID3D11Buffer* vertexBuffer;
@@ -61,6 +64,8 @@ private:
 	SimplePixelShader* SkyPS;
 	SimpleVertexShader* vertexShader;
 	SimplePixelShader* pixelShader;
+	SimpleVertexShader* waterShaderVS;
+	SimplePixelShader* waterShaderPS;
 
 	// The matrices to go from model space to screen space
 	DirectX::XMFLOAT4X4 worldMatrix;

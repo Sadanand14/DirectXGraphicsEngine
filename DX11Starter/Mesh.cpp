@@ -32,6 +32,7 @@ void Mesh::CreatingBuffer(Vertex* vertextArray, unsigned int* intArray, int tota
 	D3D11_SUBRESOURCE_DATA initialIndexData;
 	initialIndexData.pSysMem = intArray;
 	device->CreateBuffer(&ibd, &initialIndexData, &indexPointer);
+
 }
 
 Mesh::Mesh(Vertex* vertextArray, unsigned int* intArray, int totalVertices, int totalIndices, ID3D11Device* device)
