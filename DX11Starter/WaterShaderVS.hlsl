@@ -21,8 +21,8 @@ struct WaterVertexToPixel
 WaterVertexToPixel main(WaterVertex input) 
 {
 	WaterVertexToPixel output;
-
-	output.Position = float4(input.Position, 1.0f);
+	matrix worldViewProj = mul(mul(world, view), projection);
+	output.Position = mul(float4(input.Position, 1.0f), worldViewProj);
 	return output;
 }
 

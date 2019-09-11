@@ -194,21 +194,22 @@ void Game::CreateWaterMesh()
 	{	
 		for (unsigned int j = 0; j < 400; j++) 
 		{
-			vbw[i * 400 + j].Position = XMFLOAT3(i, -20, j);
+			vbw[i * 400 + j].Position = XMFLOAT3(i, 0, j);
 		}
 	}
 
 	UINT* ibw = new UINT[6*399*399];
+	int index = 0;
 	for (unsigned int i = 0; i < 399; i++)
 	{
 		for (unsigned int j = 0; j < 399; j++)
 		{
-			ibw[i * 399 + j * 6] = i*400 + j ;
-			ibw[i * 399 + j * 6 + 1] = i*400 + (j+1);
-			ibw[i * 399 + j * 6 + 2] = (i+1)*400 + j ;
-			ibw[i * 399 + j * 6 + 3] = i * 400 + (j + 1);
-			ibw[i * 399 + j * 6 + 4] = (i+1)*400 + (j+1);
-			ibw[i * 399 + j * 6 + 5] = (i + 1) * 400 + j;
+			ibw[index++] = i*400 + j ;
+			ibw[index++] = i*400 + (j+1);
+			ibw[index++] = (i+1)*400 + j ;
+			ibw[index++] = i * 400 + (j + 1);
+			ibw[index++] = (i+1)*400 + (j+1);
+			ibw[index++] = (i + 1) * 400 + j;
 		}
 	}
 
@@ -235,6 +236,13 @@ void Game::CreateWaterMesh()
 	D3D11_SUBRESOURCE_DATA initialIndexData;
 	initialIndexData.pSysMem = ibw;
 	device->CreateBuffer(&ibd, &initialIndexData, &WaterIndexBuffer);
+
+	XMMATRIX trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
+	XMMATRIX scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
+	XMMATRIX waterMatrix = XMMatrixMultiply(XMMatrixMultiply(scale, rot), trans);
+	XMStoreFloat4x4(&WaterMatrix, XMMatrixTranspose(waterMatrix));
+
 }
 
 void Game::LoadTextureDirectory() 
@@ -401,10 +409,16 @@ void Game::DrawWater()
 	context->IAGetVertexBuffers(0, 1, &WaterVertexBuffer, &stride, &offset);
 	context->IASetIndexBuffer(WaterIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
-	SkyVS->SetMatrix4x4("view", camera->GetView());
-	SkyVS->SetMatrix4x4("projection", camera->GetProjection());
-	SkyVS->CopyAllBufferData();
-	SkyVS->SetShader();
+	waterShaderVS->SetMatrix4x4("world", WaterMatrix);
+	waterShaderVS->SetMatrix4x4("view", camera->GetView());
+	waterShaderVS->SetMatrix4x4("projection", camera->GetProjection());
+	waterShaderVS->CopyAllBufferData();
+	waterShaderVS->SetShader();
+
+	waterShaderPS->CopyAllBufferData();
+	waterShaderPS->SetShader();
+	
+	context->DrawIndexed(6 * 399 * 399, 0, 0);
 }
 
 void Game::RenderSky() 
