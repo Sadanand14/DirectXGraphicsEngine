@@ -12,7 +12,7 @@ void Mesh::CreatingBuffer(Vertex* vertextArray, unsigned int* intArray, int tota
 	indexCount = totalIndices;
 	D3D11_BUFFER_DESC vbd;
 	vbd.Usage = D3D11_USAGE_IMMUTABLE;
-	vbd.ByteWidth = sizeof(Vertex) * totalVertices;// I modified this so that I wouldn't need to define 4 separate meshes to create 4 objects      
+	vbd.ByteWidth = sizeof(Vertex) * totalVertices;
 	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vbd.CPUAccessFlags = 0;
 	vbd.MiscFlags = 0;

@@ -34,7 +34,7 @@ public:
 	XMFLOAT4X4 GetPos(){ return m_translation; }
 	XMFLOAT4X4 GetRot(){ return m_rotation; }
 	XMFLOAT4X4 GetScale(){ return m_scaling; }
-	std::string GetOffset() { return m_modelTitle; }
+	std::string GetTitle() { return m_modelTitle; }
 
 	XMMATRIX GetWM(); // returns a world matrix for storing in the worldMatrix variable
 };

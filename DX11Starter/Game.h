@@ -18,10 +18,10 @@ public:
 	Game(HINSTANCE hInstance);
 	~Game();
 
-	Materials* material;
-	ID3D11Buffer* WaterVertexBuffer;
-	ID3D11Buffer* WaterIndexBuffer;
-	Camera* camera;
+	Materials* material = nullptr;
+	ID3D11Buffer* WaterVertexBuffer = nullptr;
+	ID3D11Buffer* WaterIndexBuffer = nullptr;
+	Camera* camera = nullptr;
 	
 	std::vector<Entity*> entityList;
 	std::map<std::string, Mesh*> meshMap;
@@ -56,16 +56,16 @@ private:
 	void DrawWater();
 
 	// Buffers to hold actual geometry data
-	ID3D11Buffer* vertexBuffer;
-	ID3D11Buffer* indexBuffer;
+	ID3D11Buffer* vertexBuffer = nullptr;
+	ID3D11Buffer* indexBuffer = nullptr;
 
 	// Wrappers for DirectX shaders to provide simplified functionality
-	SimpleVertexShader* SkyVS;
-	SimplePixelShader* SkyPS;
-	SimpleVertexShader* vertexShader;
-	SimplePixelShader* pixelShader;
-	SimpleVertexShader* waterShaderVS;
-	SimplePixelShader* waterShaderPS;
+	SimpleVertexShader* SkyVS = nullptr;
+	SimplePixelShader* SkyPS = nullptr;
+	SimpleVertexShader* vertexShader = nullptr;
+	SimplePixelShader* pixelShader = nullptr;
+	SimpleVertexShader* waterShaderVS = nullptr;
+	SimplePixelShader* waterShaderPS = nullptr;
 
 	// The matrices to go from model space to screen space
 	DirectX::XMFLOAT4X4 worldMatrix;
@@ -73,10 +73,10 @@ private:
 	DirectX::XMFLOAT4X4 projectionMatrix;
 
 	//RasterStates
-	ID3D11RasterizerState* skyRS;
+	ID3D11RasterizerState* skyRS = nullptr;
 
 	//DepthStates
-	ID3D11DepthStencilState* skyDS;
+	ID3D11DepthStencilState* skyDS = nullptr;
 
 	// Keeps track of the old mouse position.  Useful for 
 	// determining how far the mouse moved in a single frame.

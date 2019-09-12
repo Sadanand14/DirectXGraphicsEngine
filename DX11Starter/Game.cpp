@@ -55,27 +55,37 @@ Game::Game(HINSTANCE hInstance)
 // --------------------------------------------------------
 Game::~Game()
 {
-	entityList.clear();
+	if (skyRS != nullptr) skyRS->Release();
+	if (skyDS != nullptr)skyDS->Release();
+
+	
 	// Release any (and all!) DirectX objects
 	// we've made in the Game class
-	if (vertexBuffer) { vertexBuffer->Release(); }
-	if (indexBuffer) { indexBuffer->Release(); }
-	//delete mesh1, mesh2, mesh3, mesh4,entity1, entity2, entity3, entity4, entity5, &entityList;
+	if (vertexBuffer!= nullptr) { vertexBuffer->Release(); }
+	if (indexBuffer != nullptr) { indexBuffer->Release(); }
+	if (WaterVertexBuffer != nullptr) WaterVertexBuffer->Release();
+	if (WaterIndexBuffer != nullptr) WaterIndexBuffer->Release();
 
 	for (auto& m : entityList) { delete m; }
 	for (auto&& m : meshMap) { delete m.second; }
 	for (auto&& m : texMap) { delete m.second; }
 	// Delete our simple shader objects, which
 	// will clean up their own internal DirectX stuff
-	delete vertexShader;
-	delete pixelShader;
-	delete camera;
 
-	//if (SkyVS)delete SkyVS;
-	//if (SkyPS)delete SkyPS;
-	//if (pixelShader)delete pixelShader;
-	//if (vertexShader)delete vertexShader;
+	if (camera != nullptr) delete camera;
 
+	if (pixelShader != nullptr) delete pixelShader;
+	if (vertexShader != nullptr) delete vertexShader;
+	if (SkyVS != nullptr) delete SkyVS;
+	if (SkyPS != nullptr) delete SkyPS;
+	if (waterShaderVS != nullptr) delete waterShaderVS;
+	if (waterShaderPS != nullptr) delete waterShaderPS;
+
+	if (material != nullptr) delete material;
+
+	entityList.clear();
+	meshMap.clear();
+	texMap.clear();
 }
 
 // --------------------------------------------------------
@@ -189,12 +199,18 @@ void Game::LoadModelDirectory()
 
 void Game::CreateWaterMesh() 
 {
+	WaterVertex Current;
 	WaterVertex* vbw = new WaterVertex[400 * 400];
 	for (unsigned int i = 0; i < 400; i++) 
 	{	
 		for (unsigned int j = 0; j < 400; j++) 
 		{
-			vbw[i * 400 + j].Position = XMFLOAT3(i, 0, j);
+			Current = WaterVertex();
+			Current.Position = XMFLOAT3(i, 0, j);
+			Current.Normal = XMFLOAT3(0, 1, 0);
+			Current.UV = XMFLOAT2(0, 0);
+			Current.Tangent = XMFLOAT3(0, 0, 0);
+			vbw[i * 400 + j] = Current;
 		}
 	}
 
@@ -216,26 +232,28 @@ void Game::CreateWaterMesh()
 	
 	D3D11_BUFFER_DESC vbd;
 	vbd.Usage = D3D11_USAGE_IMMUTABLE;
-	vbd.ByteWidth = sizeof(WaterVertex) * 400*400;// I modified this so that I wouldn't need to define 4 separate meshes to create 4 objects      
+	vbd.ByteWidth = sizeof(WaterVertex) * 400*400;
 	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vbd.CPUAccessFlags = 0;
 	vbd.MiscFlags = 0;
 	vbd.StructureByteStride = 0;
 	D3D11_SUBRESOURCE_DATA initialVertexData;
-	initialVertexData.pSysMem = vbw;
+	initialVertexData.pSysMem = &vbw[0];
 	device->CreateBuffer(&vbd, &initialVertexData, &WaterVertexBuffer);
 
+	delete[] vbw;
 	//creating buffer for the indices
 	D3D11_BUFFER_DESC ibd;
 	ibd.Usage = D3D11_USAGE_IMMUTABLE;
-	ibd.ByteWidth = sizeof(UINT) * 6*399*399;// I modified this so that I wouldn't need to define 4 separate meshes to create 4 objects         
+	ibd.ByteWidth = sizeof(UINT) * 6*399*399;
 	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	ibd.CPUAccessFlags = 0;
 	ibd.MiscFlags = 0;
 	ibd.StructureByteStride = 0;
 	D3D11_SUBRESOURCE_DATA initialIndexData;
-	initialIndexData.pSysMem = ibw;
+	initialIndexData.pSysMem = &ibw[0];
 	device->CreateBuffer(&ibd, &initialIndexData, &WaterIndexBuffer);
+	delete[] ibw;
 
 	XMMATRIX trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
 	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
@@ -387,11 +405,11 @@ void Game::Draw(float deltaTime, float totalTime)
 		pixelShader->SetShader();
 		UINT stride = sizeof(Vertex);
 		UINT offset = 0;
-		ID3D11Buffer *v1Buffer = meshMap[entityList[i]->GetOffset()]->GetVertexBuffer();
-		ID3D11Buffer *i1Buffer = meshMap[entityList[i]->GetOffset()]->GetIndexBuffer();
+		ID3D11Buffer *v1Buffer = meshMap[entityList[i]->GetTitle()]->GetVertexBuffer();
+		ID3D11Buffer *i1Buffer = meshMap[entityList[i]->GetTitle()]->GetIndexBuffer();
 		context->IASetVertexBuffers(0, 1, &v1Buffer, &stride, &offset);
 		context->IASetIndexBuffer(i1Buffer, DXGI_FORMAT_R32_UINT, 0);
-		int indicesCount1 = meshMap[entityList[i]->GetOffset()]->GetIndexCount();
+		int indicesCount1 = meshMap[entityList[i]->GetTitle()]->GetIndexCount();
 		context->DrawIndexed(indicesCount1, 0, 0);
 	}
 	DrawWater();
