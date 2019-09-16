@@ -1,6 +1,0 @@
-﻿  Game.cpp
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine-master\DX11Starter\Game.cpp(184,49): warning C4267:  'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine-master\DX11Starter\Game.cpp(209,38): warning C4244:  'argument': conversion from 'unsigned int' to 'float', possible loss of data
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine-master\DX11Starter\Game.cpp(209,32): warning C4244:  'argument': conversion from 'unsigned int' to 'float', possible loss of data
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine-master\DX11Starter\Game.cpp(272,49): warning C4267:  'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
-  DX11Starter.vcxproj -> C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine-master\x64\Debug\DX11Starter.exe

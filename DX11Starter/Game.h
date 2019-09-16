@@ -53,7 +53,7 @@ private:
 	void AddLighting();
 	void RenderSky();
 	void CreateWaterMesh();
-	void DrawWater();
+	void DrawWater(float);
 
 	// Buffers to hold actual geometry data
 	ID3D11Buffer* vertexBuffer = nullptr;
@@ -73,7 +73,7 @@ private:
 	DirectX::XMFLOAT4X4 projectionMatrix;
 
 	//RasterStates
-	ID3D11RasterizerState* skyRS = nullptr;
+	ID3D11RasterizerState* skyRS = nullptr ;
 
 	//DepthStates
 	ID3D11DepthStencilState* skyDS = nullptr;
@@ -83,5 +83,6 @@ private:
 	POINT prevMousePos;
 
 	XMFLOAT4X4 WaterMatrix;
+	float WaterTime;
 };
 
