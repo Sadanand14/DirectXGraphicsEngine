@@ -29,17 +29,10 @@ WaterVertexToPixel main(WaterVertex input)
 	// WAVE CALCULATIONS
 
 
-	//float timestep = fmod(waterTime, 5.0f);
-	//if (timestep > 3.0f)
-	//{
-	float temp = 3.14 * (waterTime - input.Position.x / 20);
-	//float phaseStep = fmod(temp, 2 * 3.14);
-	//if (temp > 2 * 3.14 && temp < 0) 
-	//{
-		input.Position.y = 4 * sin(temp);
-	//}
-	// moving water
-		//input.Position.y = sin(3.14 * (waterTime *2 + input.Position.x / 20)) - sin(3.14* (waterTime*2 - ( input.Position.x)/20));// still water
+	float temp = 3.14 * (waterTime - input.Position.x / 20);//moving waves
+	input.Position.y = 4 * sin(temp);
+	
+	//input.Position.y = sin(3.14 * (waterTime *2 + input.Position.x / 20)) - sin(3.14* (waterTime*2 - ( input.Position.x)/20));// standing waves
 	//}
 
 

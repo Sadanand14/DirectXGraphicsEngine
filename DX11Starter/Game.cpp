@@ -108,7 +108,7 @@ void Game::Init()
 	CreateBasicGeometry();
 	AddLighting();
 
-	/*D3D11_RASTERIZER_DESC rd = {};
+	D3D11_RASTERIZER_DESC rd = {};
 	rd.CullMode = D3D11_CULL_FRONT;
 	rd.FillMode = D3D11_FILL_SOLID;
 	rd.DepthClipEnable = true;
@@ -118,7 +118,7 @@ void Game::Init()
 	dd.DepthEnable = true;
 	dd.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 	dd.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-	device->CreateDepthStencilState(&dd, &skyDS);*/
+	device->CreateDepthStencilState(&dd, &skyDS);
 	
 	// Tell the input assembler stage of the pipeline what kind of
 	// geometric primitives (points, lines or triangles) we want to draw.  
@@ -178,7 +178,7 @@ void Game::LoadShaders()
 	waterShaderPS = new SimplePixelShader(device, context);
 	waterShaderPS->LoadShaderFile(L"WaterShaderPS.cso");
 }
-
+//loads all models and stores them in a mesh map
 void Game::LoadModelDirectory() 
 {
 	std::stringstream ss;
@@ -200,6 +200,7 @@ void Game::LoadModelDirectory()
 
 }
 
+//creates a grid mesh to implement water 
 void Game::CreateWaterMesh() 
 {
 	WaterVertex Current;
@@ -268,6 +269,7 @@ void Game::CreateWaterMesh()
 
 }
 
+// loads all textures and stores them in texture map.
 void Game::LoadTextureDirectory() 
 {
 	std::stringstream ss;
@@ -326,13 +328,13 @@ void Game::CreateBasicGeometry()
 	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
 	XMMATRIX scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
 	
-	//entityList.push_back(new Entity(trans, rot, scale, "cube", material));
+	entityList.push_back(new Entity(trans, rot, scale, "cube", material));
 
 	trans = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
 	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
 	scale = XMMatrixScaling(0.5f, 0.5f, 0.5f);
 
-	//entityList.push_back(new Entity(trans, rot, scale, "sphere", material));
+	entityList.push_back(new Entity(trans, rot, scale, "sphere", material));
 
 }
 
@@ -395,7 +397,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	//Looped all the sequences for loading the worldmatrix as well as loading the index and vertex buffers to the 
 	//GPU using a vector of entities.
 
-	for (int i = 0; i < entityList.size(); i++) {
+	/*for (int i = 0; i < entityList.size(); i++) {
 		XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(entityList[i]->GetWM()));
 		vertexShader->SetMatrix4x4("world", worldMatrix);
 		vertexShader->SetMatrix4x4("view", camera->GetView());
@@ -416,15 +418,15 @@ void Game::Draw(float deltaTime, float totalTime)
 		context->IASetIndexBuffer(i1Buffer, DXGI_FORMAT_R32_UINT, 0);
 		int indicesCount1 = meshMap[entityList[i]->GetTitle()]->GetIndexCount();
 		context->DrawIndexed(indicesCount1, 0, 0);
-	}
+	}*/
 	DrawWater(deltaTime);
-
 	RenderSky();
+
 	
 	swapChain->Present(0, 0);
 }
 
-
+// function to draw water mesh
 void Game::DrawWater(float delta)
 {
 	WaterTime += delta;
@@ -433,19 +435,21 @@ void Game::DrawWater(float delta)
 	context->IASetVertexBuffers(0, 1, &WaterVertexBuffer, &stride, &offset);
 	context->IASetIndexBuffer(WaterIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
+	waterShaderVS->SetShader();
+	waterShaderPS->SetShader();
+
 	waterShaderVS->SetMatrix4x4("world", WaterMatrix);
 	waterShaderVS->SetMatrix4x4("view", camera->GetView());
 	waterShaderVS->SetMatrix4x4("projection", camera->GetProjection());
 	waterShaderVS->SetFloat("waterTime", WaterTime);
 	waterShaderVS->CopyAllBufferData();
-	waterShaderVS->SetShader();
 
 	waterShaderPS->CopyAllBufferData();
-	waterShaderPS->SetShader();
 	
 	context->DrawIndexed(6*399*399, 0 ,0);
 }
 
+//funciton to draw sky
 void Game::RenderSky() 
 {
 	Mesh* skymesh = meshMap["cube"];
