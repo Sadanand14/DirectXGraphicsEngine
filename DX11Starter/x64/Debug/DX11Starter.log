@@ -1,4 +1,19 @@
-﻿C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\WaterShaderVS.hlsl(41,27-36): warning X3203: signed/unsigned mismatch, unsigned assumed
+﻿D:\Independent Study\DirectXGraphicsEngine\DX11Starter\WaterShaderVS.hlsl(42,27-36): warning X3203: signed/unsigned mismatch, unsigned assumed
+  compilation object save succeeded; see D:\Independent Study\DirectXGraphicsEngine\x64\Debug\WaterShaderVS.cso
   
-  compilation object save succeeded; see C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\x64\Debug\WaterShaderVS.cso
-  DX11Starter.vcxproj -> C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\x64\Debug\DX11Starter.exe
+  Game.cpp
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(197,49): warning C4267:  'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(224,38): warning C4244:  'argument': conversion from 'unsigned int' to 'float', possible loss of data
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(224,32): warning C4244:  'argument': conversion from 'unsigned int' to 'float', possible loss of data
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(289,49): warning C4267:  'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(443,42): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(444,42): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(445,42): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(446,42): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(447,45): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(448,45): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(449,45): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(450,46): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(458,12): warning C4244:  'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(473,41): warning C4244:  'argument': conversion from 'int' to 'float', possible loss of data
+  DX11Starter.vcxproj -> D:\Independent Study\DirectXGraphicsEngine\x64\Debug\DX11Starter.exe
