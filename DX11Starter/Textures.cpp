@@ -7,7 +7,7 @@ ID3D11SamplerState*  Texture::m_sampler;
 Texture::Texture(std::wstring path, ID3D11Device* device, ID3D11DeviceContext* context):m_srv(nullptr)
 {
 	std::wstring ws= path.substr(path.find('.') + 1, path.length());
-	if (ws == L"png")
+	if (ws == L"png"|| ws == L"jpg")
 		DirectX::CreateWICTextureFromFile(device, context, path.c_str(), 0, &m_srv);
 	else if (ws == L"dds")
 		DirectX::CreateDDSTextureFromFile(device, path.c_str(), 0, &m_srv);

@@ -1,10 +1,14 @@
 struct WaterVertexToPixel 
 {
 	float4 Position : SV_POSITION;
-	float Time : TIME;
+	float2 UV		: TEXCOORD;
 };
+
+Texture2D waterTexture : register (t0);
+SamplerState Sampler   : register (s0);
 
 float4 main(WaterVertexToPixel input) : SV_TARGET
 {
-	return float4(1.0f,0.0f+input.Time*0.05f ,0.0f,0.0f);
+	float4 finalColor = waterTexture.Sample(Sampler ,input.UV);
+	return finalColor;
 }

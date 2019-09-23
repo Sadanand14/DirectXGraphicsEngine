@@ -1,0 +1,4 @@
+﻿D:\DirectXGraphicsEngine\DX11Starter\WaterShaderVS.hlsl(41,27-36): warning X3203: signed/unsigned mismatch, unsigned assumed
+  
+  compilation object save succeeded; see D:\DirectXGraphicsEngine\x64\Debug\WaterShaderVS.cso
+  DX11Starter.vcxproj -> D:\DirectXGraphicsEngine\x64\Debug\DX11Starter.exe

@@ -205,40 +205,40 @@ void Game::CreateWaterMesh()
 {
 	WaterVertex Current;
 
-	WaterVertex* vbw = new WaterVertex[400 * 400];
-	for (unsigned int i = 0; i < 400; i++) 
+	WaterVertex* vbw = new WaterVertex[1000 * 1000];
+	for (unsigned int i = 0; i < 1000; i++) 
 	{	
-		for (unsigned int j = 0; j < 400; j++) 
+		for (unsigned int j = 0; j < 1000; j++) 
 		{
 			Current = WaterVertex();
 			Current.Position = XMFLOAT3(i, 0, j);
 			Current.Normal = XMFLOAT3(0, 1, 0);
-			Current.UV = XMFLOAT2(0, 0);
+			Current.UV = XMFLOAT2(((float)i)/50, ((float)j)/50);
 			Current.Tangent = XMFLOAT3(0, 0, 0);
-			vbw[i * 400 + j] = Current;
+			vbw[i * 1000 + j] = Current;
 		}
 	}
 
 
-	UINT* ibw = new UINT[6*399*399];
+	UINT* ibw = new UINT[6*999*999];
 	int index = 0;
-	for (unsigned int i = 0; i < 399; i++)
+	for (unsigned int i = 0; i < 999; i++)
 	{
-		for (unsigned int j = 0; j < 399; j++)
+		for (unsigned int j = 0; j < 999; j++)
 		{
-			ibw[index++] = i*400 + j ;
-			ibw[index++] = i*400 + (j+1);
-			ibw[index++] = (i+1)*400 + j ;
-			ibw[index++] = i * 400 + (j + 1);
-			ibw[index++] = (i+1)*400 + (j+1);
-			ibw[index++] = (i + 1) * 400 + j;
+			ibw[index++] = i*1000 + j ;
+			ibw[index++] = i*1000 + (j+1);
+			ibw[index++] = (i+1)*1000 + j ;
+			ibw[index++] = i * 1000 + (j + 1);
+			ibw[index++] = (i+1)*1000 + (j+1);
+			ibw[index++] = (i + 1) * 1000 + j;
 		}
 	}
 
 	
 	D3D11_BUFFER_DESC vbd;
 	vbd.Usage = D3D11_USAGE_IMMUTABLE;
-	vbd.ByteWidth = sizeof(WaterVertex) * 400*400;
+	vbd.ByteWidth = sizeof(WaterVertex) * 1000*1000;
 	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vbd.CPUAccessFlags = 0;
 	vbd.MiscFlags = 0;
@@ -251,7 +251,7 @@ void Game::CreateWaterMesh()
 	//creating buffer for the indices
 	D3D11_BUFFER_DESC ibd;
 	ibd.Usage = D3D11_USAGE_IMMUTABLE;
-	ibd.ByteWidth = sizeof(UINT) * 6*399*399;
+	ibd.ByteWidth = sizeof(UINT) * 6*999*999;
 	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	ibd.CPUAccessFlags = 0;
 	ibd.MiscFlags = 0;
@@ -444,9 +444,11 @@ void Game::DrawWater(float delta)
 	waterShaderVS->SetFloat("waterTime", WaterTime);
 	waterShaderVS->CopyAllBufferData();
 
+	waterShaderPS->SetSamplerState("Sampler", Texture::m_sampler);
+	waterShaderPS->SetShaderResourceView("waterTexture", texMap["water"]->GetSRV());
 	waterShaderPS->CopyAllBufferData();
 	
-	context->DrawIndexed(6*399*399, 0 ,0);
+	context->DrawIndexed(6*999*999, 0 ,0);
 }
 
 //funciton to draw sky
