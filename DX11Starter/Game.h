@@ -54,6 +54,7 @@ private:
 	void RenderSky();
 	void CreateWaterMesh();
 	void DrawWater(float);
+	void CreateWaves();
 
 	// Buffers to hold actual geometry data
 	ID3D11Buffer* vertexBuffer = nullptr;
@@ -84,5 +85,6 @@ private:
 
 	XMFLOAT4X4 WaterMatrix;
 	float WaterTime;
+	Waves* waves;
 };
 

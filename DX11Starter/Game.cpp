@@ -25,6 +25,8 @@ namespace fs = std::experimental::filesystem;
 
 std::wstring stringStream2wstring(std::stringstream& strs);
 
+
+
 Game::Game(HINSTANCE hInstance)
 	: DXCore(
 		hInstance,		// The application's handle
@@ -53,6 +55,8 @@ Game::Game(HINSTANCE hInstance)
 // --------------------------------------------------------
 Game::~Game()
 {
+	delete[] waves;
+
 	//clear sky stuff
 	if (skyRS != nullptr)
 		skyRS->Release();
@@ -80,11 +84,13 @@ Game::~Game()
 	if (camera != nullptr) delete camera;
 
 	if (pixelShader != nullptr) delete pixelShader;
+
 	if (vertexShader != nullptr) delete vertexShader;
 	if (waterShaderVS != nullptr) delete waterShaderVS;
 	if (waterShaderPS != nullptr) delete waterShaderPS;
 
 	if (material != nullptr) delete material;
+
 
 	entityList.clear();
 	meshMap.clear();
@@ -104,6 +110,7 @@ void Game::Init()
 	LoadModelDirectory();
 	LoadTextureDirectory();
 	CreateWaterMesh();
+	CreateWaves();
 	CreateMatrices();
 	CreateBasicGeometry();
 	AddLighting();
@@ -125,6 +132,8 @@ void Game::Init()
 	// Essentially: "What kind of shape should the GPU draw with our data?"
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
+
+
 
 void Game::AddLighting() 
 {
@@ -426,6 +435,21 @@ void Game::Draw(float deltaTime, float totalTime)
 	swapChain->Present(0, 0);
 }
 
+void Game::CreateWaves()
+{
+	waves = new Waves[8];
+
+	waves[0].AFSW = XMFLOAT4(3, 0.5, 1, 2);
+	waves[1].AFSW = XMFLOAT4(1, 0.8, 2, 2);
+	waves[2].AFSW = XMFLOAT4(3.5, 0.4, 3, 1);
+	waves[3].AFSW = XMFLOAT4(2, 0.2, 4, 3);
+	waves[4].AFSW = XMFLOAT4(2, 0.7, 5, 1);
+	waves[5].AFSW = XMFLOAT4(1, 0.3, 6, 3);
+	waves[6].AFSW = XMFLOAT4(2, 0.1, 7, 1);
+	waves[7].AFSW = XMFLOAT4(2, 0.6, 8, 2);
+
+};
+
 // function to draw water mesh
 void Game::DrawWater(float delta)
 {
@@ -442,6 +466,7 @@ void Game::DrawWater(float delta)
 	waterShaderVS->SetMatrix4x4("view", camera->GetView());
 	waterShaderVS->SetMatrix4x4("projection", camera->GetProjection());
 	waterShaderVS->SetFloat("waterTime", WaterTime);
+	waterShaderVS->SetData("waves", waves, sizeof(Waves)*8);
 	waterShaderVS->CopyAllBufferData();
 
 	waterShaderPS->SetSamplerState("Sampler", Texture::m_sampler);

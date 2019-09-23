@@ -21,3 +21,8 @@ struct WaterVertex
 	DirectX::XMFLOAT2 UV = DirectX::XMFLOAT2(0,0);
 	DirectX::XMFLOAT3 Tangent = DirectX::XMFLOAT3(0, 0, 0);
 };
+
+struct Waves 
+{
+	DirectX::XMFLOAT4 AFSW;
+};
