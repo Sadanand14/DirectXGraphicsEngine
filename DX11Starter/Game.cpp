@@ -440,23 +440,35 @@ void Game::CreateWaves()
 {
 	waves = new Waves[8];
 
-	waves[0].AFSW = XMFLOAT4(1.3,  0.1, 4, 5);
-	waves[1].AFSW = XMFLOAT4(1.4,  0.1, 5, 2);
-	waves[2].AFSW = XMFLOAT4(1.41, 0.1, 2, 1);
-	waves[3].AFSW = XMFLOAT4(1.3, 0.03, 6, 3);
-	waves[4].AFSW = XMFLOAT4(1.24, 0.07, 4.5, 1);
-	waves[5].AFSW = XMFLOAT4(1.05, 0.34, 7.5, 9);
-	waves[6].AFSW = XMFLOAT4(1.26, 0.15, 6.5, 1);
-	waves[7].AFSW = XMFLOAT4(1.28, 0.26, 5.5, 10);
+	waves[0].AFSW = XMFLOAT4(0.2,  3, 2 ,0);
+	//waves[0].WaveDirection = XMFLOAT4(1,  0, 0, 0);
 
+	waves[1].AFSW = XMFLOAT4(0.14,  3.53,  3 , 0);
+//waves[1].WaveDirection= XMFLOAT4(0,  1, 0, 0);
+
+	waves[2].AFSW = XMFLOAT4(0.12, 2.5,  4 , 0);
+	//waves[2].AFSW = XMFLOAT4(1, 1, 0, 0);
+
+	waves[3].AFSW = XMFLOAT4(0.1, 1.6, 2, 0);
+	//waves[3].AFSW = XMFLOAT4(-1, 1, 0, 0);
+
+	waves[4].AFSW = XMFLOAT4(0.28, 4, 2, 0);
+	//waves[4].AFSW = XMFLOAT4(1, 0, 0, 0);
+
+	waves[5].AFSW = XMFLOAT4(0.1, 4.4, 2, 0);
+	//waves[5].AFSW = XMFLOAT4(1, 1, 0, 0);
+
+	waves[6].AFSW = XMFLOAT4(0.12, 5.5, 1, 0);
+	//waves[6].AFSW = XMFLOAT4(0, 1, 0, 0);
+
+	waves[7].AFSW = XMFLOAT4(0.16, 5.26, 4, 0);
+	//waves[7].AFSW = XMFLOAT4(1, 1, 0, 0);
 };
 
 // function to draw water mesh
 void Game::DrawWater(float delta)
 {
 	WaterTime += delta;
-	srand(time(NULL));
-	int randomNumber = rand() % 360 + 1;
 
 	UINT stride = sizeof(WaterVertex);
 	UINT offset = 0;
@@ -470,7 +482,6 @@ void Game::DrawWater(float delta)
 	waterShaderVS->SetMatrix4x4("view", camera->GetView());
 	waterShaderVS->SetMatrix4x4("projection", camera->GetProjection());
 	waterShaderVS->SetFloat("waterTime", WaterTime);
-	waterShaderVS->SetFloat("randomAngle", randomNumber);
 	waterShaderVS->SetData("waves", waves, sizeof(Waves)*8);
 	waterShaderVS->CopyAllBufferData();
 
@@ -479,7 +490,6 @@ void Game::DrawWater(float delta)
 	waterShaderPS->CopyAllBufferData();
 
 	context->DrawIndexed(6*999*999, 0 ,0);
-
 }
 
 //funciton to draw sky

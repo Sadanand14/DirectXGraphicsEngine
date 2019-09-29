@@ -25,4 +25,5 @@ struct WaterVertex
 struct Waves 
 {
 	DirectX::XMFLOAT4 AFSW;
+	//DirectX::XMFLOAT4 WaveDirection;
 };

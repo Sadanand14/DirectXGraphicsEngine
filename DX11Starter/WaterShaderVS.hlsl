@@ -5,16 +5,16 @@ cbuffer externalData : register(b0)
 	matrix projection;
 	float4 WaveParameters;//x = Amplitude ,y = omega, WaveLEngth
 	float waterTime;
-	float randomAngle;
 };
+
 
 
 struct Wave 
 {
 	float Amplitude;
-	float Frequency;
-	float Speed;
 	float Wavelength;
+	float Speed;
+	float garbage;
 };
 
 cbuffer WaveData : register(b1)
@@ -33,52 +33,115 @@ struct WaterVertex
 struct WaterVertexToPixel 
 {
 	float4 Position : SV_POSITION;
+	float3 Normal	: Normal;
 	float2 UV		: TEXCOORD;
 };
 
-float3 CalculateWavePosition(float3 inputPosition, int length, float theta)
+//Calculates Position using Gerstner Equation
+float3 CalculateWavePosition(float3 inputPosition, int length)
 {
 	float3 finalPosition = inputPosition;
-	float sineInput = theta;
+	float steepness = 1.2;
+	float depth = 5;
+	float WVT = 1;
+	float SVT = 0.5;
+	float pi = 3.14;
 
-	for (unsigned int i = 0; i < length; i++) 
+	for (unsigned int i = 0; i < length/2; i++) 
 	{
-		finalPosition.x += waves[i].Amplitude * sin((waves[i].Frequency * inputPosition.x) + (waterTime * waves[i].Speed / (2 * waves[i].Wavelength)));
-		finalPosition.z += waves[i].Amplitude * sin((waves[i].Frequency * inputPosition.z) + (waterTime * waves[i].Speed / (2 * waves[i].Wavelength)));
-		//finalPosition.y += waves[i].Amplitude * sin(waves[i].Frequency * finalPosition.y + waterTime * waves[i].Speed / (2 * waves[i].Wavelength));
-		
-		//finalPosition.y += waves[i].Amplitude * sin(theta);
+		float Li = waves[i].Wavelength;
+		float Ai = waves[i].Amplitude;
+		float Si = waves[i].Speed;
+		float Wi = 2 /Li ;
+
+
+		float phase = Si * Wi;
+
+		//adjustWavelength
+		Li = Li - WVT + (2 * depth * WVT) / Li;
+		Wi = 2 / Li;
+
+		//AdjustSteepness
+		steepness = steepness - SVT + (2 * depth * SVT) / steepness;
+
+		finalPosition.x += Ai * sin(Wi * inputPosition.x + phase * waterTime);
+		finalPosition.z += Ai * sin(Wi * inputPosition.z + phase * waterTime);
+
+		//float xDirection = pow(-1, i);
+
+		float sineValue = sin(Wi * dot(inputPosition.xz, normalize(float2(1, -1))) + phase * waterTime);
+		float finalValue = pow((sineValue + 1) / 2, steepness);
+
+		finalPosition.y += Ai * finalValue;
+
 	}
+
+	for (unsigned int i = length/2; i < length; i++)
+	{
+		float Li = waves[i].Wavelength;
+		float Ai = waves[i].Amplitude;
+		float Si = waves[i].Speed;
+		float Wi = 2 / Li;
+
+		float phase = Si * Wi;
+
+		//adjustWavelength
+		Li = Li - WVT + (2 * depth * WVT)/Li;
+		Wi = 2 / Li;
+		
+		//AdjustSteepness
+		steepness = steepness - SVT + (2 * depth * SVT) / steepness;
+
+		finalPosition.x += Ai * sin(Wi * inputPosition.x + phase * waterTime);
+		finalPosition.z += Ai * sin(Wi * inputPosition.z + phase * waterTime);
+
+		//float xDirection = pow(-1, i);
+
+		float sineValue = sin(Wi * dot(inputPosition.xz, normalize(float2(-1, -1))) + phase * waterTime);
+		float finalValue = pow((sineValue + 1) / 2, steepness);
+
+		finalPosition.y += Ai * finalValue;
+
+	}
+
 	return finalPosition;
+}
+
+//Calculates Gerstner Normals
+float3 UpdateNormals(float3 inputPosition, WaterVertexToPixel output,int length)
+{
+	float pi = 3.14;
+	float3 baseNormal = float3(0, 1, 0);
+
+	for (int i = 0; i < length/2; i++) 
+	{
+		float Ai = waves[i].Amplitude;
+		float Li = waves[i].Wavelength;
+		float Si = waves[i].Speed;
+		float Wi = 2 / Li;
+		float phase = Wi * Si;
+		float2 direction = float2(1, -1);
+
+		baseNormal.x -= Ai * cos(dot(inputPosition.xz, normalize(float2(1,-1))) * Wi + phase * waterTime);
+		baseNormal.z -= Ai * cos(dot(inputPosition.xz, normalize(direction)) * Wi * ( -1) + phase * waterTime);
+
+		baseNormal.y += Ai * sin(dot(inputPosition.xz, normalize(direction)) * Wi + phase * waterTime);
+	}
+
 }
 
 WaterVertexToPixel main(WaterVertex input)
 {
 	WaterVertexToPixel output;
 	matrix worldViewProj = mul(mul(world, view), projection);
-	float theta= 2 * 3.14 * randomAngle / 360;
 
 
 	// WAVE CALCULATIONS
 	
 	
-	input.Position = CalculateWavePosition(input.Position, 8, theta);
+	input.Position = CalculateWavePosition(input.Position, 8);
 	
-
-	/*float Amplitude = 2.0f;
-	float frequency = 0.2f;
-	float Speed = 5.0f;
-	float Wavelength = 2.0f;
-
-	float Amplitude1 = 1.0f;
-	float frequency1 = 0.4f;
-	float Speed1 = 1.0f;
-	float Wavelength1 = 1.0f;
-
-    input.Position.y = input.Position.y + Amplitude * sin(2 * 3.14 * input.Position.y* frequency*waterTime) + Amplitude1 * sin(2 * 3.14 * frequency1 * waterTime);
-	input.Position.x = input.Position.x + Amplitude * sin(frequency* input.Position.x + waterTime * Speed / (4.0f)) + Amplitude1 * sin(frequency1* input.Position.x + waterTime * Speed1 / (2.0f));
-	input.Position.z = input.Position.z + Amplitude * sin(frequency* input.Position.z + waterTime * Speed / (4.0f)) + Amplitude1 * sin(frequency1* input.Position.z+ waterTime * Speed1 / (2.0f));*/
-	///////////////////
+	///////////////
 	
 	output.Position = mul(float4(input.Position, 1.0f), worldViewProj);
 	output.UV = input.UV;

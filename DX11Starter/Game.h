@@ -86,5 +86,6 @@ private:
 	XMFLOAT4X4 WaterMatrix;
 	float WaterTime;
 	Waves* waves;
+	int randomNumber, drawcount =  0;
 };
 
