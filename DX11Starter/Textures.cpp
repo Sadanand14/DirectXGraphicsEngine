@@ -3,9 +3,11 @@
 #include "DDSTextureLoader.h"
 
 ID3D11SamplerState*  Texture::m_sampler;
+unsigned int Texture::count = 0;
 
 Texture::Texture(std::wstring path, ID3D11Device* device, ID3D11DeviceContext* context):m_srv(nullptr)
 {
+	count++;
 	std::wstring ws= path.substr(path.find('.') + 1, path.length());
 	if (ws == L"png"|| ws == L"jpg")
 		DirectX::CreateWICTextureFromFile(device, context, path.c_str(), 0, &m_srv);
@@ -29,4 +31,5 @@ Texture::Texture(std::wstring path, ID3D11Device* device, ID3D11DeviceContext* c
 Texture::~Texture()
 {
 	if(m_srv)m_srv->Release();
+	if (--count == 0) m_sampler->Release();
 }

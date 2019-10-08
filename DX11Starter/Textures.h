@@ -6,6 +6,7 @@ class Texture
 {
 private:
 	ID3D11ShaderResourceView* m_srv;
+	static unsigned int count;
 
 public:
 	static ID3D11SamplerState* m_sampler;

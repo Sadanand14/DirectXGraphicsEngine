@@ -12,11 +12,12 @@ Entity::Entity(XMMATRIX a, XMMATRIX b, XMMATRIX c, std::string d, Materials* e)
 	XMStoreFloat4x4(&m_rotation, b);
 	XMStoreFloat4x4(&m_scaling, c);
 	m_modelTitle = d;
-	material = e;
+	m_material = e;
 }
 
 Entity::~Entity() 
 {
+	//if(m_material) delete m_material;
 }
 
 XMMATRIX Entity::GetWM()

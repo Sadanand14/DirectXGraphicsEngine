@@ -39,8 +39,8 @@ Game::Game(HINSTANCE hInstance)
 	// Initialize fields
 	WaterTime = 0.0f;
 	camera = new Camera((float)width, (float)height);
-
 	
+
 #if defined(DEBUG) || defined(_DEBUG)
 	// Do we want a console window?  Probably only in debug mode
 	CreateConsoleWindow(500, 120, 32, 120);
@@ -56,7 +56,13 @@ Game::Game(HINSTANCE hInstance)
 // --------------------------------------------------------
 Game::~Game()
 {
+	//delete/release waterStuff;
 	delete[] waves;
+
+	//delete/release terrain stuff;
+	if(terrainVertices) delete[] terrainVertices;
+	if(terrainIndices) delete[] terrainIndices;
+	if(heightArray) delete[] heightArray;
 
 	//clear sky stuff
 	if (skyRS != nullptr)
@@ -65,16 +71,15 @@ Game::~Game()
 		skyDS->Release();
 	if (SkyVS != nullptr)
 		delete SkyVS;
-	if (SkyPS != nullptr) 
+	if (SkyPS != nullptr)
 		delete SkyPS;
 
-	
+
 	// Release any (and all!) DirectX objects
 	// we've made in the Game class
-	if (vertexBuffer!= nullptr) { vertexBuffer->Release(); }
+	if (vertexBuffer != nullptr) { vertexBuffer->Release(); }
 	if (indexBuffer != nullptr) { indexBuffer->Release(); }
-	if (WaterVertexBuffer != nullptr) WaterVertexBuffer->Release();
-	if (WaterIndexBuffer != nullptr) WaterIndexBuffer->Release();
+\
 
 	for (auto& m : entityList) { delete m; }
 	for (auto&& m : meshMap) { delete m.second; }
@@ -111,6 +116,8 @@ void Game::Init()
 	LoadModelDirectory();
 	LoadTextureDirectory();
 	CreateWaterMesh();
+	LoadHeightMap("terrain.raw", 1000, 1000);
+	GenerateTerrain();
 	CreateWaves();
 	CreateMatrices();
 	CreateBasicGeometry();
@@ -127,7 +134,7 @@ void Game::Init()
 	dd.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 	dd.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
 	device->CreateDepthStencilState(&dd, &skyDS);
-	
+
 	// Tell the input assembler stage of the pipeline what kind of
 	// geometric primitives (points, lines or triangles) we want to draw.  
 	// Essentially: "What kind of shape should the GPU draw with our data?"
@@ -135,8 +142,66 @@ void Game::Init()
 }
 
 
+void Game::LoadHeightMap(const char* fileLocation, unsigned int length, unsigned int width)
+{
+	//Defining variables for use
+	int error, count;
+	
+	unsigned int numVerts = width* length;
+	//creating arrays to store data
+	heightArray = new unsigned int[numVerts];
+	terrainVertices = new TerrainVertex[numVerts];
+	terrainIndices = new UINT[6*(width-1)* (length-1)];
+	//loading file
+	FILE* file;
+	error = fopen_s(&file, fileLocation, "rb");
+	//if (error != 0) std::cout << "couldnt OPEN!!\n";
 
-void Game::AddLighting() 
+	count = fread(heightArray, sizeof(unsigned short), numVerts, file);
+	//if (count != numVerts)std::cout << "Numbers not MAtching!!\n";
+	std::cout << numVerts << "    " << count;
+	error = fclose(file);
+}
+
+void Game::GenerateTerrain()
+{
+	using namespace DirectX;
+	for (int i = 0; i < 1000; i++)
+	{
+		for (int j = 0; j < 1000; j++)
+		{
+			TerrainVertex V = TerrainVertex();
+			V.Position = XMFLOAT3(i, (float)heightArray[i * 1000 + j] / 100, j);
+			V.UV = XMFLOAT2(i / 10.0f, j / 10.0f);
+			V.Normal = XMFLOAT3(0, 1, 0);
+			terrainVertices[i * 1000 + j] = V;
+		}
+	}
+
+	int intIndex = 0;
+	for (int i = 0; i < 999; i++)
+	{
+		for (int j = 0; j < 999; j++)
+		{
+			terrainIndices[intIndex++] = i * 999 + j;
+			terrainIndices[intIndex++] = i * 999 + j + 1;
+			terrainIndices[intIndex++] = (i + 1) * 999 + j;
+			terrainIndices[intIndex++] = i * 999 + j + 1;
+			terrainIndices[intIndex++] = (i + 1) * 999 + j + 1;
+			terrainIndices[intIndex++] = (i + 1) * 999 + j;
+		}
+	}
+
+	meshMap["terrain"] = new Mesh(terrainVertices, terrainIndices, 1000000, 6*999*999, device);
+
+	XMMATRIX trans = XMMatrixTranslation(0.0f, -4.0f, 0.0f);
+	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
+	XMMATRIX scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
+	XMMATRIX terrainMatrix = XMMatrixMultiply(XMMatrixMultiply(scale, rot), trans);
+	XMStoreFloat4x4(&TerrainMatrix, XMMatrixTranspose(terrainMatrix));
+}
+
+void Game::AddLighting()
 {
 	//intitalizing the directional light structure defined in game.h
 	light1.AmbientColor.x = 0.1f;
@@ -189,13 +254,13 @@ void Game::LoadShaders()
 	waterShaderPS->LoadShaderFile(L"WaterShaderPS.cso");
 }
 //loads all models and stores them in a mesh map
-void Game::LoadModelDirectory() 
+void Game::LoadModelDirectory()
 {
 	std::stringstream ss;
-	std::string s,path;
+	std::string s, path;
 	std::string ModelPath = "Models";
 	unsigned int strlength = ModelPath.length() + 1;
-	for (const auto& entry : fs::directory_iterator(ModelPath)) 
+	for (const auto& entry : fs::directory_iterator(ModelPath))
 	{
 		ss << entry.path();
 		s = ss.str();
@@ -203,7 +268,7 @@ void Game::LoadModelDirectory()
 		ss.clear();
 		path = s.substr(strlength);
 		ss << ModelPath << "/" << path;
-		meshMap[path.substr(0, path.find("."))] =new Mesh(ss.str().c_str(), device);
+		meshMap[path.substr(0, path.find("."))] = new Mesh(ss.str().c_str(), device);
 		ss.str(std::string());
 		ss.clear();
 	}
@@ -211,65 +276,45 @@ void Game::LoadModelDirectory()
 }
 
 //creates a grid mesh to implement water 
-void Game::CreateWaterMesh() 
+void Game::CreateWaterMesh()
 {
 	WaterVertex Current;
 
 	WaterVertex* vbw = new WaterVertex[1000 * 1000];
-	for (unsigned int i = 0; i < 1000; i++) 
-	{	
-		for (unsigned int j = 0; j < 1000; j++) 
+	for (unsigned int i = 0; i < 1000; i++)
+	{
+		for (unsigned int j = 0; j < 1000; j++)
 		{
 			Current = WaterVertex();
 			Current.Position = XMFLOAT3(i, 0, j);
 			Current.Normal = XMFLOAT3(0, 1, 0);
-			Current.UV = XMFLOAT2(((float)i)/50, ((float)j)/50);
+			Current.UV = XMFLOAT2(((float)i) / 50, ((float)j) / 50);
 			Current.Tangent = XMFLOAT3(0, 0, 0);
 			vbw[i * 1000 + j] = Current;
 		}
 	}
 
 
-	UINT* ibw = new UINT[6*999*999];
+	UINT* ibw = new UINT[6 * 999 * 999];
 	int index = 0;
 	for (unsigned int i = 0; i < 999; i++)
 	{
 		for (unsigned int j = 0; j < 999; j++)
 		{
-			ibw[index++] = i*1000 + j ;
-			ibw[index++] = i*1000 + (j+1);
-			ibw[index++] = (i+1)*1000 + j ;
+			ibw[index++] = i * 1000 + j;
 			ibw[index++] = i * 1000 + (j + 1);
-			ibw[index++] = (i+1)*1000 + (j+1);
+			ibw[index++] = (i + 1) * 1000+ j;
+			ibw[index++] = i * 1000 + (j + 1);
+			ibw[index++] = (i + 1) * 1000 + (j + 1);
 			ibw[index++] = (i + 1) * 1000 + j;
 		}
 	}
 
-	
-	D3D11_BUFFER_DESC vbd;
-	vbd.Usage = D3D11_USAGE_IMMUTABLE;
-	vbd.ByteWidth = sizeof(WaterVertex) * 1000*1000;
-	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vbd.CPUAccessFlags = 0;
-	vbd.MiscFlags = 0;
-	vbd.StructureByteStride = 0;
-	D3D11_SUBRESOURCE_DATA initialVertexData;
-	initialVertexData.pSysMem = vbw;
-	device->CreateBuffer(&vbd, &initialVertexData, &WaterVertexBuffer);
-	delete[] vbw;
 
-	//creating buffer for the indices
-	D3D11_BUFFER_DESC ibd;
-	ibd.Usage = D3D11_USAGE_IMMUTABLE;
-	ibd.ByteWidth = sizeof(UINT) * 6*999*999;
-	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	ibd.CPUAccessFlags = 0;
-	ibd.MiscFlags = 0;
-	ibd.StructureByteStride = 0;
-	D3D11_SUBRESOURCE_DATA initialIndexData;
-	initialIndexData.pSysMem = ibw;
-	device->CreateBuffer(&ibd, &initialIndexData, &WaterIndexBuffer);
-	delete[] ibw;
+	meshMap["water"] = new Mesh(vbw, ibw, 1000000, 6 * 999 * 999,device);
+	delete vbw;
+	delete ibw;
+
 
 	XMMATRIX trans = XMMatrixTranslation(0.0f, -1.0f, 0.0f);
 	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
@@ -280,14 +325,14 @@ void Game::CreateWaterMesh()
 }
 
 // loads all textures and stores them in texture map.
-void Game::LoadTextureDirectory() 
+void Game::LoadTextureDirectory()
 {
 	std::stringstream ss;
 	std::string s, path;
 	std::wstring ws;
 	std::string texturePath = "Textures";
-	unsigned int strlength = texturePath.length()+1;
-	for(const auto& entry : fs::directory_iterator(texturePath))
+	unsigned int strlength = texturePath.length() + 1;
+	for (const auto& entry : fs::directory_iterator(texturePath))
 	{
 		ss << entry.path();
 		s = ss.str();
@@ -337,7 +382,7 @@ void Game::CreateBasicGeometry()
 	XMMATRIX trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
 	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
 	XMMATRIX scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
-	
+
 	entityList.push_back(new Entity(trans, rot, scale, "cube", material));
 
 	trans = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
@@ -372,17 +417,17 @@ void Game::OnResize()
 // --------------------------------------------------------
 void Game::Update(float deltaTime, float totalTime)
 {
-	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f,totalTime, totalTime);
+	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, totalTime, totalTime);
 	//entityList[0].SetRot(rot);
 
 	rot = XMMatrixRotationRollPitchYaw(totalTime, 0.0f, totalTime);
 	//entityList[1].SetRot(rot);
-	
+
 	camera->Update(deltaTime);
 	// Quit if the escape key is pressed
 	if (GetAsyncKeyState(VK_ESCAPE))
 		Quit();
-	
+
 	camera->Update(deltaTime);
 }
 
@@ -407,32 +452,34 @@ void Game::Draw(float deltaTime, float totalTime)
 	//Looped all the sequences for loading the worldmatrix as well as loading the index and vertex buffers to the 
 	//GPU using a vector of entities.
 
-	/*for (int i = 0; i < entityList.size(); i++) {
-		XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(entityList[i]->GetWM()));
-		vertexShader->SetMatrix4x4("world", worldMatrix);
-		vertexShader->SetMatrix4x4("view", camera->GetView());
-		vertexShader->SetMatrix4x4("projection", camera->GetProjection());
-		pixelShader->SetData("Light1", &light1, sizeof(DirectionalLight));
-		pixelShader->SetData("Light2", &light2, sizeof(DirectionalLight));
-		pixelShader->SetShaderResourceView("Texture", texMap["crate"]->GetSRV());
-		pixelShader->SetSamplerState("BasicSampler",Texture::m_sampler);
-		vertexShader->CopyAllBufferData();
-		pixelShader->CopyAllBufferData();
-		vertexShader->SetShader();
-		pixelShader->SetShader();
-		UINT stride = sizeof(Vertex);
-		UINT offset = 0;
-		ID3D11Buffer *v1Buffer = meshMap[entityList[i]->GetTitle()]->GetVertexBuffer();
-		ID3D11Buffer *i1Buffer = meshMap[entityList[i]->GetTitle()]->GetIndexBuffer();
-		context->IASetVertexBuffers(0, 1, &v1Buffer, &stride, &offset);
-		context->IASetIndexBuffer(i1Buffer, DXGI_FORMAT_R32_UINT, 0);
-		int indicesCount1 = meshMap[entityList[i]->GetTitle()]->GetIndexCount();
-		context->DrawIndexed(indicesCount1, 0, 0);
-	}*/
+	DrawTerrain();
+
+	//for (int i = 0; i < entityList.size(); i++) {
+	//	XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(entityList[i]->GetWM()));
+	//	vertexShader->SetMatrix4x4("world", worldMatrix);
+	//	vertexShader->SetMatrix4x4("view", camera->GetView());
+	//	vertexShader->SetMatrix4x4("projection", camera->GetProjection());
+	//	pixelShader->SetData("Light1", &light1, sizeof(DirectionalLight));
+	//	pixelShader->SetData("Light2", &light2, sizeof(DirectionalLight));
+	//	pixelShader->SetShaderResourceView("Texture", texMap["crate"]->GetSRV());
+	//	pixelShader->SetSamplerState("BasicSampler",Texture::m_sampler);
+	//	vertexShader->CopyAllBufferData();
+	//	pixelShader->CopyAllBufferData();
+	//	vertexShader->SetShader();
+	//	pixelShader->SetShader();
+	//	UINT stride = sizeof(Vertex);
+	//	UINT offset = 0;
+	//	ID3D11Buffer *v1Buffer = meshMap[entityList[i]->GetTitle()]->GetVertexBuffer();
+	//	ID3D11Buffer *i1Buffer = meshMap[entityList[i]->GetTitle()]->GetIndexBuffer();
+	//	context->IASetVertexBuffers(0, 1, &v1Buffer, &stride, &offset);
+	//	context->IASetIndexBuffer(i1Buffer, DXGI_FORMAT_R32_UINT, 0);
+	//	int indicesCount1 = meshMap[entityList[i]->GetTitle()]->GetIndexCount();
+	//	context->DrawIndexed(indicesCount1, 0, 0);
+	//}
 	DrawWater(deltaTime);
 	RenderSky();
 
-	
+
 	swapChain->Present(0, 0);
 }
 
@@ -440,6 +487,26 @@ void Game::CreateWaves()
 {
 	waves = new Waves[8];
 
+<<<<<<< HEAD
+	waves[0].AFSW = XMFLOAT4(0.2, 3, 2, 0);
+	//waves[0].WaveDirection = XMFLOAT4(1,  0, 0, 0);
+
+	waves[1].AFSW = XMFLOAT4(0.14, 3.53, 3, 0);
+	//waves[1].WaveDirection= XMFLOAT4(0,  1, 0, 0);
+
+	waves[2].AFSW = XMFLOAT4(0.12, 2.5, 4, 0);
+	//waves[2].AFSW = XMFLOAT4(1, 1, 0, 0);
+
+	waves[3].AFSW = XMFLOAT4(0.1, 1.6, 2, 0);
+	//waves[3].AFSW = XMFLOAT4(-1, 1, 0, 0);
+
+	waves[4].AFSW = XMFLOAT4(0.28, 4, 2, 0);
+	//waves[4].AFSW = XMFLOAT4(1, 0, 0, 0);
+
+	waves[5].AFSW = XMFLOAT4(0.1, 4.4, 2, 0);
+	//waves[5].AFSW = XMFLOAT4(1, 1, 0, 0);
+
+=======
 	waves[0].AFSW = XMFLOAT4(0.2,  3, 2 ,0);
 	//waves[0].WaveDirection = XMFLOAT4(1,  0, 0, 0);
 
@@ -458,12 +525,25 @@ void Game::CreateWaves()
 	waves[5].AFSW = XMFLOAT4(0.1, 4.4, 2, 0);
 	//waves[5].AFSW = XMFLOAT4(1, 1, 0, 0);
 
+>>>>>>> 607ec4e818de825e88055f1e040a2a9f65c26a1c
 	waves[6].AFSW = XMFLOAT4(0.12, 5.5, 1, 0);
 	//waves[6].AFSW = XMFLOAT4(0, 1, 0, 0);
 
 	waves[7].AFSW = XMFLOAT4(0.16, 5.26, 4, 0);
 	//waves[7].AFSW = XMFLOAT4(1, 1, 0, 0);
 };
+
+void Game::DrawTerrain() 
+{
+	/*UINT stride = sizeof(TerrainVertex);
+	UINT offset = 0;
+
+	ID3D11Buffer* const vertex = meshMap["terrain"]->GetVertexBuffer();
+	ID3D11Buffer* const index = meshMap["terrain"]->GetIndexBuffer();
+
+	context->IASetVertexBuffers(0, 1, &vertex, &stride, &offset);
+	context->IASetIndexBuffer(index, DXGI_FORMAT_R32_UINT, 0);*/
+}
 
 // function to draw water mesh
 void Game::DrawWater(float delta)
@@ -472,8 +552,12 @@ void Game::DrawWater(float delta)
 
 	UINT stride = sizeof(WaterVertex);
 	UINT offset = 0;
-	context->IASetVertexBuffers(0, 1, &WaterVertexBuffer, &stride, &offset);
-	context->IASetIndexBuffer(WaterIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+	ID3D11Buffer* const vertex = meshMap["water"]->GetVertexBuffer();
+	ID3D11Buffer* const index = meshMap["water"]->GetIndexBuffer();
+
+	context->IASetVertexBuffers(0, 1, &vertex, &stride, &offset);
+	context->IASetIndexBuffer(index, DXGI_FORMAT_R32_UINT, 0);
 
 	waterShaderVS->SetShader();
 	waterShaderPS->SetShader();
@@ -482,18 +566,26 @@ void Game::DrawWater(float delta)
 	waterShaderVS->SetMatrix4x4("view", camera->GetView());
 	waterShaderVS->SetMatrix4x4("projection", camera->GetProjection());
 	waterShaderVS->SetFloat("waterTime", WaterTime);
+<<<<<<< HEAD
+	waterShaderVS->SetData("waves", waves, sizeof(Waves) * 8);
+=======
 	waterShaderVS->SetData("waves", waves, sizeof(Waves)*8);
+>>>>>>> 607ec4e818de825e88055f1e040a2a9f65c26a1c
 	waterShaderVS->CopyAllBufferData();
 
 	waterShaderPS->SetSamplerState("Sampler", Texture::m_sampler);
 	waterShaderPS->SetShaderResourceView("waterTexture", texMap["water"]->GetSRV());
 	waterShaderPS->CopyAllBufferData();
 
+<<<<<<< HEAD
+	context->DrawIndexed(6 * 999 * 999, 0, 0);
+=======
 	context->DrawIndexed(6*999*999, 0 ,0);
+>>>>>>> 607ec4e818de825e88055f1e040a2a9f65c26a1c
 }
 
 //funciton to draw sky
-void Game::RenderSky() 
+void Game::RenderSky()
 {
 	Mesh* skymesh = meshMap["cube"];
 	ID3D11Buffer* vb = skymesh->GetVertexBuffer();
@@ -508,8 +600,8 @@ void Game::RenderSky()
 	SkyVS->SetMatrix4x4("projection", camera->GetProjection());
 	SkyVS->CopyAllBufferData();
 	SkyVS->SetShader();
-	
-	SkyPS->SetShaderResourceView("sky",texMap["SunnyCubeMap"]->GetSRV());
+
+	SkyPS->SetShaderResourceView("sky", texMap["SunnyCubeMap"]->GetSRV());
 	SkyPS->SetSamplerState("BasicSampler", Texture::m_sampler);
 	SkyPS->CopyAllBufferData();
 	SkyPS->SetShader();
@@ -534,7 +626,7 @@ void Game::RenderSky()
 void Game::OnMouseDown(WPARAM buttonState, int x, int y)
 {
 	// Add any custom code here...
-	
+
 	// Save the previous mouse position, so we have it for the future
 	prevMousePos.x = x;
 	prevMousePos.y = y;

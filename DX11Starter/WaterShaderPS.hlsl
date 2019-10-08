@@ -1,6 +1,7 @@
 struct WaterVertexToPixel 
 {
 	float4 Position : SV_POSITION;
+	float3 Normal	: Normal;
 	float2 UV		: TEXCOORD;
 };
 

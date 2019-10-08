@@ -18,7 +18,7 @@ class Entity
 
 	XMFLOAT4X4 m_translation, m_rotation, m_scaling; // Guess this is pretty obvious
 	std::string m_modelTitle;
-	Materials* material;
+	Materials* m_material;
 
 
 
