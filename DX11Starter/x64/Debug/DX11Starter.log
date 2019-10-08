@@ -1,7 +1,17 @@
-﻿C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\WaterShaderVS.hlsl(49,27-38): warning X3203: signed/unsigned mismatch, unsigned assumed
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\WaterShaderVS.hlsl(78,34-43): warning X3203: signed/unsigned mismatch, unsigned assumed
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\WaterShaderVS.hlsl(78,20): warning X3078: 'i': loop control variable conflicts with a previous declaration in the outer scope; most recent declaration will be used
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\WaterShaderVS.hlsl(126,23-42): warning X3578: Output value 'main' is not completely initialized
-  
-  compilation object save succeeded; see C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\x64\Debug\WaterShaderVS.cso
-  DX11Starter.vcxproj -> C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\x64\Debug\DX11Starter.exe
+﻿  Game.cpp
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(160,68): warning C4267:  '=': conversion from 'size_t' to 'int', possible loss of data
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(174,69): warning C4244:  'argument': conversion from 'int' to 'float', possible loss of data
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(174,26): warning C4244:  'argument': conversion from 'int' to 'float', possible loss of data
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(262,49): warning C4267:  'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(289,38): warning C4244:  'argument': conversion from 'unsigned int' to 'float', possible loss of data
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(289,32): warning C4244:  'argument': conversion from 'unsigned int' to 'float', possible loss of data
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(334,51): warning C4267:  'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(490,39): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(493,43): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(496,42): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(499,41): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(502,40): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(505,41): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(508,42): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(511,43): warning C4305:  'argument': truncation from 'double' to 'float'
+  DX11Starter.vcxproj -> D:\DirectXGraphicsEngine\x64\Debug\DX11Starter.exe

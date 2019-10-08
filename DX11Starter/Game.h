@@ -94,15 +94,6 @@ private:
 	// determining how far the mouse moved in a single frame.
 	POINT prevMousePos;
 
-<<<<<<< HEAD
-
 	int randomNumber, drawcount = 0;
-	
-=======
-	XMFLOAT4X4 WaterMatrix;
-	float WaterTime;
-	Waves* waves;
-	int randomNumber, drawcount =  0;
->>>>>>> 607ec4e818de825e88055f1e040a2a9f65c26a1c
 };
 

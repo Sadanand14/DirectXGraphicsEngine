@@ -26,7 +26,6 @@ struct Waves
 {
 	DirectX::XMFLOAT4 AFSW;
 	//DirectX::XMFLOAT4 WaveDirection;
-<<<<<<< HEAD
 };
 
 struct TerrainVertex
@@ -34,6 +33,4 @@ struct TerrainVertex
 	DirectX::XMFLOAT3 Position;
 	DirectX::XMFLOAT3 Normal;
 	DirectX::XMFLOAT2 UV;
-=======
->>>>>>> 607ec4e818de825e88055f1e040a2a9f65c26a1c
 };
