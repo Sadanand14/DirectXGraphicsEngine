@@ -26,8 +26,9 @@ public:
 
 	//TerrainStuff
 	TerrainVertex* terrainVertices = nullptr;
-	UINT* heightArray = nullptr, * terrainIndices = nullptr;
+	unsigned int * heightArray = nullptr, * terrainIndices = nullptr;
 	XMFLOAT4X4 TerrainMatrix;
+	unsigned int m_resolution;
 
 	//General Stuff
 	Camera* camera = nullptr;
@@ -63,8 +64,7 @@ private:
 	void CreateWaterMesh();
 	void DrawWater(float);
 	void CreateWaves();
-	void GenerateTerrain();
-	void LoadHeightMap(const char*, unsigned int, unsigned int);
+	void LoadHeightMap(const char*, unsigned int );
 	void DrawTerrain();
 
 	// Buffers to hold actual geometry data
@@ -78,6 +78,8 @@ private:
 	SimplePixelShader* pixelShader = nullptr;
 	SimpleVertexShader* waterShaderVS = nullptr;
 	SimplePixelShader* waterShaderPS = nullptr;
+	SimpleVertexShader* terrainVS = nullptr;
+	SimplePixelShader* terrainPS = nullptr;
 
 	// The matrices to go from model space to screen space
 	DirectX::XMFLOAT4X4 worldMatrix;

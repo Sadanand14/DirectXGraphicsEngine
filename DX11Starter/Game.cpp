@@ -58,11 +58,15 @@ Game::~Game()
 {
 	//delete/release waterStuff;
 	delete[] waves;
+	if (waterShaderVS != nullptr) delete waterShaderVS;
+	if (waterShaderPS != nullptr) delete waterShaderPS;
 
 	//delete/release terrain stuff;
 	if(terrainVertices) delete[] terrainVertices;
 	if(terrainIndices) delete[] terrainIndices;
 	if(heightArray) delete[] heightArray;
+	if (terrainVS) delete terrainVS;
+	if (terrainPS) delete terrainPS;
 
 	//clear sky stuff
 	if (skyRS != nullptr)
@@ -79,7 +83,7 @@ Game::~Game()
 	// we've made in the Game class
 	if (vertexBuffer != nullptr) { vertexBuffer->Release(); }
 	if (indexBuffer != nullptr) { indexBuffer->Release(); }
-\
+
 
 	for (auto& m : entityList) { delete m; }
 	for (auto&& m : meshMap) { delete m.second; }
@@ -88,16 +92,11 @@ Game::~Game()
 	// will clean up their own internal DirectX stuff
 
 	if (camera != nullptr) delete camera;
-
-	if (pixelShader != nullptr) delete pixelShader;
-
-	if (vertexShader != nullptr) delete vertexShader;
-	if (waterShaderVS != nullptr) delete waterShaderVS;
-	if (waterShaderPS != nullptr) delete waterShaderPS;
-
 	if (material != nullptr) delete material;
 
-
+	if (pixelShader != nullptr) delete pixelShader;
+	if (vertexShader != nullptr) delete vertexShader;
+	
 	entityList.clear();
 	meshMap.clear();
 	texMap.clear();
@@ -116,8 +115,7 @@ void Game::Init()
 	LoadModelDirectory();
 	LoadTextureDirectory();
 	CreateWaterMesh();
-	LoadHeightMap("terrain.raw", 1000, 1000);
-	GenerateTerrain();
+	LoadHeightMap("terrain.raw", 1024);
 	CreateWaves();
 	CreateMatrices();
 	CreateBasicGeometry();
@@ -142,59 +140,60 @@ void Game::Init()
 }
 
 
-void Game::LoadHeightMap(const char* fileLocation, unsigned int length, unsigned int width)
+void Game::LoadHeightMap(const char* fileLocation, unsigned int resolution)
 {
 	//Defining variables for use
 	int error, count;
-	
-	unsigned int numVerts = width* length;
+	resolution++;
+	m_resolution = resolution;
+	unsigned int numVerts = resolution * resolution;
+	unsigned int numIndicies = (resolution - 1) * (resolution - 1) * 6;
+
 	//creating arrays to store data
 	heightArray = new unsigned int[numVerts];
 	terrainVertices = new TerrainVertex[numVerts];
-	terrainIndices = new UINT[6*(width-1)* (length-1)];
+	terrainIndices = new unsigned int[numIndicies];
+
 	//loading file
 	FILE* file;
 	error = fopen_s(&file, fileLocation, "rb");
-	if (error != 0) std::cout << "couldnt OPEN!!\n";
+	//if (error != 0) std::cout << "couldnt OPEN!!\n";
 
 	count = fread(heightArray, sizeof(unsigned short), numVerts, file);
 	//if (count != numVerts)std::cout << "Numbers not MAtching!!\n";
 	std::cout << numVerts << "    " << count;
 	error = fclose(file);
-}
-
-void Game::GenerateTerrain()
-{
 	using namespace DirectX;
-	for (int i = 0; i < 1000; i++)
+	for (int i = 0; i < m_resolution; i++)
 	{
-		for (int j = 0; j < 1000; j++)
+		for (int j = 0; j < m_resolution; j++)
 		{
 			TerrainVertex V = TerrainVertex();
-			V.Position = XMFLOAT3(i, (float)heightArray[i * 1000 + j] / 100, j);
+			V.Position = XMFLOAT3(i, (float)heightArray[i * m_resolution + j] / 10000000, j);
 			V.UV = XMFLOAT2(i / 10.0f, j / 10.0f);
 			V.Normal = XMFLOAT3(0, 1, 0);
-			terrainVertices[i * 1000 + j] = V;
+			terrainVertices[i * m_resolution + j] = V;
 		}
 	}
+
 
 	int intIndex = 0;
-	for (int i = 0; i < 999; i++)
+	for (int i = 0; i < m_resolution - 1; i++)
 	{
-		for (int j = 0; j < 999; j++)
+		for (int j = 0; j < m_resolution - 1; j++)
 		{
-			terrainIndices[intIndex++] = i * 999 + j;
-			terrainIndices[intIndex++] = i * 999 + j + 1;
-			terrainIndices[intIndex++] = (i + 1) * 999 + j;
-			terrainIndices[intIndex++] = i * 999 + j + 1;
-			terrainIndices[intIndex++] = (i + 1) * 999 + j + 1;
-			terrainIndices[intIndex++] = (i + 1) * 999 + j;
+			terrainIndices[intIndex++] = i * m_resolution + j;
+			terrainIndices[intIndex++] = i * m_resolution + j + 1;
+			terrainIndices[intIndex++] = (i + 1) * m_resolution + j;
+			terrainIndices[intIndex++] = i * m_resolution + j + 1;
+			terrainIndices[intIndex++] = (i + 1) * m_resolution + j + 1;
+			terrainIndices[intIndex++] = (i + 1) * m_resolution + j;
 		}
 	}
 
-	meshMap["terrain"] = new Mesh(terrainVertices, terrainIndices, 1000000, 6*999*999, device);
+	meshMap["terrain"] = new Mesh(terrainVertices, terrainIndices,numVerts, numIndicies, device);
 
-	XMMATRIX trans = XMMatrixTranslation(0.0f, -4.0f, 0.0f);
+	XMMATRIX trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
 	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
 	XMMATRIX scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
 	XMMATRIX terrainMatrix = XMMatrixMultiply(XMMatrixMultiply(scale, rot), trans);
@@ -252,6 +251,12 @@ void Game::LoadShaders()
 
 	waterShaderPS = new SimplePixelShader(device, context);
 	waterShaderPS->LoadShaderFile(L"WaterShaderPS.cso");
+
+	terrainVS = new SimpleVertexShader(device, context);
+	terrainVS->LoadShaderFile(L"Terrain_VS.cso");
+
+	terrainPS = new SimplePixelShader(device, context);
+	terrainPS->LoadShaderFile(L"Terrain_PS.cso");
 }
 //loads all models and stores them in a mesh map
 void Game::LoadModelDirectory()
@@ -514,14 +519,28 @@ void Game::CreateWaves()
 
 void Game::DrawTerrain() 
 {
-	/*UINT stride = sizeof(TerrainVertex);
+	UINT stride = sizeof(TerrainVertex);
 	UINT offset = 0;
 
 	ID3D11Buffer* const vertex = meshMap["terrain"]->GetVertexBuffer();
 	ID3D11Buffer* const index = meshMap["terrain"]->GetIndexBuffer();
 
 	context->IASetVertexBuffers(0, 1, &vertex, &stride, &offset);
-	context->IASetIndexBuffer(index, DXGI_FORMAT_R32_UINT, 0);*/
+	context->IASetIndexBuffer(index, DXGI_FORMAT_R32_UINT, 0);
+
+	terrainVS->SetShader();
+	terrainPS->SetShader();
+
+	terrainVS->SetMatrix4x4("world", TerrainMatrix);
+	terrainVS->SetMatrix4x4("projection", camera->GetProjection());
+	terrainVS->SetMatrix4x4("view", camera->GetView());
+	terrainVS->CopyAllBufferData();
+
+	terrainPS->SetSamplerState("state", Texture::m_sampler);
+	terrainPS->SetShaderResourceView("terrainTexture", texMap["crate"]->GetSRV());
+	terrainPS->CopyAllBufferData();
+
+	context->DrawIndexed(6 * (m_resolution-1)* (m_resolution - 1), 0, 0);
 }
 
 // function to draw water mesh
