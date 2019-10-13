@@ -1,26 +1,21 @@
-﻿  Camera.cpp
-  Entity.cpp
-  Game.cpp
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(214,68): warning C4267:  '=': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(219,20): warning C4018:  '<': signed/unsigned mismatch
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(221,21): warning C4018:  '<': signed/unsigned mismatch
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(224,82): warning C4244:  'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(224,26): warning C4244:  'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(234,20): warning C4018:  '<': signed/unsigned mismatch
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(236,21): warning C4018:  '<': signed/unsigned mismatch
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(320,49): warning C4267:  'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(347,38): warning C4244:  'argument': conversion from 'unsigned int' to 'float', possible loss of data
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(347,32): warning C4244:  'argument': conversion from 'unsigned int' to 'float', possible loss of data
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(392,51): warning C4267:  'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(548,39): warning C4305:  'argument': truncation from 'double' to 'float'
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(551,43): warning C4305:  'argument': truncation from 'double' to 'float'
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(554,42): warning C4305:  'argument': truncation from 'double' to 'float'
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(557,41): warning C4305:  'argument': truncation from 'double' to 'float'
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(560,40): warning C4305:  'argument': truncation from 'double' to 'float'
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(563,41): warning C4305:  'argument': truncation from 'double' to 'float'
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(566,42): warning C4305:  'argument': truncation from 'double' to 'float'
-  Main.cpp
-  Materials.cpp
-  Generating Code...
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(569,43): warning C4305:  'argument': truncation from 'double' to 'float'
-  DX11Starter.vcxproj -> C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\x64\Debug\DX11Starter.exe
+﻿  Game.cpp
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(218,68): warning C4267:  '=': conversion from 'size_t' to 'int', possible loss of data
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(223,20): warning C4018:  '<': signed/unsigned mismatch
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(225,21): warning C4018:  '<': signed/unsigned mismatch
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(228,82): warning C4244:  'argument': conversion from 'int' to 'float', possible loss of data
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(228,26): warning C4244:  'argument': conversion from 'int' to 'float', possible loss of data
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(238,20): warning C4018:  '<': signed/unsigned mismatch
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(240,21): warning C4018:  '<': signed/unsigned mismatch
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(324,49): warning C4267:  'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(351,38): warning C4244:  'argument': conversion from 'unsigned int' to 'float', possible loss of data
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(351,32): warning C4244:  'argument': conversion from 'unsigned int' to 'float', possible loss of data
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(396,51): warning C4267:  'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(552,39): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(555,43): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(558,42): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(561,41): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(564,40): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(567,41): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(570,42): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\Game.cpp(573,43): warning C4305:  'argument': truncation from 'double' to 'float'
+  DX11Starter.vcxproj -> D:\Independent Study\DirectXGraphicsEngine\x64\Debug\DX11Starter.exe

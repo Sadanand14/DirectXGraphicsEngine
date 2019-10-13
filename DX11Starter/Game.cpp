@@ -61,6 +61,13 @@ Game::~Game()
 	if (waterShaderVS != nullptr) delete waterShaderVS;
 	if (waterShaderPS != nullptr) delete waterShaderPS;
 
+	if (refractionRTV != nullptr) refractionRTV->Release();
+	if (refractSampler != nullptr) refractSampler->Release();
+	if (refractionSRV != nullptr) refractionSRV->Release();
+
+	if (QuadPS != nullptr) delete QuadPS;
+	if (QuadVS != nullptr) delete QuadVS;
+
 	//delete/release terrain stuff;
 	if(terrainVertices) delete[] terrainVertices;
 	if(terrainIndices) delete[] terrainIndices;
@@ -246,7 +253,7 @@ void Game::LoadHeightMap(const char* fileLocation, unsigned int resolution)
 
 	meshMap["terrain"] = new Mesh(terrainVertices, terrainIndices,numVerts, numIndicies, device);
 
-	XMMATRIX trans = XMMatrixTranslation(0.0f, -10.0f, 0.0f);
+	XMMATRIX trans = XMMatrixTranslation(0.0f, -1.5f, 0.0f);
 	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
 	XMMATRIX scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
 	XMMATRIX terrainMatrix = XMMatrixMultiply(XMMatrixMultiply(scale, rot), trans);
@@ -287,6 +294,12 @@ void Game::AddLighting()
 
 void Game::LoadShaders()
 {
+	QuadVS = new SimpleVertexShader(device, context);
+	QuadVS->LoadShaderFile(L"QuadVS.cso");
+
+	QuadPS = new SimplePixelShader(device, context);
+	QuadPS->LoadShaderFile(L"QuadPS.cso");
+
 	vertexShader = new SimpleVertexShader(device, context);
 	vertexShader->LoadShaderFile(L"VertexShader.cso");
 
@@ -501,6 +514,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	//  - Do this ONCE PER FRAME
 	//  - At the beginning of Draw (before drawing *anything*)
 	context->ClearRenderTargetView(backBufferRTV, color);
+	context->ClearRenderTargetView(refractionRTV, color);
 	context->ClearDepthStencilView(
 		depthStencilView,
 		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
@@ -509,36 +523,28 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	//Looped all the sequences for loading the worldmatrix as well as loading the index and vertex buffers to the 
 	//GPU using a vector of entities.
-
+	context->OMSetRenderTargets(1, &refractionRTV, depthStencilView);
 	DrawTerrain();
-
-	//for (int i = 0; i < entityList.size(); i++) {
-	//	XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(entityList[i]->GetWM()));
-	//	vertexShader->SetMatrix4x4("world", worldMatrix);
-	//	vertexShader->SetMatrix4x4("view", camera->GetView());
-	//	vertexShader->SetMatrix4x4("projection", camera->GetProjection());
-	//	pixelShader->SetData("Light1", &light1, sizeof(DirectionalLight));
-	//	pixelShader->SetData("Light2", &light2, sizeof(DirectionalLight));
-	//	pixelShader->SetShaderResourceView("Texture", texMap["crate"]->GetSRV());
-	//	pixelShader->SetSamplerState("BasicSampler",Texture::m_sampler);
-	//	vertexShader->CopyAllBufferData();
-	//	pixelShader->CopyAllBufferData();
-	//	vertexShader->SetShader();
-	//	pixelShader->SetShader();
-	//	UINT stride = sizeof(Vertex);
-	//	UINT offset = 0;
-	//	ID3D11Buffer *v1Buffer = meshMap[entityList[i]->GetTitle()]->GetVertexBuffer();
-	//	ID3D11Buffer *i1Buffer = meshMap[entityList[i]->GetTitle()]->GetIndexBuffer();
-	//	context->IASetVertexBuffers(0, 1, &v1Buffer, &stride, &offset);
-	//	context->IASetIndexBuffer(i1Buffer, DXGI_FORMAT_R32_UINT, 0);
-	//	int indicesCount1 = meshMap[entityList[i]->GetTitle()]->GetIndexCount();
-	//	context->DrawIndexed(indicesCount1, 0, 0);
-	//}
-	DrawWater(deltaTime);
 	RenderSky();
+	context->OMGetRenderTargets(1, &backBufferRTV, 0);
+	DrawQuad();
 
-
+	DrawWater(deltaTime);
 	swapChain->Present(0, 0);
+}
+
+void Game::DrawQuad() 
+{
+	context->IASetVertexBuffers(0, 0, 0, 0, 0);
+	context->IASetIndexBuffer(0, DXGI_FORMAT_R32_UINT, 0);
+
+	// Set up the fullscreen quad shaders
+	QuadVS->SetShader();
+	QuadPS->SetShaderResourceView("Pixels", refractionSRV);
+	QuadPS->SetSamplerState("Sampler", Texture::m_sampler);
+	QuadPS->SetShader();
+
+	context->Draw(3, 0);
 }
 
 void Game::CreateWaves()
@@ -590,7 +596,7 @@ void Game::DrawTerrain()
 	terrainVS->CopyAllBufferData();
 
 	terrainPS->SetSamplerState("state", Texture::m_sampler);
-	terrainPS->SetShaderResourceView("terrainTexture", texMap["crate"]->GetSRV());
+	terrainPS->SetShaderResourceView("terrainTexture", texMap["beach"]->GetSRV());
 	terrainPS->CopyAllBufferData();
 
 	context->DrawIndexed(6 * (m_resolution-1)* (m_resolution - 1), 0, 0);

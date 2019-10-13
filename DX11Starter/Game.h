@@ -23,9 +23,9 @@ public:
 	XMFLOAT4X4 WaterMatrix;
 	float WaterTime;
 	Waves* waves;
-	ID3D11RenderTargetView* refractionRTV;
-	ID3D11SamplerState* refractSampler;
-	ID3D11ShaderResourceView* refractionSRV;
+	ID3D11RenderTargetView* refractionRTV = nullptr;
+	ID3D11SamplerState* refractSampler = nullptr;
+	ID3D11ShaderResourceView* refractionSRV = nullptr;
 
 	//TerrainStuff
 	TerrainVertex* terrainVertices = nullptr;
@@ -69,6 +69,7 @@ private:
 	void CreateWaves();
 	void LoadHeightMap(const char*, unsigned int );
 	void DrawTerrain();
+	void DrawQuad();
 
 	// Buffers to hold actual geometry data
 	ID3D11Buffer* vertexBuffer = nullptr;
@@ -83,6 +84,8 @@ private:
 	SimplePixelShader* waterShaderPS = nullptr;
 	SimpleVertexShader* terrainVS = nullptr;
 	SimplePixelShader* terrainPS = nullptr;
+	SimpleVertexShader* QuadVS = nullptr;
+	SimplePixelShader* QuadPS = nullptr;
 
 	// The matrices to go from model space to screen space
 	DirectX::XMFLOAT4X4 worldMatrix;
