@@ -43,16 +43,16 @@ float3 CalculateWavePosition(float3 inputPosition, int length)
 {
 	float3 finalPosition = inputPosition;
 	float steepness = 1.2;
-	float depth = 5;
+	float depth = 0.5;
 	float WVT = 1;
 	float SVT = 0.5;
 	float pi = 3.14;
 
 	for (unsigned int i = 0; i < length/2; i++) 
 	{
-		float Li = waves[i].Wavelength;
-		float Ai = waves[i].Amplitude;
-		float Si = waves[i].Speed;
+		float Li = waves[i].Wavelength*2;
+		float Ai = waves[i].Amplitude*2;
+		float Si = waves[i].Speed*2;
 		float Wi = 2 /Li ;
 
 
@@ -79,9 +79,9 @@ float3 CalculateWavePosition(float3 inputPosition, int length)
 
 	for (unsigned int i = length/2; i < length; i++)
 	{
-		float Li = waves[i].Wavelength;
-		float Ai = waves[i].Amplitude;
-		float Si = waves[i].Speed;
+		float Li = waves[i].Wavelength*2;
+		float Ai = waves[i].Amplitude*2;
+		float Si = waves[i].Speed*2;
 		float Wi = 2 /Li ;
 
 

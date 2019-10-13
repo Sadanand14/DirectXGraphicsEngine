@@ -23,6 +23,9 @@ public:
 	XMFLOAT4X4 WaterMatrix;
 	float WaterTime;
 	Waves* waves;
+	ID3D11RenderTargetView* refractionRTV;
+	ID3D11SamplerState* refractSampler;
+	ID3D11ShaderResourceView* refractionSRV;
 
 	//TerrainStuff
 	TerrainVertex* terrainVertices = nullptr;

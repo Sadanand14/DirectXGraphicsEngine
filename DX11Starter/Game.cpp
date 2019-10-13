@@ -136,6 +136,58 @@ void Game::Init()
 	// Tell the input assembler stage of the pipeline what kind of
 	// geometric primitives (points, lines or triangles) we want to draw.  
 	// Essentially: "What kind of shape should the GPU draw with our data?"
+
+	// Refraction setup ------------------------
+	ID3D11Texture2D* refractionRenderTexture;
+
+	// Set up render texture
+	D3D11_TEXTURE2D_DESC rtDesc = {};
+	rtDesc.Width = width;
+	rtDesc.Height = height;
+	rtDesc.MipLevels = 1;
+	rtDesc.ArraySize = 1;
+	rtDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	rtDesc.Usage = D3D11_USAGE_DEFAULT;
+	rtDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	rtDesc.CPUAccessFlags = 0;
+	rtDesc.MiscFlags = 0;
+	rtDesc.SampleDesc.Count = 1;
+	rtDesc.SampleDesc.Quality = 0;
+	device->CreateTexture2D(&rtDesc, 0, &refractionRenderTexture);
+
+
+	// Set up render target view
+	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
+	rtvDesc.Format = rtDesc.Format;
+	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	rtvDesc.Texture2D.MipSlice = 0;
+	device->CreateRenderTargetView(refractionRenderTexture, &rtvDesc, &refractionRTV);
+
+	// Set up shader resource view for same texture
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Format = rtDesc.Format;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MipLevels = 1;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	device->CreateShaderResourceView(refractionRenderTexture, &srvDesc, &refractionSRV);
+
+	// All done with this texture ref
+	refractionRenderTexture->Release();
+
+	// Set up a sampler that uses clamp addressing
+	// for use when doing refration - this is useful so 
+	// that we don't wrap the refraction from the other
+	// side of the screen
+	D3D11_SAMPLER_DESC rSamp = {};
+	rSamp.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	rSamp.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	rSamp.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	rSamp.Filter = D3D11_FILTER_ANISOTROPIC;
+	rSamp.MaxAnisotropy = 16;
+	rSamp.MaxLOD = D3D11_FLOAT32_MAX;
+
+	// Ask DirectX for the actual object
+	device->CreateSamplerState(&rSamp, &refractSampler);
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
@@ -169,7 +221,8 @@ void Game::LoadHeightMap(const char* fileLocation, unsigned int resolution)
 		for (int j = 0; j < m_resolution; j++)
 		{
 			TerrainVertex V = TerrainVertex();
-			V.Position = XMFLOAT3(i, (float)heightArray[i * m_resolution + j] / 10000000, j);
+			V.Position = XMFLOAT3(i, (float)heightArray[i * m_resolution + j] / 90000000, j);
+			if (V.Position.y > 30) V.Position.y = 0.0f;
 			V.UV = XMFLOAT2(i / 10.0f, j / 10.0f);
 			V.Normal = XMFLOAT3(0, 1, 0);
 			terrainVertices[i * m_resolution + j] = V;
@@ -193,7 +246,7 @@ void Game::LoadHeightMap(const char* fileLocation, unsigned int resolution)
 
 	meshMap["terrain"] = new Mesh(terrainVertices, terrainIndices,numVerts, numIndicies, device);
 
-	XMMATRIX trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+	XMMATRIX trans = XMMatrixTranslation(0.0f, -10.0f, 0.0f);
 	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
 	XMMATRIX scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
 	XMMATRIX terrainMatrix = XMMatrixMultiply(XMMatrixMultiply(scale, rot), trans);

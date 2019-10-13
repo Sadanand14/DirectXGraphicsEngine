@@ -13,7 +13,7 @@ Camera::Camera(float width,float height)
 		0.25f * 3.1415926535f,		// Field of View Angle
 		width / height,				// Aspect ratio
 		0.1f,						// Near clip plane distance
-		1000.0f);					// Far clip plane distance
+		500.0f);					// Far clip plane distance
 	XMStoreFloat4x4(&projectionMatrix, XMMatrixTranspose(P));
 	upUnit = XMVectorSet(0, 1, 0, 0);
 	XMStoreFloat3(&currentPos, XMVectorSet(0, 0, -5, 0));
