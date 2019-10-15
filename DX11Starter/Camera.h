@@ -18,8 +18,10 @@ public:
 	Camera(float width, float height);
 	~Camera();
 	void Update(float deltaTime);
-	XMFLOAT4X4 GetView() { return viewMatrix; }
-	XMFLOAT4X4 GetProjection() { return projectionMatrix; }
+	inline XMFLOAT4X4 GetView() { return viewMatrix; }
+	inline XMFLOAT4X4 GetProjection() { return projectionMatrix; }
+	inline XMFLOAT3 GetPosition() { return currentPos; };
+
 	void UpdateViewMatrix();
 	void Rotate(float x , float y);
 	void MoveRelative(float x, float y, float z);

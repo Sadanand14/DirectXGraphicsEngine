@@ -526,10 +526,13 @@ void Game::Draw(float deltaTime, float totalTime)
 	context->OMSetRenderTargets(1, &refractionRTV, depthStencilView);
 	DrawTerrain();
 	RenderSky();
-	context->OMGetRenderTargets(1, &backBufferRTV, 0);
+	context->OMSetRenderTargets(1, &backBufferRTV, 0);
 	DrawQuad();
-
+	context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
 	DrawWater(deltaTime);
+	ID3D11ShaderResourceView* nullSRV[16] = {};
+	context->PSSetShaderResources(0, 16, nullSRV);
+
 	swapChain->Present(0, 0);
 }
 
@@ -551,28 +554,28 @@ void Game::CreateWaves()
 {
 	waves = new Waves[8];
 
-	waves[0].AFSW = XMFLOAT4(0.2, 3, 2, 0);
+	waves[0].AFSW = XMFLOAT4(3, 2, 0.22, 3);
 	//waves[0].WaveDirection = XMFLOAT4(1,  0, 0, 0);
 
-	waves[1].AFSW = XMFLOAT4(0.14, 3.53, 3, 0);
+	waves[1].AFSW = XMFLOAT4(1, 1, 0.24, 3.53);
 	//waves[1].WaveDirection= XMFLOAT4(0,  1, 0, 0);
 
-	waves[2].AFSW = XMFLOAT4(0.12, 2.5, 4, 0);
+	waves[2].AFSW = XMFLOAT4(-1, -3, 0.22, 2.5);
 	//waves[2].AFSW = XMFLOAT4(1, 1, 0, 0);
 
-	waves[3].AFSW = XMFLOAT4(0.1, 1.6, 2, 0);
+	waves[3].AFSW = XMFLOAT4(-4, 5, 0.21, 1.6);
 	//waves[3].AFSW = XMFLOAT4(-1, 1, 0, 0);
 
-	waves[4].AFSW = XMFLOAT4(0.28, 4, 2, 0);
+	waves[4].AFSW = XMFLOAT4(2,-1, 0.48, 4);
 	//waves[4].AFSW = XMFLOAT4(1, 0, 0, 0);
 
-	waves[5].AFSW = XMFLOAT4(0.1, 4.4, 2, 0);
+	waves[5].AFSW = XMFLOAT4(1, 0, 0.21, 4);
 	//waves[5].AFSW = XMFLOAT4(1, 1, 0, 0);
 
-	waves[6].AFSW = XMFLOAT4(0.12, 5.5, 1, 0);
+	waves[6].AFSW = XMFLOAT4(-1, 0, 0.22, 5.5);
 	//waves[6].AFSW = XMFLOAT4(0, 1, 0, 0);
 
-	waves[7].AFSW = XMFLOAT4(0.16, 5.26, 4, 0);
+	waves[7].AFSW = XMFLOAT4(0, -1, 0.36, 5.26);
 	//waves[7].AFSW = XMFLOAT4(1, 1, 0, 0);
 };
 
@@ -628,6 +631,9 @@ void Game::DrawWater(float delta)
 
 	waterShaderPS->SetSamplerState("Sampler", Texture::m_sampler);
 	waterShaderPS->SetShaderResourceView("waterTexture", texMap["water"]->GetSRV());
+	waterShaderPS->SetSamplerState("RefracSampler", refractSampler);
+	waterShaderPS->SetShaderResourceView("Scene", refractionSRV);
+	waterShaderPS->SetFloat3("CameraPosition", camera->GetPosition());
 	waterShaderPS->CopyAllBufferData();
 
 	context->DrawIndexed(6 * 999 * 999, 0, 0);
