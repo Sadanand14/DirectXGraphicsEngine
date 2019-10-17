@@ -68,6 +68,9 @@ Game::~Game()
 	if (QuadPS != nullptr) delete QuadPS;
 	if (QuadVS != nullptr) delete QuadVS;
 
+	if (depthSRV != nullptr) depthSRV->Release();
+	if (depthView != nullptr) depthView->Release();
+
 	//delete/release terrain stuff;
 	if(terrainVertices) delete[] terrainVertices;
 	if(terrainIndices) delete[] terrainIndices;
@@ -180,6 +183,39 @@ void Game::Init()
 
 	// All done with this texture ref
 	refractionRenderTexture->Release();
+
+	//Creating DepthTexture/StencilView/SRV for depth sampling in screen space reflections
+	ID3D11Texture2D* depthTexture = nullptr;
+
+	D3D11_TEXTURE2D_DESC texDesc = {};
+	texDesc.Width = width;
+	texDesc.Height = height;
+	texDesc.MipLevels = 1;
+	texDesc.ArraySize = 1;
+	texDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+	texDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+	texDesc.Usage = D3D11_USAGE_DEFAULT;
+	texDesc.CPUAccessFlags = 0;
+	texDesc.MiscFlags = 0;
+	texDesc.SampleDesc.Count = 1;
+	texDesc.SampleDesc.Quality = 0;
+
+	device->CreateTexture2D(&texDesc, 0, &depthTexture);
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC stencilDesc = {};
+	stencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	stencilDesc.Flags = 0;
+	stencilDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	device->CreateDepthStencilView(depthTexture,&stencilDesc, &depthView);
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC depthSrvDesc = {};
+	depthSrvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	depthSrvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	depthSrvDesc.Texture2D.MipLevels = -1;
+	depthSrvDesc.Texture2D.MostDetailedMip = 0;
+	device->CreateShaderResourceView(depthTexture, &depthSrvDesc, &depthSRV);
+
+	if (depthTexture != nullptr) depthTexture->Release();
 
 	// Set up a sampler that uses clamp addressing
 	// for use when doing refration - this is useful so 
@@ -515,6 +551,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	//  - At the beginning of Draw (before drawing *anything*)
 	context->ClearRenderTargetView(backBufferRTV, color);
 	context->ClearRenderTargetView(refractionRTV, color);
+	context->ClearDepthStencilView(depthView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	context->ClearDepthStencilView(
 		depthStencilView,
 		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
@@ -523,7 +560,7 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	//Looped all the sequences for loading the worldmatrix as well as loading the index and vertex buffers to the 
 	//GPU using a vector of entities.
-	context->OMSetRenderTargets(1, &refractionRTV, depthStencilView);
+	context->OMSetRenderTargets(1, &refractionRTV, depthView);
 	DrawTerrain();
 	RenderSky();
 	context->OMSetRenderTargets(1, &backBufferRTV, 0);

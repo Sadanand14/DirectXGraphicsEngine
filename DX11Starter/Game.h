@@ -25,7 +25,9 @@ public:
 	Waves* waves;
 	ID3D11RenderTargetView* refractionRTV = nullptr;
 	ID3D11SamplerState* refractSampler = nullptr;
-	ID3D11ShaderResourceView* refractionSRV = nullptr;
+	ID3D11ShaderResourceView* refractionSRV = nullptr, *depthSRV = nullptr;
+	ID3D11DepthStencilView* depthView = nullptr;
+
 
 	//TerrainStuff
 	TerrainVertex* terrainVertices = nullptr;

@@ -31,13 +31,16 @@ struct WaterVertex
 
 struct WaterVertexToPixel 
 {
-	float4 Position : SV_POSITION;
-	float3 Normal	: NORMAL;
-	float2 UV		: TEXCOORD;
-	float3 Tangent  : TANGENT;
-	float3 worldPos : POSITION;
+	float4 Position		: SV_POSITION;
+	float4 ViewPos		: VIEWPOS;
+	float3 ViewNormal	: VIEWNORM;
+	float3 ScreenPos	: SCRNPOS;
+	float3 Normal		: NORMAL;
+	float2 UV			: TEXCOORD;
+	float3 Tangent		: TANGENT;
+	float3 worldPos		: POSITION;
+	matrix View			: VIEW;
 	noperspective float2 ScreenUV : TEXCOORD1;
-	matrix View		: VIEW;
 };
 
 //Calculates Position using Gerstner Equation
@@ -129,8 +132,8 @@ float3 UpdateTangents(float3 inputPosition, int length)
 WaterVertexToPixel main(WaterVertex input)
 {
 	WaterVertexToPixel output;
-	matrix worldViewProj = mul(mul(world, view), projection);
-
+	matrix worldView = mul(world, view);
+	matrix worldViewProj = mul(worldView, projection);
 
 	// WAVE CALCULATIONS///////////////////////////
 	
@@ -147,14 +150,17 @@ WaterVertexToPixel main(WaterVertex input)
 
 	output.Normal = mul(input.Normal, (float3x3)world);
 	output.Normal = normalize(input.Normal);
-	//output.Normal = input.Normal;
 
-	//output.Tangent = normalize(mul(input.Tangent, (float3x3)world));
-
+	output.Tangent = normalize(mul(input.Tangent, (float3x3)world));
 
 	output.ScreenUV = (output.Position.xy / output.Position.w);
 	output.ScreenUV.x = output.ScreenUV.x * 0.5f + 0.5f;
 	output.ScreenUV.y = -output.ScreenUV.y * 0.5f + 0.5f;
+
+	//For Screen-Space Reflection
+	output.ViewPos = mul(float4(input.Position, 1.0f), worldView);
+	output.ViewNormal = mul(input.Normal, (float3x3)worldView);
+	output.ScreenPos = output.Position.xyz / output.Position.w;
 
 	return output;
 }
