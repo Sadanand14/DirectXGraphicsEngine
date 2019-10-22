@@ -6,7 +6,6 @@ cbuffer externalData : register(b0)
 	float waterTime;
 };
 
-float pi = 3.14;
 
 
 struct Wave 
@@ -31,15 +30,12 @@ struct WaterVertex
 
 struct WaterVertexToPixel 
 {
-	float4 Position		: SV_POSITION;
-	float4 ViewPos		: VIEWPOS;
-	float3 ViewNormal	: VIEWNORM;
-	float3 ScreenPos	: SCRNPOS;
-	float3 Normal		: NORMAL;
-	float2 UV			: TEXCOORD;
-	float3 Tangent		: TANGENT;
-	float3 worldPos		: POSITION;
-	matrix View			: VIEW;
+	float4 Position			: SV_POSITION;
+	float3 Normal			: NORMAL;
+	float2 UV				: TEXCOORD;
+	float3 Tangent			: TANGENT;
+	float3 worldPos			: POSITION;
+	matrix View				: VIEW;
 	noperspective float2 ScreenUV : TEXCOORD1;
 };
 
@@ -135,14 +131,14 @@ WaterVertexToPixel main(WaterVertex input)
 	matrix worldView = mul(world, view);
 	matrix worldViewProj = mul(worldView, projection);
 
+	input.Position.y -= 10.0f;
 	// WAVE CALCULATIONS///////////////////////////
 	
-	input.Position = CalculateWavePosition(input.Position, 8);
-	input.Normal = UpdateNormals(input.Position, 8);
+	//input.Position = CalculateWavePosition(input.Position, 8);
+	//input.Normal = UpdateNormals(input.Position, 8); 
 	//input.Tangent = UpdateTangents(input.Position, 8);
 
 	///////////////////////////////////////////////
-	
 	output.View = view;
 	output.Position = mul(float4(input.Position, 1.0f), worldViewProj);
 	output.worldPos = mul(float4(input.Position, 1.0f), world).xyz;
@@ -156,11 +152,6 @@ WaterVertexToPixel main(WaterVertex input)
 	output.ScreenUV = (output.Position.xy / output.Position.w);
 	output.ScreenUV.x = output.ScreenUV.x * 0.5f + 0.5f;
 	output.ScreenUV.y = -output.ScreenUV.y * 0.5f + 0.5f;
-
-	//For Screen-Space Reflection
-	output.ViewPos = mul(float4(input.Position, 1.0f), worldView);
-	output.ViewNormal = mul(input.Normal, (float3x3)worldView);
-	output.ScreenPos = output.Position.xyz / output.Position.w;
 
 	return output;
 }

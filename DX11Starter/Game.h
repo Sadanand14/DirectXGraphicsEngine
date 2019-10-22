@@ -24,8 +24,11 @@ public:
 	float WaterTime;
 	Waves* waves;
 	ID3D11RenderTargetView* refractionRTV = nullptr;
+	ID3D11RenderTargetView*reflectionRTV = nullptr;
 	ID3D11SamplerState* refractSampler = nullptr;
-	ID3D11ShaderResourceView* refractionSRV = nullptr, *depthSRV = nullptr;
+	ID3D11ShaderResourceView* refractionSRV = nullptr;
+	ID3D11ShaderResourceView* reflectionSRV = nullptr;
+	ID3D11ShaderResourceView* depthSRV = nullptr;
 	ID3D11DepthStencilView* depthView = nullptr;
 
 
@@ -71,24 +74,29 @@ private:
 	void CreateWaves();
 	void LoadHeightMap(const char*, unsigned int );
 	void DrawTerrain();
-	void DrawQuad();
+	void DrawQuad(ID3D11ShaderResourceView*);
+	void CreateReflectionRTVSRV();
+	void CreateRfractionRTVSRV();
+	void CreateReflectionDSVRTV();
 
 	// Buffers to hold actual geometry data
 	ID3D11Buffer* vertexBuffer = nullptr;
 	ID3D11Buffer* indexBuffer = nullptr;
 
 	// Wrappers for DirectX shaders to provide simplified functionality
+	//sky shaders
 	SimpleVertexShader* SkyVS = nullptr;
 	SimplePixelShader* SkyPS = nullptr;
+	//basic entity shaders
 	SimpleVertexShader* vertexShader = nullptr;
 	SimplePixelShader* pixelShader = nullptr;
-	SimpleVertexShader* waterShaderVS = nullptr;
-	SimplePixelShader* waterShaderPS = nullptr;
+	//terrain shaders
 	SimpleVertexShader* terrainVS = nullptr;
 	SimplePixelShader* terrainPS = nullptr;
-	SimpleVertexShader* QuadVS = nullptr;
-	SimplePixelShader* QuadPS = nullptr;
-
+	//water shaders
+	SimpleVertexShader* QuadVS = nullptr, * waterShaderVS = nullptr, *SSReflVS = nullptr;
+	SimplePixelShader* QuadPS = nullptr, * waterShaderPS = nullptr, * SSReflPS = nullptr;
+	
 	// The matrices to go from model space to screen space
 	DirectX::XMFLOAT4X4 worldMatrix;
 	DirectX::XMFLOAT4X4 viewMatrix;

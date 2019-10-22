@@ -60,10 +60,14 @@ Game::~Game()
 	delete[] waves;
 	if (waterShaderVS != nullptr) delete waterShaderVS;
 	if (waterShaderPS != nullptr) delete waterShaderPS;
+	if (SSReflVS != nullptr) delete SSReflVS;
+	if (SSReflPS != nullptr) delete SSReflPS;
 
 	if (refractionRTV != nullptr) refractionRTV->Release();
 	if (refractSampler != nullptr) refractSampler->Release();
 	if (refractionSRV != nullptr) refractionSRV->Release();
+	if (reflectionRTV != nullptr) reflectionRTV->Release();
+	if (reflectionSRV != nullptr) reflectionSRV->Release();
 
 	if (QuadPS != nullptr) delete QuadPS;
 	if (QuadVS != nullptr) delete QuadVS;
@@ -147,10 +151,10 @@ void Game::Init()
 	// geometric primitives (points, lines or triangles) we want to draw.  
 	// Essentially: "What kind of shape should the GPU draw with our data?"
 
-	// Refraction setup ------------------------
-	ID3D11Texture2D* refractionRenderTexture;
 
-	// Set up render texture
+	// Refraction setup ------------------------
+	ID3D11Texture2D* refractionRenderTexture, * reflectionTexture;
+
 	D3D11_TEXTURE2D_DESC rtDesc = {};
 	rtDesc.Width = width;
 	rtDesc.Height = height;
@@ -163,15 +167,18 @@ void Game::Init()
 	rtDesc.MiscFlags = 0;
 	rtDesc.SampleDesc.Count = 1;
 	rtDesc.SampleDesc.Quality = 0;
+
 	device->CreateTexture2D(&rtDesc, 0, &refractionRenderTexture);
+	device->CreateTexture2D(&rtDesc, 0, &reflectionTexture);
 
-
-	// Set up render target view
+	// Set up render target view description
 	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
 	rtvDesc.Format = rtDesc.Format;
 	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 	rtvDesc.Texture2D.MipSlice = 0;
+
 	device->CreateRenderTargetView(refractionRenderTexture, &rtvDesc, &refractionRTV);
+	device->CreateRenderTargetView(reflectionTexture, &rtvDesc, &reflectionRTV);
 
 	// Set up shader resource view for same texture
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -179,11 +186,13 @@ void Game::Init()
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = 1;
 	srvDesc.Texture2D.MostDetailedMip = 0;
+
 	device->CreateShaderResourceView(refractionRenderTexture, &srvDesc, &refractionSRV);
-
-	// All done with this texture ref
+	device->CreateShaderResourceView(reflectionTexture, &srvDesc, &reflectionSRV);
+	
 	refractionRenderTexture->Release();
-
+	reflectionTexture->Release();
+	
 	//Creating DepthTexture/StencilView/SRV for depth sampling in screen space reflections
 	ID3D11Texture2D* depthTexture = nullptr;
 
@@ -330,6 +339,12 @@ void Game::AddLighting()
 
 void Game::LoadShaders()
 {
+	SSReflVS = new SimpleVertexShader(device, context);
+	SSReflVS->LoadShaderFile(L"WaterRefl_VS.cso");
+
+	SSReflPS = new SimplePixelShader(device, context);
+	SSReflPS->LoadShaderFile(L"WaterRefl_PS.cso");
+
 	QuadVS = new SimpleVertexShader(device, context);
 	QuadVS->LoadShaderFile(L"QuadVS.cso");
 
@@ -423,7 +438,7 @@ void Game::CreateWaterMesh()
 	delete ibw;
 
 
-	XMMATRIX trans = XMMatrixTranslation(0.0f, -1.0f, 0.0f);
+	XMMATRIX trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
 	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
 	XMMATRIX scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
 	XMMATRIX waterMatrix = XMMatrixMultiply(XMMatrixMultiply(scale, rot), trans);
@@ -551,6 +566,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	//  - At the beginning of Draw (before drawing *anything*)
 	context->ClearRenderTargetView(backBufferRTV, color);
 	context->ClearRenderTargetView(refractionRTV, color);
+	context->ClearRenderTargetView(reflectionRTV, color);
 	context->ClearDepthStencilView(depthView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	context->ClearDepthStencilView(
 		depthStencilView,
@@ -563,24 +579,26 @@ void Game::Draw(float deltaTime, float totalTime)
 	context->OMSetRenderTargets(1, &refractionRTV, depthView);
 	DrawTerrain();
 	RenderSky();
-	context->OMSetRenderTargets(1, &backBufferRTV, 0);
-	DrawQuad();
-	context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
+	/*context->OMSetRenderTargets(1, &backBufferRTV, 0);
+	DrawQuad(refractionSRV);*/
+	////////////
 	DrawWater(deltaTime);
+	context->OMSetRenderTargets(1, &backBufferRTV, 0);
+	DrawQuad(reflectionSRV);
 	ID3D11ShaderResourceView* nullSRV[16] = {};
 	context->PSSetShaderResources(0, 16, nullSRV);
 
 	swapChain->Present(0, 0);
 }
 
-void Game::DrawQuad() 
+void Game::DrawQuad(ID3D11ShaderResourceView* srv) 
 {
 	context->IASetVertexBuffers(0, 0, 0, 0, 0);
 	context->IASetIndexBuffer(0, DXGI_FORMAT_R32_UINT, 0);
 
 	// Set up the fullscreen quad shaders
 	QuadVS->SetShader();
-	QuadPS->SetShaderResourceView("Pixels", refractionSRV);
+	QuadPS->SetShaderResourceView("Pixels", srv);
 	QuadPS->SetSamplerState("Sampler", Texture::m_sampler);
 	QuadPS->SetShader();
 
@@ -655,25 +673,43 @@ void Game::DrawWater(float delta)
 
 	context->IASetVertexBuffers(0, 1, &vertex, &stride, &offset);
 	context->IASetIndexBuffer(index, DXGI_FORMAT_R32_UINT, 0);
+	context->OMSetRenderTargets(1, &reflectionRTV, depthView);
 
-	waterShaderVS->SetShader();
-	waterShaderPS->SetShader();
+	////////////Rendering screen space reflections to our reflection texture
+	SSReflVS->SetShader();
+	SSReflPS->SetShader();
 
-	waterShaderVS->SetMatrix4x4("world", WaterMatrix);
-	waterShaderVS->SetMatrix4x4("view", camera->GetView());
-	waterShaderVS->SetMatrix4x4("projection", camera->GetProjection());
-	waterShaderVS->SetFloat("waterTime", WaterTime);
-	waterShaderVS->SetData("waves", waves, sizeof(Waves) * 8);
-	waterShaderVS->CopyAllBufferData();
+	SSReflVS->SetMatrix4x4("world", WaterMatrix);
+	SSReflVS->SetMatrix4x4("view", camera->GetView());
+	SSReflVS->SetMatrix4x4("projection", camera->GetProjection());
+	SSReflVS->CopyAllBufferData();
 
-	waterShaderPS->SetSamplerState("Sampler", Texture::m_sampler);
-	waterShaderPS->SetShaderResourceView("waterTexture", texMap["water"]->GetSRV());
-	waterShaderPS->SetSamplerState("RefracSampler", refractSampler);
-	waterShaderPS->SetShaderResourceView("Scene", refractionSRV);
-	waterShaderPS->SetFloat3("CameraPosition", camera->GetPosition());
-	waterShaderPS->CopyAllBufferData();
-
+	SSReflPS->SetSamplerState("Sampler", Texture::m_sampler);
+	SSReflPS->SetShaderResourceView("depthTex", depthSRV);
+	SSReflPS->SetShaderResourceView("SceneTex", refractionSRV);
+	SSReflPS->CopyAllBufferData();
 	context->DrawIndexed(6 * 999 * 999, 0, 0);
+
+	//////////////////////////////////////////////////////////
+	//waterShaderVS->SetShader();
+	//waterShaderPS->SetShader();
+
+	//waterShaderVS->SetMatrix4x4("world", WaterMatrix);
+	//waterShaderVS->SetMatrix4x4("view", camera->GetView());
+	//waterShaderVS->SetMatrix4x4("projection", camera->GetProjection());
+	//waterShaderVS->SetFloat("waterTime", WaterTime);
+	//waterShaderVS->SetData("waves", waves, sizeof(Waves) * 8);
+	//waterShaderVS->CopyAllBufferData();
+
+	//waterShaderPS->SetSamplerState("Sampler", Texture::m_sampler);
+	//waterShaderPS->SetShaderResourceView("waterTexture", texMap["water"]->GetSRV());
+	//waterShaderPS->SetSamplerState("RefracSampler", refractSampler);
+	//waterShaderPS->SetShaderResourceView("Scene", refractionSRV);
+	//waterShaderPS->SetFloat3("CameraPosition", camera->GetPosition());
+	////waterShaderPS->SetShaderResourceView("Reflection", reflectionSRV);
+	//waterShaderPS->CopyAllBufferData();
+
+	//context->DrawIndexed(6 * 999 * 999, 0, 0);
 
 }
 
