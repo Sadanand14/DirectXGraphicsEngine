@@ -1,8 +1,5 @@
-﻿  compilation object save succeeded; see C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\x64\Debug\WaterRefl_VS.cso
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\WaterShaderVS.hlsl(53,27-36): warning X3203: signed/unsigned mismatch, unsigned assumed
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\WaterShaderVS.hlsl(58,9-18): warning X3206: implicit truncation of vector type
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\WaterShaderVS.hlsl(97,9-18): warning X3206: implicit truncation of vector type
-C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\WaterShaderVS.hlsl(118,9-18): warning X3206: implicit truncation of vector type
+﻿C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\WaterRefl_PS.hlsl(49,9-25): warning X3206: implicit truncation of vector type
+C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\WaterRefl_PS.hlsl(64,28-40): warning X3203: signed/unsigned mismatch, unsigned assumed
   
-  compilation object save succeeded; see C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\x64\Debug\WaterShaderVS.cso
+  compilation object save succeeded; see C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\x64\Debug\WaterRefl_PS.cso
   DX11Starter.vcxproj -> C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\x64\Debug\DX11Starter.exe
