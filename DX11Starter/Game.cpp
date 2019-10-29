@@ -6,6 +6,7 @@
 #include <iostream>
 #include "Lights.h"
 
+#include <codecvt>
 #include <filesystem>
 #include <sstream>
 #include <vector>
@@ -13,7 +14,7 @@
 
 // For the DirectX Math library
 using namespace DirectX;
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 
 // --------------------------------------------------------
 // Constructor
@@ -379,22 +380,23 @@ void Game::LoadShaders()
 void Game::LoadModelDirectory()
 {
 	std::stringstream ss;
-	std::string s, path;
+	std::string s, path, s1;
 	std::string ModelPath = "Models";
-	unsigned int strlength = ModelPath.length() + 1;
+	unsigned int strlength = ModelPath.length() + 2;
 	for (const auto& entry : fs::directory_iterator(ModelPath))
 	{
 		ss << entry.path();
 		s = ss.str();
+		s = s.substr(1, s.length() - 2);
 		ss.str(std::string());
 		ss.clear();
+
 		path = s.substr(strlength);
 		ss << ModelPath << "/" << path;
 		meshMap[path.substr(0, path.find("."))] = new Mesh(ss.str().c_str(), device);
 		ss.str(std::string());
 		ss.clear();
 	}
-
 }
 
 //creates a grid mesh to implement water 
@@ -453,11 +455,12 @@ void Game::LoadTextureDirectory()
 	std::string s, path;
 	std::wstring ws;
 	std::string texturePath = "Textures";
-	unsigned int strlength = texturePath.length() + 1;
+	unsigned int strlength = texturePath.length() + 2;
 	for (const auto& entry : fs::directory_iterator(texturePath))
 	{
 		ss << entry.path();
 		s = ss.str();
+		s = s.substr(1, s.length() - 2);
 		ss.str(std::string());
 		ss.clear();
 		path = s.substr(strlength);
@@ -466,6 +469,7 @@ void Game::LoadTextureDirectory()
 		ss.str(std::string());
 		ss.clear();
 	}
+	std::cout << "texmap Size: " << texMap.size() << "\n";
 }
 
 

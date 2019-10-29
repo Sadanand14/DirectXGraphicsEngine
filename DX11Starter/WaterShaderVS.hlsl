@@ -131,7 +131,7 @@ WaterVertexToPixel main(WaterVertex input)
 	matrix worldView = mul(world, view);
 	matrix worldViewProj = mul(worldView, projection);
 
-	input.Position.y -= 10.0f;
+	//input.Position.y -= 10.0f;
 	// WAVE CALCULATIONS///////////////////////////
 	
 	//input.Position = CalculateWavePosition(input.Position, 8);
