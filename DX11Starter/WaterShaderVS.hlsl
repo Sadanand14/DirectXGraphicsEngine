@@ -134,8 +134,8 @@ WaterVertexToPixel main(WaterVertex input)
 	//input.Position.y -= 10.0f;
 	// WAVE CALCULATIONS///////////////////////////
 	
-	//input.Position = CalculateWavePosition(input.Position, 8);
-	//input.Normal = UpdateNormals(input.Position, 8); 
+	input.Position = CalculateWavePosition(input.Position, 8);
+	input.Normal = UpdateNormals(input.Position, 8); 
 	//input.Tangent = UpdateTangents(input.Position, 8);
 
 	///////////////////////////////////////////////

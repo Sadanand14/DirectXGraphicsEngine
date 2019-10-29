@@ -7,7 +7,6 @@
 #include "Camera.h"
 #include "Lights.h"
 #include "Textures.h"
-
 #include "types.h"
 
 class Game
@@ -114,4 +113,5 @@ private:
 
 	int randomNumber, drawcount = 0;
 };
+
 

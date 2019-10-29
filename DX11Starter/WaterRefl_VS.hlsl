@@ -3,7 +3,7 @@ cbuffer externalData : register (b0)
 	matrix world;
 	matrix view;
 	matrix projection;
-	matrix invView;
+	//matrix invView;
 }
 
 struct VertexShaderInput
@@ -20,7 +20,7 @@ struct VertexToPixel
 	float4 vsPos		: TEXCOORD0;
 	float3 csPos		: TEXCOORD1;
 	float3 vsNormal		: TEXCOORD2;
-	float3 vsUp			: TEXCOORD3;
+	//float3 vsUp			: TEXCOORD3;
 	matrix Proj			: PROJECTION;
 };
 
@@ -35,6 +35,6 @@ VertexToPixel main(VertexShaderInput input)
 	output.vsNormal = mul(input.Normal, (float3x3)WorldView);
 	output.csPos = output.Position.xyz / output.Position.w;
 	output.Proj = projection;
-	output.vsUp = mul(float3(0.0f,1.0f,0.0f), (float3x3) view);
+	//output.vsUp = mul(float3(0.0f,1.0f,0.0f), (float3x3) view);
  	return output;
 }

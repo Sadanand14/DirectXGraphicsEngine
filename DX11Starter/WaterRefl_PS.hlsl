@@ -50,12 +50,12 @@ float4 main(VertexToPixel input) : SV_TARGET
 		float3 vsPosReflect = vsPos + vsReflect;
 		//vsPosReflect = reflect(vsPosReflect, float3(0.0f,1.0f,0.0f));
 		float3 csPosReflect = mul(float4(vsPosReflect, 1.0f), proj).xyz / vsPosReflect.z;
-		float3 csReflect = csPosReflect - input.csPos;
+		float3 csReflect = csPosReflect + input.csPos;
 
 		float reflectionScale = PixelSize / length(csReflect.xy);
 		//csReflect *= reflectionScale;// ReflScale;
 
-		float3 currOffset = input.csPos + csReflect;
+		float3 currOffset = csReflect - input.csPos;
 		currOffset.xy = currOffset.xy * float2(0.5f, -0.5f) + 0.5f;
 		float3 lastOffset = input.csPos;
 		lastOffset.xy = lastOffset.xy * float2(0.5f, -0.5f) + 0.5f;
