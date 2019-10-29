@@ -680,25 +680,23 @@ void Game::DrawWater(float delta)
 	SSReflPS->SetShader();
 
 	XMFLOAT4X4 view = camera->GetView();
-	XMMATRIX view2 = XMLoadFloat4x4(&view);
+	/*XMMATRIX view2 = XMLoadFloat4x4(&view);
 	XMFLOAT4X4 invertedView;
-	XMStoreFloat4x4(&invertedView, XMMatrixTranspose(view2));
+	XMStoreFloat4x4(&invertedView, XMMatrixTranspose(view2));*/
 
 	XMFLOAT4X4 projection = camera->GetProjection();
-	XMMATRIX temp = XMLoadFloat4x4(&projection);
+	/*XMMATRIX temp = XMLoadFloat4x4(&projection);
 	XMFLOAT4X4 invertedProjection;
-	XMStoreFloat4x4(&invertedProjection, XMMatrixTranspose(temp));
+	XMStoreFloat4x4(&invertedProjection, XMMatrixTranspose(temp));*/
 
 	SSReflVS->SetMatrix4x4("world", WaterMatrix);
 	SSReflVS->SetMatrix4x4("view", view);
 	SSReflVS->SetMatrix4x4("projection", projection);
-	SSReflVS->SetMatrix4x4("invView", invertedView);
 	SSReflVS->CopyAllBufferData();
 
 	SSReflPS->SetSamplerState("Sampler", Texture::m_sampler);
 	SSReflPS->SetShaderResourceView("depthTex", depthSRV);
 	SSReflPS->SetShaderResourceView("SceneTex", refractionSRV);
-	SSReflPS->SetMatrix4x4("invertedProj", invertedProjection);
 	SSReflPS->CopyAllBufferData();
 	context->DrawIndexed(6 * 999 * 999, 0, 0);
 
@@ -721,7 +719,7 @@ void Game::DrawWater(float delta)
 	////waterShaderPS->SetShaderResourceView("Reflection", reflectionSRV);
 	//waterShaderPS->CopyAllBufferData();
 
-	context->DrawIndexed(6 * 999 * 999, 0, 0);
+	//context->DrawIndexed(6 * 999 * 999, 0, 0);
 
 }
 
