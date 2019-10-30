@@ -16,10 +16,9 @@ struct VertexShaderInput
 struct VertexToPixel
 {
 	float4 Position		: SV_POSITION;
-	float3 worldPos		: POSITION;
-	float3 Normal
+	float3 vsNormal		: NORMAL;
+	float3 csPos		: CLIPPOS;
 	matrix Proj			: PROJECTION;
-	float2 UV			: TEXCOORD3;
 };
 
 VertexToPixel main(VertexShaderInput input)
@@ -29,7 +28,9 @@ VertexToPixel main(VertexShaderInput input)
 
 	VertexToPixel output;
 	output.Position = mul(float4 (input.Position, 1.0f), WorldViewProj);
-	output.worldPos = mul(float4(input.Position, 1.0f), world).xyz;
+	output.vsNormal = mul(float4 (input.Normal, 1.0f), WorldView).xyz;
+	//output.worldPos = mul(float4(input.Position, 1.0f), world).xyz;
+	output.csPos = output.Position.xyz / output.Position.w;
 	output.Proj = projection;
  	return output;
 }

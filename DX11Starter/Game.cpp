@@ -579,8 +579,8 @@ void Game::Draw(float deltaTime, float totalTime)
 	context->OMSetRenderTargets(1, &refractionRTV, depthView);
 	DrawTerrain();
 	RenderSky();
-	/*context->OMSetRenderTargets(1, &backBufferRTV, depthView);
-	DrawQuad(refractionSRV);*/
+	//context->OMSetRenderTargets(1, &backBufferRTV, 0);
+	//DrawQuad(refractionSRV);
 	////////////
 	DrawWater(deltaTime);
 	context->OMSetRenderTargets(1, &backBufferRTV, depthView);
@@ -701,6 +701,8 @@ void Game::DrawWater(float delta)
 	context->DrawIndexed(6 * 999 * 999, 0, 0);
 
 	//////////////////////////////////////////////////////////
+	//context->OMSetRenderTargets(1, &backBufferRTV, depthView);
+
 	//waterShaderVS->SetShader();
 	//waterShaderPS->SetShader();
 
