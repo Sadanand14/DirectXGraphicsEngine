@@ -63,13 +63,16 @@ float4 main(VertexToPixel input) : SV_TARGET
 
 		for (unsigned int i = 0; i < numChecks; i++)
 		{
-			float depthSample = depthTex.SampleLevel(Sampler, currOffset.xy, 0.0).x + DepthBias;
+			float X = 1 - currOffset.x;
+			float Y = 1 - currOffset.y;
+			float depthSample = depthTex.SampleLevel(Sampler,float2(X,Y), 0.0).x + DepthBias;
 			//depthSample = ProjectionParams.z / (depthSample + ProjectionParams.w);
 			if (depthSample < currOffset.z)
 			{
 				//float2 uv = currOffset.xy;
 				currOffset.xy = lastOffset.xy + (currOffset.z - depthSample) * csReflect.xy;
-				reflectColor.xyz = SceneTex.SampleLevel(Sampler, currOffset.xy, 0.0).xyz;
+				
+				reflectColor.xyz = SceneTex.SampleLevel(Sampler, float2(X,Y), 0.0).xyz;
 
 				//float edgeFade = saturate(distance(currOffset.xy, float2(0.5f,0.5f))*2.0f )
 				//

@@ -62,12 +62,25 @@
 		if (waterShaderPS != nullptr) delete waterShaderPS;
 		if (SSReflVS != nullptr) delete SSReflVS;
 		if (SSReflPS != nullptr) delete SSReflPS;
+		if (DownSamPS != nullptr) delete DownSamPS;
+
+		if (PS_gaussianBlurrHor != nullptr)delete PS_gaussianBlurrHor;
+		if (PS_gaussianBlurrVert != nullptr)delete PS_gaussianBlurrVert;
+		if (PS_merge != nullptr) delete PS_merge;
 
 		if (refractionRTV != nullptr) refractionRTV->Release();
 		if (refractSampler != nullptr) refractSampler->Release();
 		if (refractionSRV != nullptr) refractionSRV->Release();
 		if (reflectionRTV != nullptr) reflectionRTV->Release();
 		if (reflectionSRV != nullptr) reflectionSRV->Release();
+		if (DOFRTV1 != nullptr) DOFRTV1->Release();
+		if (DOFRTV2 != nullptr) DOFRTV2->Release();
+		if (DOFRTV3 != nullptr) DOFRTV3->Release();
+		if (DOFSRV1 != nullptr) DOFSRV1->Release();
+		if (DOFSRV2 != nullptr) DOFSRV2->Release();
+		if (DOFSRV3 != nullptr) DOFSRV3->Release();
+
+
 
 		if (QuadPS != nullptr) delete QuadPS;
 		if (QuadVS != nullptr) delete QuadVS;
@@ -153,7 +166,7 @@
 
 
 		// Refraction setup ------------------------
-		ID3D11Texture2D* refractionRenderTexture, * reflectionTexture;
+		ID3D11Texture2D* refractionRenderTexture, * reflectionTexture , *blurredTexture1, * blurredTexture2,* blurredTexture3;
 
 		D3D11_TEXTURE2D_DESC rtDesc = {};
 		rtDesc.Width = width;
@@ -170,6 +183,9 @@
 
 		device->CreateTexture2D(&rtDesc, 0, &refractionRenderTexture);
 		device->CreateTexture2D(&rtDesc, 0, &reflectionTexture);
+		device->CreateTexture2D(&rtDesc, 0, &blurredTexture1);
+		device->CreateTexture2D(&rtDesc, 0, &blurredTexture2);
+		device->CreateTexture2D(&rtDesc, 0, &blurredTexture3);
 
 		// Set up render target view description
 		D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
@@ -179,6 +195,9 @@
 
 		device->CreateRenderTargetView(refractionRenderTexture, &rtvDesc, &refractionRTV);
 		device->CreateRenderTargetView(reflectionTexture, &rtvDesc, &reflectionRTV);
+		device->CreateRenderTargetView(blurredTexture1, &rtvDesc, &DOFRTV1);
+		device->CreateRenderTargetView(blurredTexture2, &rtvDesc, &DOFRTV2);
+		device->CreateRenderTargetView(blurredTexture3, &rtvDesc, &DOFRTV3);
 
 		// Set up shader resource view for same texture
 		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -189,9 +208,15 @@
 
 		device->CreateShaderResourceView(refractionRenderTexture, &srvDesc, &refractionSRV);
 		device->CreateShaderResourceView(reflectionTexture, &srvDesc, &reflectionSRV);
+		device->CreateShaderResourceView(blurredTexture1, &srvDesc, &DOFSRV1);
+		device->CreateShaderResourceView(blurredTexture2, &srvDesc, &DOFSRV2);
+		device->CreateShaderResourceView(blurredTexture3, &srvDesc, &DOFSRV3);
 
 		refractionRenderTexture->Release();
 		reflectionTexture->Release();
+		blurredTexture1->Release();
+		blurredTexture2->Release();
+		blurredTexture3->Release();
 
 		//Creating DepthTexture/StencilView/SRV for depth sampling in screen space reflections
 		ID3D11Texture2D* depthTexture = nullptr;
@@ -339,6 +364,18 @@
 
 	void Game::LoadShaders()
 	{
+		PS_merge = new SimplePixelShader(device, context);
+		PS_merge->LoadShaderFile(L"mergeShaderPS.cso");
+
+		PS_gaussianBlurrHor = new SimplePixelShader(device, context);
+		PS_gaussianBlurrHor->LoadShaderFile(L"horizontalBlurrPS.cso");
+
+		PS_gaussianBlurrVert = new SimplePixelShader(device, context);
+		PS_gaussianBlurrVert->LoadShaderFile(L"verticalBlurrPS.cso");
+
+		DownSamPS = new SimplePixelShader(device, context);
+		DownSamPS->LoadShaderFile(L"DownPS.cso");
+
 		SSReflVS = new SimpleVertexShader(device, context);
 		SSReflVS->LoadShaderFile(L"WaterRefl_VS.cso");
 
@@ -572,6 +609,9 @@
 		context->ClearRenderTargetView(backBufferRTV, color);
 		context->ClearRenderTargetView(refractionRTV, color);
 		context->ClearRenderTargetView(reflectionRTV, color);
+		context->ClearRenderTargetView(DOFRTV1, color);
+		context->ClearRenderTargetView(DOFRTV2, color);
+		context->ClearRenderTargetView(DOFRTV3, color);
 		context->ClearDepthStencilView(depthView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 		context->ClearDepthStencilView(
 			depthStencilView,
@@ -584,15 +624,16 @@
 		context->OMSetRenderTargets(1, &refractionRTV, depthView);
 		DrawTerrain();
 		RenderSky();
-		/*context->OMSetRenderTargets(1, &backBufferRTV, 0);
-		DrawQuad(refractionSRV);*/
+		//context->OMSetRenderTargets(1, &backBufferRTV, 0);
+		//DrawQuad(refractionSRV);
+		//DownSample(refractionSRV);
+		DepthOfField(refractionSRV);
 		////////////
-		DrawWater(deltaTime);
-		context->OMSetRenderTargets(1, &backBufferRTV, depthView);
-		DrawQuad(reflectionSRV);
+		//DrawWater(deltaTime);
+		//context->OMSetRenderTargets(1, &backBufferRTV, depthView);
+		//DrawQuad(reflectionSRV);
 		ID3D11ShaderResourceView* nullSRV[16] = {};
 		context->PSSetShaderResources(0, 16, nullSRV);
-
 		swapChain->Present(0, 0);
 	}
 
@@ -607,6 +648,68 @@
 		QuadPS->SetSamplerState("Sampler", Texture::m_sampler);
 		QuadPS->SetShader();
 
+		context->Draw(3, 0);
+	}
+
+	void Game::DownSample(ID3D11ShaderResourceView* srv) 
+	{
+		
+	}
+
+	void Game::DepthOfField(ID3D11ShaderResourceView* srv)
+	{
+		context->OMSetRenderTargets(1, &DOFRTV1, 0);
+		/// sample out areas outside the focus
+		context->IASetVertexBuffers(0, 0, 0, 0, 0);
+		context->IASetIndexBuffer(0, DXGI_FORMAT_R32_UINT, 0);
+
+		QuadVS->SetShader();
+		DownSamPS->SetFloat("width", width);
+		DownSamPS->SetFloat("height", height);
+		//DownSamPS->SetMatrix4x4("projection", camera->GetProjection());
+		DownSamPS->SetShaderResourceView("depthTex", depthSRV);
+		DownSamPS->SetShaderResourceView("inputTex", srv);
+		DownSamPS->SetSamplerState("Sampler", Texture::m_sampler);
+		DownSamPS->SetShader();
+
+		context->Draw(3, 0);
+
+		//apply horizontal blurr
+		context->OMSetRenderTargets(1, &DOFRTV2, 0);
+
+		QuadVS->SetShader();
+		PS_gaussianBlurrHor->SetShaderResourceView("rawImage", DOFSRV1);
+		PS_gaussianBlurrHor->SetSamplerState("Sampler", Texture::m_sampler);
+		PS_gaussianBlurrHor->SetFloat("width", width);
+		PS_gaussianBlurrHor->SetFloat("height", height);
+		PS_gaussianBlurrHor->SetShader();
+
+
+		context->Draw(3, 0);
+
+		context->OMSetRenderTargets(1, &DOFRTV3, 0);
+
+		//apply vertical blurr
+		QuadVS->SetShader();
+
+		PS_gaussianBlurrVert->SetShaderResourceView("blurrTex", DOFSRV2);
+		PS_gaussianBlurrVert->SetShaderResourceView("rawImage", srv);
+		//PS_gaussianBlurrVert->SetShaderResourceView("depthTex", depthSRV);
+		PS_gaussianBlurrVert->SetSamplerState("Sampler", Texture::m_sampler);
+		PS_gaussianBlurrVert->SetFloat("width", width);
+		PS_gaussianBlurrVert->SetFloat("height", height);
+		PS_gaussianBlurrVert->SetShader();
+
+		context->Draw(3, 0);
+
+		//merge with original
+		context->OMSetRenderTargets(1, &backBufferRTV, 0);
+
+		QuadVS->SetShader();
+
+		PS_merge->SetShaderResourceView("blurrTex", DOFSRV3);
+		PS_merge->SetShaderResourceView("rawImage", srv);
+		PS_merge->SetShader();
 		context->Draw(3, 0);
 	}
 
