@@ -675,7 +675,7 @@
 		context->Draw(3, 0);
 
 		//apply horizontal blurr
-		context->OMSetRenderTargets(1, &DOFRTV2, 0);
+		context->OMSetRenderTargets(1, &DOFRTV3, 0);
 
 		QuadVS->SetShader();
 		PS_gaussianBlurrHor->SetShaderResourceView("rawImage", DOFSRV1);
@@ -687,14 +687,14 @@
 
 		context->Draw(3, 0);
 
-		context->OMSetRenderTargets(1, &DOFRTV3, 0);
+		context->OMSetRenderTargets(1, &backBufferRTV, 0);
 
 		//apply vertical blurr
 		QuadVS->SetShader();
 
-		PS_gaussianBlurrVert->SetShaderResourceView("blurrTex", DOFSRV2);
+		PS_gaussianBlurrVert->SetShaderResourceView("blurrTex", DOFSRV3);
 		PS_gaussianBlurrVert->SetShaderResourceView("rawImage", srv);
-		//PS_gaussianBlurrVert->SetShaderResourceView("depthTex", depthSRV);
+		PS_gaussianBlurrVert->SetShaderResourceView("depthTex", depthSRV);
 		PS_gaussianBlurrVert->SetSamplerState("Sampler", Texture::m_sampler);
 		PS_gaussianBlurrVert->SetFloat("width", width);
 		PS_gaussianBlurrVert->SetFloat("height", height);
@@ -703,14 +703,15 @@
 		context->Draw(3, 0);
 
 		//merge with original
-		context->OMSetRenderTargets(1, &backBufferRTV, 0);
+		//context->OMSetRenderTargets(1, &backBufferRTV, 0);
 
-		QuadVS->SetShader();
+		//QuadVS->SetShader();
 
-		PS_merge->SetShaderResourceView("blurrTex", DOFSRV3);
-		PS_merge->SetShaderResourceView("rawImage", srv);
-		PS_merge->SetShader();
-		context->Draw(3, 0);
+		//PS_merge->SetShader();
+		//PS_merge->SetShaderResourceView("blurrTex", DOFSRV2);
+		//PS_merge->SetShaderResourceView("rawImage", srv);
+		//PS_merge->SetSamplerState("Sampler", Texture::m_sampler);
+		//context->Draw(3, 0);
 	}
 
 	void Game::CreateWaves()

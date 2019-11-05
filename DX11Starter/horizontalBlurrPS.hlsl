@@ -21,7 +21,7 @@ float4 main(vertexToPixel  input) :SV_TARGET
 	float pixelHeight = 1 / height;
 
 	//float sampleDepth = depthTex.Sample(Sampler, input.UV).x;
-	float sampleSize = 10;
+	float sampleSize = 4;
 	float totalSamples = 0;
 	for (unsigned int i = -sampleSize; i <= sampleSize; i++)
 	{
