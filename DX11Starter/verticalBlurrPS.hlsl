@@ -1,7 +1,11 @@
 cbuffer external : register(b0)
 {
+	float depths[4];
 	float width;
 	float height;
+	float upperFocusDepth;
+	float lowerFocusDepth;
+	int StepSize;
 }
 
 struct vertexToPixel
@@ -30,38 +34,50 @@ float4 main(vertexToPixel  input) :SV_TARGET
 	float4 color2 = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	float pixelWidth = 1 / width;
 	float pixelHeight = 1 / height;
+	int depthSize = 1;
+	float sampleDepth = depthTex.Load(int3(input.position.xyz)).x;
+	sampleDepth = LinearEyeZ(sampleDepth);
+	float depthRange = min(abs(lowerFocusDepth - sampleDepth), abs(upperFocusDepth - sampleDepth));
 
-	float sampleDepth = depthTex.Sample(Sampler, input.UV).x;
-	float sampleSize = 40;
+	unsigned int k;
+	for (k = 0; k < 4; k++)
+	{
+		if ((depths[k] - depthRange ) > 0.0f)
+		{
+			break;
+		}
+	}
+	float sampleSize = depthSize * (++k);
+	//float sampleSize = 1;
 	float totalSamples = 0;
-
+	float currDepth;
 	for (unsigned int i = -sampleSize; i < sampleSize; i++)
 	{
 		int2 newUV = int2(input.position.x , input.position.y + i);
-		color += blurrTex.Load(int3(newUV, 0));
-		totalSamples++;
+		//currDepth = depthTex.Load(int3(newUV, 0)).x;
+		//currDepth = LinearEyeZ(currDepth);
+		float4 rawColor;
+		rawColor = blurrTex.Load(int3(newUV, 0));
+		float temp = rawColor.x + rawColor.y + rawColor.z;
+		if (temp > 0) 
+		{
+			color += rawColor;
+			totalSamples++;
+		}
 	}
-	
-
-	//for (unsigned int i = 0; i < sampleSize; i++)
-	//{
-	//	int2 newUV = int2(input.position.x, input.position.y + i);
-	//	color2 += blurrTex.Load(int3(newUV, 0));
-	//	totalSamples++;
-	//}
 
 	float4 blurrcolor =   color / totalSamples;
 
 	//float temp = blurrcolor.x + blurrcolor.y + blurrcolor.z;
 	float4 output = rawImage.Load(int3(input.position.x, input.position.y, 0));
-	float depthSample = depthTex.Load(int3(input.position.x, input.position.y, 0)).x;
-	depthSample = LinearEyeZ(depthSample);
+	//sampleDepth = LinearEyeZ(sampleDepth);
 
-	if ((depthSample > 0.21f) || ( depthSample < 0.095f))
+	if ((sampleDepth > 0.21f) || (sampleDepth < 0.095f))
 	{
 		output = blurrcolor;
 	}
-
+	//return float4(((float)StepSize) / 10, ((float)StepSize) / 10, ((float)StepSize) / 10, 1.0f);
+	//return float4(((float)StepSize) / 10, ((float)StepSize) / 10, ((float)StepSize) / 10, 1.0f);
 	return output;
 	
 }

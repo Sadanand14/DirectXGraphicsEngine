@@ -32,7 +32,7 @@ VertexToPixel main(VertexShaderInput input)
 
 	VertexToPixel output;
 	output.Position = mul(float4 (input.Position, 1.0f), WorldViewProj);
-	output.worldPos = mul(float4(input.Position, 1.0f), world).xyz;
+	//output.worldPos = mul(float4(input.Position, 1.0f), world).xyz;
 	output.Proj = projection;
 	//output.vsUp = mul(float3(0.0f,1.0f,0.0f), (float3x3) view);
  	return output;
