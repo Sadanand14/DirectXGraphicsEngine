@@ -4,6 +4,7 @@
 #include "Mesh.h"
 #include <vector>
 #include "Camera.h"
+#include <iostream>
 
 using namespace DirectX;
 
@@ -14,6 +15,8 @@ Camera::Camera(float width,float height)
 		width / height,				// Aspect ratio
 		0.1f,						// Near clip plane distance
 		500.0f);					// Far clip plane distance
+
+	
 	XMStoreFloat4x4(&projectionMatrix, XMMatrixTranspose(P));
 	upUnit = XMVectorSet(0, 1, 0, 0);
 	XMStoreFloat3(&currentPos, XMVectorSet(0, 0, -5, 0));

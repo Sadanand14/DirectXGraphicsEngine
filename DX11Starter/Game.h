@@ -7,7 +7,6 @@
 #include "Camera.h"
 #include "Lights.h"
 #include "Textures.h"
-
 #include "types.h"
 
 class Game
@@ -25,11 +24,15 @@ public:
 	Waves* waves;
 	ID3D11RenderTargetView* refractionRTV = nullptr;
 	ID3D11RenderTargetView*reflectionRTV = nullptr;
+	ID3D11RenderTargetView*DOFRTV1 = nullptr, *DOFRTV2 = nullptr, * DOFRTV3= nullptr;
+	ID3D11ShaderResourceView* DOFSRV1 = nullptr, *DOFSRV2 = nullptr , *DOFSRV3 = nullptr;
 	ID3D11SamplerState* refractSampler = nullptr;
 	ID3D11ShaderResourceView* refractionSRV = nullptr;
 	ID3D11ShaderResourceView* reflectionSRV = nullptr;
 	ID3D11ShaderResourceView* depthSRV = nullptr;
 	ID3D11DepthStencilView* depthView = nullptr;
+
+
 
 
 	//TerrainStuff
@@ -75,9 +78,11 @@ private:
 	void LoadHeightMap(const char*, unsigned int );
 	void DrawTerrain();
 	void DrawQuad(ID3D11ShaderResourceView*);
-	void CreateReflectionRTVSRV();
-	void CreateRfractionRTVSRV();
-	void CreateReflectionDSVRTV();
+	void DepthOfField(ID3D11ShaderResourceView*);
+	//void CreateReflectionRTVSRV();
+	//void CreateRfractionRTVSRV();
+	//void CreateReflectionDSVRTV();
+	void DownSample(ID3D11ShaderResourceView* srv);
 
 	// Buffers to hold actual geometry data
 	ID3D11Buffer* vertexBuffer = nullptr;
@@ -97,6 +102,14 @@ private:
 	SimpleVertexShader* QuadVS = nullptr, * waterShaderVS = nullptr, *SSReflVS = nullptr;
 	SimplePixelShader* QuadPS = nullptr, * waterShaderPS = nullptr, * SSReflPS = nullptr;
 	
+	//Downsampling pixelShader
+	SimplePixelShader* DownSamPS = nullptr;
+
+	//Applying gaussian blurr
+	SimplePixelShader* PS_gaussianBlurrVert = nullptr;
+	SimplePixelShader* PS_gaussianBlurrHor = nullptr;
+	SimplePixelShader* PS_merge = nullptr;
+
 	// The matrices to go from model space to screen space
 	DirectX::XMFLOAT4X4 worldMatrix;
 	DirectX::XMFLOAT4X4 viewMatrix;
@@ -114,4 +127,5 @@ private:
 
 	int randomNumber, drawcount = 0;
 };
+
 

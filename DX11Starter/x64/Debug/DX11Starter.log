@@ -1,3 +1,17 @@
-﻿D:\Independent Study\DirectXGraphicsEngine\DX11Starter\WaterRefl_PS.hlsl(32,22-34): error X3004: undeclared identifier 'ProjectParams'
+﻿C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\horizontalBlurrPS.hlsl(26,37-51): warning X3203: signed/unsigned mismatch, unsigned assumed
+C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\horizontalBlurrPS.hlsl(26,20-34): warning X4115: Literal floating-point value out of unsigned range for conversion: -4.000000
+C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\horizontalBlurrPS.hlsl(26,20-34): warning X4115: Literal floating-point value out of unsigned range for conversion: -4.000000
+C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\horizontalBlurrPS.hlsl(26,20-34): warning X4115: Literal floating-point value out of unsigned range for conversion: -4.000000
+C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\horizontalBlurrPS.hlsl(26,20-34): warning X4115: Literal floating-point value out of unsigned range for conversion: -4.000000
+C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\horizontalBlurrPS.hlsl(26,20-34): warning X4115: Literal floating-point value out of unsigned range for conversion: -4.000000
   
-  compilation failed; no code produced
+  compilation object save succeeded; see C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\x64\Debug\horizontalBlurrPS.cso
+C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\verticalBlurrPS.hlsl(38,37-50): warning X3203: signed/unsigned mismatch, unsigned assumed
+C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\verticalBlurrPS.hlsl(38,20-34): warning X4115: Literal floating-point value out of unsigned range for conversion: -4.000000
+C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\verticalBlurrPS.hlsl(38,20-34): warning X4115: Literal floating-point value out of unsigned range for conversion: -4.000000
+C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\verticalBlurrPS.hlsl(38,20-34): warning X4115: Literal floating-point value out of unsigned range for conversion: -4.000000
+C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\verticalBlurrPS.hlsl(38,20-34): warning X4115: Literal floating-point value out of unsigned range for conversion: -4.000000
+C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\verticalBlurrPS.hlsl(38,20-34): warning X4115: Literal floating-point value out of unsigned range for conversion: -4.000000
+  
+  compilation object save succeeded; see C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\x64\Debug\verticalBlurrPS.cso
+  DX11Starter.vcxproj -> C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\x64\Debug\DX11Starter.exe
