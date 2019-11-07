@@ -1,6 +1,6 @@
 cbuffer external : register(b0) 
 {
-	float depths[4];
+	float depths[8];
 	float width;
 	float height;
 	float lowerFocusDepth;
@@ -29,37 +29,44 @@ float LinearEyeZ(float depth)
 float4 main(vertexToPixel  input) :SV_TARGET
 {
 	float4 color = float4(0.0f,0.0f,0.0f,0.0f);
-	float pixelWidth  = 1 / width;
-	float pixelHeight = 1 / height;
-	int depthSize = 1;
+
+	// set depthStep
+	int depthSize = 2;
+	//Sample current Depth
 	float sampleDepth = depthTex.Sample(Sampler, input.UV).x;
 	sampleDepth = LinearEyeZ(sampleDepth);
+
+	//calculate the minimum depth difference between the focus area and the current pixel.
 	float depthRange = min(abs(lowerFocusDepth - sampleDepth), abs(upperFocusDepth - sampleDepth));
+
+	//iterate through the depths in the array to find a matching range.
 	unsigned int k;
-	for (k= 0; k < 4; k++) 
+	for (k = 0; k <8; k++)
 	{
 		if ((depths[k] - depthRange) > 0.0f)
 		{
 			break;
 		}
 	}
+
+	// apply sample Size based on the depth
 	float sampleSize = depthSize *(++k);
-	//float sampleSize = 1;
+	//float sampleSize = 10;
 	float totalSamples = 0;
 	float currDepth;
 	for (unsigned int i = -sampleSize; i <= sampleSize; i++)
 	{
 		int2 newUV = int2(input.position.x, input.position.y + i);
-		//currDepth = depthTex.Load(int3(newUV, 0)).x;
-		//currDepth = LinearEyeZ(currDepth);
-		float4 rawColor;
-		rawColor = rawImage.Load(int3(newUV, 0));
-		float temp = rawColor.x + rawColor.y + rawColor.z;
-		if (temp > 0)
+		currDepth = depthTex.Load(int3(newUV, 0)).x;
+		currDepth = LinearEyeZ(currDepth);
+		float4 rawColor = rawImage.Load(int3(newUV, 0));
+		//float temp = rawColor.x + rawColor.y + rawColor.z;*/
+		if ((abs(sampleDepth-currDepth)<0.00005f))
 		{
 			color += rawColor;
 			totalSamples++;
 		}
+
 	}
 	
 	return color/totalSamples;

@@ -1,7 +1,4 @@
-﻿D:\Independent Study\DirectXGraphicsEngine\DX11Starter\horizontalBlurrPS.hlsl(50,37-51): warning X3203: signed/unsigned mismatch, unsigned assumed
+﻿C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\DX11Starter\verticalBlurrPS.hlsl(58,37-50): warning X3203: signed/unsigned mismatch, unsigned assumed
   
-  compilation object save succeeded; see D:\Independent Study\DirectXGraphicsEngine\x64\Debug\horizontalBlurrPS.cso
-D:\Independent Study\DirectXGraphicsEngine\DX11Starter\verticalBlurrPS.hlsl(54,37-50): warning X3203: signed/unsigned mismatch, unsigned assumed
-  
-  compilation object save succeeded; see D:\Independent Study\DirectXGraphicsEngine\x64\Debug\verticalBlurrPS.cso
-  DX11Starter.vcxproj -> D:\Independent Study\DirectXGraphicsEngine\x64\Debug\DX11Starter.exe
+  compilation object save succeeded; see C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\x64\Debug\verticalBlurrPS.cso
+  DX11Starter.vcxproj -> C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\x64\Debug\DX11Starter.exe

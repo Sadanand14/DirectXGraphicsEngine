@@ -45,7 +45,7 @@ float4 main(vertexToPixel input) : SV_TARGET
 
 	float linearDepth = LinearEyeZ(sampleDepth);
 
-	if (linearDepth > 0.2f || linearDepth <0.1)
+	if (linearDepth > 0.2f || linearDepth <0.1f)
 	{
 		color = inputTex.Sample(Sampler, input.UV);
 	}

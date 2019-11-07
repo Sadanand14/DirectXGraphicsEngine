@@ -658,7 +658,7 @@
 
 	void Game::DepthOfField(ID3D11ShaderResourceView* srv)
 	{
-		float DepthRanges[4] = { 0.5f,0.7f,0.9f,1.0f };
+		float DepthRanges[8] = { 0.1f,0.25f,0.35f,0.5f,0.62,0.75,0.875,1.0f };
 
 		context->OMSetRenderTargets(1, &DOFRTV1, 0);
 		/// sample out areas outside the focus
@@ -680,7 +680,7 @@
 		context->OMSetRenderTargets(1, &DOFRTV3, 0);
 
 		QuadVS->SetShader();
-		PS_gaussianBlurrHor->SetData("depths", &DepthRanges, 4 * sizeof(float));
+		PS_gaussianBlurrHor->SetData("depths", &DepthRanges, 8 * sizeof(float));
 		PS_gaussianBlurrHor->SetInt("StepSize", 3);
 		PS_gaussianBlurrHor->SetFloat("upperFocusDepth", 0.2f);
 		PS_gaussianBlurrHor->SetFloat("lowerFocusDepth", 0.1f);;
@@ -689,7 +689,7 @@
 		PS_gaussianBlurrHor->SetFloat("width", width);
 		PS_gaussianBlurrHor->SetFloat("height", height);
 		PS_gaussianBlurrHor->SetShader();
-
+		PS_gaussianBlurrHor->CopyAllBufferData();
 
 		context->Draw(3, 0);
 
@@ -697,7 +697,7 @@
 
 		//apply vertical blurr
 		QuadVS->SetShader();
-		PS_gaussianBlurrVert->SetData("depths", &DepthRanges, 4 * sizeof(float));
+		PS_gaussianBlurrVert->SetData("depths", &DepthRanges, 8 * sizeof(float));
 		PS_gaussianBlurrVert->SetInt("StepSize", 3);
 		PS_gaussianBlurrVert->SetFloat("upperFocusDepth", 0.2f);
 		PS_gaussianBlurrVert->SetFloat("lowerFocusDepth", 0.1f);
@@ -709,6 +709,7 @@
 		PS_gaussianBlurrVert->SetFloat("width", width);
 		PS_gaussianBlurrVert->SetFloat("height", height);
 		PS_gaussianBlurrVert->SetShader();
+		PS_gaussianBlurrVert->CopyAllBufferData();
 
 		context->Draw(3, 0);
 
