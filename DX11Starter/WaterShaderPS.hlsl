@@ -44,7 +44,7 @@ float4 main(WaterVertexToPixel input) : SV_TARGET
 
 	float4 SceneColor = Scene.Sample(RefracSampler, input.ScreenUV + refracUV);
 
-	float4 finalColor = waterTexture.Sample(Sampler ,input.UV)*0.3f + SceneColor*0.35f ;
+	float4 finalColor = waterTexture.Sample(Sampler ,input.UV)*0.5f + SceneColor*0.5f ;
 	float4 reflectionColor = Reflection.Sample(Sampler, input.UV);
 	return finalColor;
 }

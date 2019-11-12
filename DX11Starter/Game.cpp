@@ -33,8 +33,8 @@ Game::Game(HINSTANCE hInstance)
 	: DXCore(
 		hInstance,		// The application's handle
 		"DirectX Game",	   	// Text for the window's title bar
-		1280,			// Width of the window's client area
-		720,			// Height of the window's client area
+		1920,			// Width of the window's client area
+		1080,			// Height of the window's client area
 		true)			// Show extra stats (fps) in title bar?
 {
 	// Initialize fields
@@ -583,12 +583,12 @@ void Game::Draw(float deltaTime, float totalTime)
 	context->OMSetRenderTargets(1, &refractionRTV, depthView);
 	DrawTerrain();
 	RenderSky();
-	/*context->OMSetRenderTargets(1, &backBufferRTV, 0);
-	DrawQuad(refractionSRV);*/
+	context->OMSetRenderTargets(1, &backBufferRTV, 0);
+	DrawQuad(refractionSRV);
 	////////////
 	DrawWater(deltaTime);
-	context->OMSetRenderTargets(1, &backBufferRTV, 0);
-	DrawQuad(reflectionSRV);
+	/*context->OMSetRenderTargets(1, &backBufferRTV, 0);
+	DrawQuad(reflectionSRV);*/
 	ID3D11ShaderResourceView* nullSRV[16] = {};
 	context->PSSetShaderResources(0, 16, nullSRV);
 
@@ -677,43 +677,43 @@ void Game::DrawWater(float delta)
 
 	context->IASetVertexBuffers(0, 1, &vertex, &stride, &offset);
 	context->IASetIndexBuffer(index, DXGI_FORMAT_R32_UINT, 0);
-	context->OMSetRenderTargets(1, &reflectionRTV, depthView);
+	context->OMSetRenderTargets(1, &backBufferRTV, depthView);
 
 	////////////Rendering screen space reflections to our reflection texture
-	SSReflVS->SetShader();
-	SSReflPS->SetShader();
+	//SSReflVS->SetShader();
+	//SSReflPS->SetShader();
 
-	SSReflVS->SetMatrix4x4("world", WaterMatrix);
-	SSReflVS->SetMatrix4x4("view", camera->GetView());
-	SSReflVS->SetMatrix4x4("projection", camera->GetProjection());
-	SSReflVS->CopyAllBufferData();
+	//SSReflVS->SetMatrix4x4("world", WaterMatrix);
+	//SSReflVS->SetMatrix4x4("view", camera->GetView());
+	//SSReflVS->SetMatrix4x4("projection", camera->GetProjection());
+	//SSReflVS->CopyAllBufferData();
 
-	SSReflPS->SetSamplerState("Sampler", Texture::m_sampler);
-	SSReflPS->SetShaderResourceView("depthTex", depthSRV);
-	SSReflPS->SetShaderResourceView("SceneTex", refractionSRV);
-	SSReflPS->CopyAllBufferData();
-	context->DrawIndexed(6 * 999 * 999, 0, 0);
+	//SSReflPS->SetSamplerState("Sampler", Texture::m_sampler);
+	//SSReflPS->SetShaderResourceView("depthTex", depthSRV);
+	//SSReflPS->SetShaderResourceView("SceneTex", refractionSRV);
+	//SSReflPS->CopyAllBufferData();
+	//context->DrawIndexed(6 * 999 * 999, 0, 0);
 
 	//////////////////////////////////////////////////////////
-	//waterShaderVS->SetShader();
-	//waterShaderPS->SetShader();
+	waterShaderVS->SetShader();
+	waterShaderPS->SetShader();
 
-	//waterShaderVS->SetMatrix4x4("world", WaterMatrix);
-	//waterShaderVS->SetMatrix4x4("view", camera->GetView());
-	//waterShaderVS->SetMatrix4x4("projection", camera->GetProjection());
-	//waterShaderVS->SetFloat("waterTime", WaterTime);
-	//waterShaderVS->SetData("waves", waves, sizeof(Waves) * 8);
-	//waterShaderVS->CopyAllBufferData();
+	waterShaderVS->SetMatrix4x4("world", WaterMatrix);
+	waterShaderVS->SetMatrix4x4("view", camera->GetView());
+	waterShaderVS->SetMatrix4x4("projection", camera->GetProjection());
+	waterShaderVS->SetFloat("waterTime", WaterTime);
+	waterShaderVS->SetData("waves", waves, sizeof(Waves) * 8);
+	waterShaderVS->CopyAllBufferData();
 
-	//waterShaderPS->SetSamplerState("Sampler", Texture::m_sampler);
-	//waterShaderPS->SetShaderResourceView("waterTexture", texMap["water"]->GetSRV());
-	//waterShaderPS->SetSamplerState("RefracSampler", refractSampler);
-	//waterShaderPS->SetShaderResourceView("Scene", refractionSRV);
-	//waterShaderPS->SetFloat3("CameraPosition", camera->GetPosition());
-	////waterShaderPS->SetShaderResourceView("Reflection", reflectionSRV);
-	//waterShaderPS->CopyAllBufferData();
+	waterShaderPS->SetSamplerState("Sampler", Texture::m_sampler);
+	waterShaderPS->SetShaderResourceView("waterTexture", texMap["water"]->GetSRV());
+	waterShaderPS->SetSamplerState("RefracSampler", refractSampler);
+	waterShaderPS->SetShaderResourceView("Scene", refractionSRV);
+	waterShaderPS->SetFloat3("CameraPosition", camera->GetPosition());
+	//waterShaderPS->SetShaderResourceView("Reflection", reflectionSRV);
+	waterShaderPS->CopyAllBufferData();
 
-	//context->DrawIndexed(6 * 999 * 999, 0, 0);
+	context->DrawIndexed(6 * 999 * 999, 0, 0);
 
 }
 
