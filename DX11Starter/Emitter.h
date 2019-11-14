@@ -33,7 +33,7 @@ class Emitter
 	DirectX::XMFLOAT3 m_positionRange, m_velocityRange;
 	DirectX::XMFLOAT4 m_rotationRange;
 
-	unsigned int m_liveParticles,m_particlesPerSec;
+	unsigned int m_liveParticles,m_emitRate;
 
 	float m_timeSinceEmit, m_timePerEmmission, m_lifeTime, m_startSize, m_endSize;
 
@@ -50,7 +50,13 @@ class Emitter
 
 public:
 
-	Emitter();
+	Emitter
+	(
+		DirectX::XMFLOAT3 startVelocity, DirectX::XMFLOAT4 startColor , DirectX::XMFLOAT4 endColor, 
+		DirectX::XMFLOAT4 rotationRange, DirectX::XMFLOAT3 velocityRange, DirectX::XMFLOAT3 positionRange, 
+		DirectX::XMFLOAT3 emitterPosition, DirectX::XMFLOAT3 emitterAcceleration,
+		unsigned int maxParticles, unsigned int emitRate, float lifeTime, float startSize, float endSize
+	);
 	~Emitter();
 	void UpdateEmitter();
 	void DrawEmitter();
