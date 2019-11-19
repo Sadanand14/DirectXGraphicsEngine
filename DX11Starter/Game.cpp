@@ -682,8 +682,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	context->OMSetDepthStencilState(0, 0);
 	context->RSSetState(0);
 
-	context->OMSetRenderTargets(1, &backBufferRTV, depthView);
-	RenderSky();
+
 
 	/*context->OMSetRenderTargets(1, &backBufferRTV, 0);
 	DrawQuad(reflectionSRV);*/

@@ -116,6 +116,7 @@
     <ClCompile Include="DXCore.cpp" />
     <ClCompile Include="Emitter.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="HybridEmitter.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="SimpleShader.cpp" />
     <ClCompile Include="Camera.cpp" />
@@ -130,6 +131,7 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="HybridEmitter.h" />
     <ClInclude Include="Lights.h" />
     <ClInclude Include="Materials.h" />
     <ClInclude Include="Mesh.h" />

@@ -21,6 +21,8 @@ struct HybridParticle
 class HybridEmitter 
 {
 private:
+
+	HybridParticle* m_particleArr;
 	DirectX::XMFLOAT3 m_startVel, m_emitterAcc, m_emitterPos;
 	DirectX::XMFLOAT3 m_velRange, m_posRange;
 	
@@ -33,7 +35,7 @@ private:
 	ID3D11ShaderResourceView* m_particleBuffSRV, * m_texture;
 
 	SimpleVertexShader* m_vs;
-	SimplePixelShader* m_PS;
+	SimplePixelShader* m_ps;
 
 	void UpdateParticle(unsigned int index, float totalTime);
 	void SpawnParticle(float totalTime);
