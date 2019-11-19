@@ -10,6 +10,8 @@
 #include "Materials.h";
 #include "types.h"
 #include "Emitter.h"
+#include "HybridEmitter.h"
+
 class Game
 	: public DXCore
 {
@@ -23,7 +25,7 @@ public:
 	ID3D11BlendState* particleBlend = nullptr;
 	ID3D11RasterizerState* debugRaster = nullptr;
 	Emitter* emitter = nullptr;
-
+	HybridEmitter* emitterHY = nullptr;
 	//Water Stuff
 	Materials* material = nullptr;
 	XMFLOAT4X4 WaterMatrix;

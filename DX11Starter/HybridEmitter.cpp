@@ -24,6 +24,11 @@ HybridEmitter::HybridEmitter
 	m_startSize = startSize;
 	m_endSize = endSize;
 
+	m_timePerEmission = 1.0f / m_emitRate;
+	m_oldestAlive = 0; 
+	m_oldestDead = 0; 
+	m_liveParticles = 0;
+
 	m_vs = vs;
 	m_ps = ps;
 
@@ -143,7 +148,7 @@ void HybridEmitter::DrawEmitter(ID3D11DeviceContext* context, Camera* camera, fl
 	m_vs->SetFloat4("startColor", m_startColor);
 	m_vs->SetFloat4("endColor", m_endColor);
 	m_vs->SetFloat("startSize", m_startSize);
-	m_vs->SetFloat("m_endSize", m_endSize);
+	m_vs->SetFloat("endSize", m_endSize);
 	m_vs->SetFloat("lifeTime", m_lifeTime);
 	m_vs->SetFloat("totalTime", totalTime);
 

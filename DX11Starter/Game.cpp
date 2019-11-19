@@ -66,6 +66,7 @@ Game::~Game()
 	if (GPUparticleVS != nullptr) delete GPUparticleVS;
 	if (particlePS != nullptr) delete particlePS;
 	if (emitter != nullptr) delete emitter;
+	if (emitterHY != nullptr) delete emitterHY;
 
 	//delete/release waterStuff;
 	delete[] waves;
@@ -614,6 +615,8 @@ void Game::Update(float deltaTime, float totalTime)
 	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, totalTime, totalTime);
 	//entityList[0].SetRot(rot);
 	emitter->UpdateEmitter(deltaTime);
+	emitterHY->UpdateEmitter(deltaTime, totalTime);
+
 	rot = XMMatrixRotationRollPitchYaw(totalTime, 0.0f, totalTime);
 	//entityList[1].SetRot(rot);
 
@@ -669,6 +672,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	particlePS->CopyAllBufferData();
 
 	emitter->DrawEmitter(context, camera);
+	emitterHY->DrawEmitter(context, camera, totalTime);
 
 	//if (GetAsyncKeyState('C')) 
 	//{
