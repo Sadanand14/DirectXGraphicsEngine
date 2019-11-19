@@ -57,6 +57,16 @@ Game::Game(HINSTANCE hInstance)
 // --------------------------------------------------------
 Game::~Game()
 {
+	//delete / Release particle Stuff
+	if (particleDepth != nullptr) particleDepth->Release();
+	if (particleBlend != nullptr) particleBlend->Release();
+	if (debugRaster != nullptr) debugRaster->Release();
+	if (particleVS != nullptr) delete particleVS;
+	if (hybridParticleVS != nullptr) delete hybridParticleVS;
+	if (GPUparticleVS != nullptr) delete GPUparticleVS;
+	if (particlePS != nullptr) delete particlePS;
+	if (emitter != nullptr) delete emitter;
+
 	//delete/release waterStuff;
 	delete[] waves;
 	if (waterShaderVS != nullptr) delete waterShaderVS;
@@ -239,6 +249,55 @@ void Game::Init()
 	rSamp.MaxAnisotropy = 16;
 	rSamp.MaxLOD = D3D11_FLOAT32_MAX;
 
+	//particle Stuff
+	D3D11_DEPTH_STENCIL_DESC dp = {};
+	dp.DepthEnable = true;
+	dp.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+	dp.DepthFunc = D3D11_COMPARISON_LESS;
+	device->CreateDepthStencilState(&dp, &particleDepth);
+
+	//BlendState for Particles
+	D3D11_BLEND_DESC pbs = {};
+	pbs.AlphaToCoverageEnable = false;
+	pbs.IndependentBlendEnable = false;
+	pbs.RenderTarget[0].BlendEnable = true;
+	pbs.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	pbs.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	pbs.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+	pbs.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	pbs.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	pbs.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+	pbs.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	device->CreateBlendState(&pbs, &particleBlend);
+
+	//rasterState for debugging particles
+	D3D11_RASTERIZER_DESC rasterdesc = {};
+	rasterdesc.CullMode = D3D11_CULL_BACK;
+	rd.DepthClipEnable = true;
+	rd.FillMode = D3D11_FILL_WIREFRAME;
+	device->CreateRasterizerState(&rd, &debugRaster);
+
+	emitter = new Emitter
+	(
+		XMFLOAT3(-2, 2, 0),
+		XMFLOAT4(1, 0.1f, 0.1f, 0.7f),
+		XMFLOAT4(1, 0.6f, 0.1f, 0.f),
+		XMFLOAT4(-2, 2, -2, 2),
+		XMFLOAT3(0.2f, 0.2f, 0.2f),
+		XMFLOAT3(0.1f, 0.1f, 0.1f),
+		XMFLOAT3(2, 0, -10),
+		XMFLOAT3(0, -1, 0),
+		210,
+		30,
+		2,
+		0.1f,
+		2.0f,
+		device,
+		particleVS,
+		particlePS,
+		texMap["particle"]->GetSRV()
+	);
+
 	// Ask DirectX for the actual object
 	device->CreateSamplerState(&rSamp, &refractSampler);
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -340,6 +399,15 @@ void Game::AddLighting()
 
 void Game::LoadShaders()
 {
+	particleVS = new SimpleVertexShader(device, context);
+	particleVS->LoadShaderFile(L"ParticleVS.cso");
+
+	hybridParticleVS = new SimpleVertexShader(device, context);
+	hybridParticleVS->LoadShaderFile(L"HybridParticleVS.cso");
+
+	particlePS = new SimplePixelShader(device, context);
+	particlePS->LoadShaderFile(L"ParticlePS.cso");
+
 	SSReflVS = new SimpleVertexShader(device, context);
 	SSReflVS->LoadShaderFile(L"WaterRefl_VS.cso");
 
@@ -545,7 +613,7 @@ void Game::Update(float deltaTime, float totalTime)
 {
 	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, totalTime, totalTime);
 	//entityList[0].SetRot(rot);
-
+	emitter->UpdateEmitter(deltaTime);
 	rot = XMMatrixRotationRollPitchYaw(totalTime, 0.0f, totalTime);
 	//entityList[1].SetRot(rot);
 
@@ -563,8 +631,11 @@ void Game::Update(float deltaTime, float totalTime)
 void Game::Draw(float deltaTime, float totalTime)
 {
 	// Background color (Cornflower Blue in this case) for clearing
-	const float color[4] = { 0.4f, 0.6f, 0.75f, 0.0f };
-
+	//const float color[4] = { 0.4f, 0.6f, 0.75f, 0.0f };
+	
+	//Black BackGround
+	const float color[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	
 	// Clear the render target and depth buffer (erases what's on the screen)
 	//  - Do this ONCE PER FRAME
 	//  - At the beginning of Draw (before drawing *anything*)
@@ -580,13 +651,40 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	//Looped all the sequences for loading the worldmatrix as well as loading the index and vertex buffers to the 
 	//GPU using a vector of entities.
-	context->OMSetRenderTargets(1, &refractionRTV, depthView);
-	DrawTerrain();
-	RenderSky();
-	context->OMSetRenderTargets(1, &backBufferRTV, 0);
-	DrawQuad(refractionSRV);
+	//context->OMSetRenderTargets(1, &refractionRTV, depthView);
+	//DrawTerrain();
+	//context->OMSetRenderTargets(1, &backBufferRTV, depthView);
+	//RenderSky();
+	context->OMSetRenderTargets(1, &backBufferRTV, depthView);
+	//DrawQuad(refractionSRV);
 	////////////
-	DrawWater(deltaTime);
+	//DrawWater(deltaTime);
+
+	float blend[4] = { 1,1,1,1 };
+	context->OMSetBlendState(particleBlend, blend, 0xffffffff);
+	context->OMSetDepthStencilState(particleDepth, 0);
+
+	particlePS->SetInt("debugWireFrame", 0);
+	particlePS->SetSamplerState("Sampler", Texture::m_sampler);
+	particlePS->CopyAllBufferData();
+
+	emitter->DrawEmitter(context, camera);
+
+	//if (GetAsyncKeyState('C')) 
+	//{
+	//	context->RSSetState(debugRaster);
+	//	particlePS->SetInt("debugWireFrame", 1);
+	//	particlePS->CopyAllBufferData();
+	//	//emitter->DrawEmitter(context, camera);
+	//}
+
+	context->OMSetBlendState(0, blend, 0xffffffff);
+	context->OMSetDepthStencilState(0, 0);
+	context->RSSetState(0);
+
+	context->OMSetRenderTargets(1, &backBufferRTV, depthView);
+	RenderSky();
+
 	/*context->OMSetRenderTargets(1, &backBufferRTV, 0);
 	DrawQuad(reflectionSRV);*/
 	ID3D11ShaderResourceView* nullSRV[16] = {};

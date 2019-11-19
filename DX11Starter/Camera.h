@@ -3,10 +3,11 @@
 #pragma comment(lib, "d3dcompiler.lib")
 #include "Mesh.h"
 #include <d3dcompiler.h>
-#include "Game.h"
+//#include "Game.h"
 #include"types.h"
 
-using namespace DirectX;
+	using namespace DirectX;
+
 class Camera 
 {
 	XMFLOAT4X4 viewMatrix, projectionMatrix;
@@ -15,6 +16,7 @@ class Camera
 	XMFLOAT4 rotation;
 	float xRot, yRot,delta;
 public:
+	//Camera() {};
 	Camera(float width, float height);
 	~Camera();
 	void Update(float deltaTime);

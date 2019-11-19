@@ -7,9 +7,9 @@
 #include "Camera.h"
 #include "Lights.h"
 #include "Textures.h"
-
+#include "Materials.h";
 #include "types.h"
-
+#include "Emitter.h"
 class Game
 	: public DXCore
 {
@@ -17,6 +17,12 @@ class Game
 public:
 	Game(HINSTANCE hInstance);
 	~Game();
+
+	//Particle Stuff
+	ID3D11DepthStencilState* particleDepth = nullptr;
+	ID3D11BlendState* particleBlend = nullptr;
+	ID3D11RasterizerState* debugRaster = nullptr;
+	Emitter* emitter = nullptr;
 
 	//Water Stuff
 	Materials* material = nullptr;
@@ -39,7 +45,7 @@ public:
 	unsigned int m_resolution;
 
 	//General Stuff
-	Camera* camera = nullptr;
+	Camera * camera = nullptr;
 	std::vector<Entity*> entityList;
 	std::map<std::string, Mesh*> meshMap;
 	std::map<std::string, Texture*> texMap;
@@ -75,9 +81,9 @@ private:
 	void LoadHeightMap(const char*, unsigned int );
 	void DrawTerrain();
 	void DrawQuad(ID3D11ShaderResourceView*);
-	void CreateReflectionRTVSRV();
+	/*void CreateReflectionRTVSRV();
 	void CreateRfractionRTVSRV();
-	void CreateReflectionDSVRTV();
+	void CreateReflectionDSVRTV();*/
 
 	// Buffers to hold actual geometry data
 	ID3D11Buffer* vertexBuffer = nullptr;
@@ -97,6 +103,11 @@ private:
 	SimpleVertexShader* QuadVS = nullptr, * waterShaderVS = nullptr, *SSReflVS = nullptr;
 	SimplePixelShader* QuadPS = nullptr, * waterShaderPS = nullptr, * SSReflPS = nullptr;
 	
+	//Particle Shaders
+	SimpleVertexShader* particleVS = nullptr, *hybridParticleVS = nullptr, *GPUparticleVS = nullptr;
+	SimplePixelShader* particlePS = nullptr;
+
+
 	// The matrices to go from model space to screen space
 	DirectX::XMFLOAT4X4 worldMatrix;
 	DirectX::XMFLOAT4X4 viewMatrix;
