@@ -28,7 +28,7 @@ private:
 	
 	DirectX::XMFLOAT4 m_rotRange, m_startColor, m_endColor;
 
-	unsigned int m_emitRate, m_liveParticles, m_maxParticles, m_oldestAlive, m_oldestDead;
+	unsigned int m_emitRate, m_liveParticles, m_maxParticles, m_aliveHead, m_deadHead;
 	float m_timePerEmission, m_timeSinceEmit, m_lifeTime, m_startSize, m_endSize;
 
 	ID3D11Buffer* m_particleBuff, *m_Ibuff;

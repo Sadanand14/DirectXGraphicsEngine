@@ -5,7 +5,7 @@ cbuffer external : register (b0)
 
 struct vertexToPixel
 {
-	float4 position : SV_POSITION;
+	float4 Position : SV_POSITION;
 	float2 UV		: TEXCOORD;
 	float4 Color	: COLOR;
 };

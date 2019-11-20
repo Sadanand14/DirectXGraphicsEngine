@@ -5,8 +5,10 @@ cbuffer external : register(b0)
 
 	int startIndex;
 	float3 acc;
+
 	float4 startColor;
 	float4 endColor;
+
 	float startSize;
 	float endSize;
 	float lifeTime;
@@ -67,7 +69,7 @@ VertexToPixel main(uint id: SV_VertexID)
 
 	float2 rotatedOffset = mul(offsets[cornerID], rotationMatrix);
 	pos += float3 (view._11, view._21, view._31) * rotatedOffset.x * size;
-	pos += float3 (view._11, view._21, view._31) * rotatedOffset.y * size;
+	pos += float3 (view._12, view._21, view._31) * rotatedOffset.y * size;
 
 	matrix viewProjection = mul(view, projection);
 	output.Position = mul(float4(pos, 1.0f), viewProjection);

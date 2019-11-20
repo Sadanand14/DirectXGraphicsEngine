@@ -25,8 +25,8 @@ HybridEmitter::HybridEmitter
 	m_endSize = endSize;
 
 	m_timePerEmission = 1.0f / m_emitRate;
-	m_oldestAlive = 0; 
-	m_oldestDead = 0; 
+	m_aliveHead = 0; 
+	m_deadHead = 0; 
 	m_liveParticles = 0;
 	m_timeSinceEmit = 0;
 
@@ -91,17 +91,18 @@ void HybridEmitter::UpdateEmitter(float delta, float totalTime)
 {
 	if (m_liveParticles > 0) 
 	{
-		if (m_oldestAlive < m_oldestDead)
+		if (m_aliveHead < m_deadHead)
 		{
-			for (unsigned int i = m_oldestAlive; i < m_oldestDead; i++)
+			for (unsigned int i = m_aliveHead; i < m_deadHead; i++)
 				UpdateParticle(i, totalTime);
 		}
-		else if (m_oldestAlive<m_oldestDead) 
+		else if (m_deadHead<m_aliveHead)
 		{
-			for (unsigned int i = 0; i < m_oldestDead; i++) 
+		
+			for (unsigned int i = 0; i < m_deadHead; i++) 
 				UpdateParticle(i, totalTime);
 
-			for (unsigned int i = m_oldestAlive; i < m_maxParticles; i++) 
+			for (unsigned int i = m_aliveHead; i < m_maxParticles; i++) 
 				UpdateParticle(i, totalTime);
 		}
 		else 
@@ -125,7 +126,7 @@ void HybridEmitter::UpdateParticle(unsigned int index, float totalTime)
 	float age = totalTime - m_particleArr[index].spawnTime;
 	if (age >= m_lifeTime) 
 	{
-		++m_oldestAlive %= m_maxParticles;
+		++m_aliveHead %= m_maxParticles;
 		m_liveParticles--;
 	}
 }
@@ -160,11 +161,11 @@ void HybridEmitter::DrawEmitter(ID3D11DeviceContext* context, Camera* camera, fl
 	m_ps->SetShaderResourceView("particleTex", m_texture);
 	m_ps->SetShader();
 
-	std::cout << "live : " << m_liveParticles << " m_oldestAlive : " << m_oldestAlive << " oldestDead : " << m_oldestDead << "\n";
+	std::cout << "live : " << m_liveParticles << " m_oldestAlive : " << m_aliveHead << " oldestDead : " << m_deadHead << "\n";
 
-	if (m_oldestAlive < m_oldestDead)
+	if (m_aliveHead < m_deadHead)
 	{
-		m_vs->SetInt("startIndex", m_oldestAlive);
+		m_vs->SetInt("startIndex", m_aliveHead);
 		m_vs->CopyAllBufferData();
 		context->DrawIndexed(m_liveParticles * 6, 0, 0);
 	}
@@ -172,11 +173,11 @@ void HybridEmitter::DrawEmitter(ID3D11DeviceContext* context, Camera* camera, fl
 	{
 		m_vs->SetInt("startIndex", 0);
 		m_vs->CopyAllBufferData();
-		context->DrawIndexed((m_oldestDead-1)*6,0,0);
+		context->DrawIndexed((m_deadHead-1)*6,0,0);
 
-		m_vs->SetInt("startIndex", m_oldestAlive);
+		m_vs->SetInt("startIndex", m_aliveHead);
 		m_vs->CopyAllBufferData();
-		context->DrawIndexed((m_maxParticles-m_oldestAlive)*6,0,0);
+		context->DrawIndexed((m_maxParticles-m_aliveHead)*6,0,0);
 	}
 }
 
@@ -186,7 +187,9 @@ void HybridEmitter::SpawnParticle(float totalTime)
 	if (m_liveParticles == m_maxParticles)
 		return;
 
-	HybridParticle* currParticle = m_particleArr + m_oldestDead;
+	HybridParticle* currParticle = m_particleArr + m_deadHead;
+
+	currParticle->spawnTime = totalTime;
 
 	currParticle->StartPosition = m_emitterPos;
 	currParticle->StartPosition.x += (((float)rand() / RAND_MAX) * 2 - 1) * m_posRange.x;
@@ -202,7 +205,7 @@ void HybridEmitter::SpawnParticle(float totalTime)
 
 	currParticle->RotationEnd = ((float)rand() / RAND_MAX) * (m_rotRange.w - m_rotRange.z) + m_rotRange.z;
 
-	++m_oldestDead %= m_maxParticles;
+	++m_deadHead %= m_maxParticles;
 	m_liveParticles++;
 
 }
