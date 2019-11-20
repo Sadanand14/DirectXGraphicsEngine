@@ -55,9 +55,9 @@ VertexToPixel main(uint id: SV_VertexID)
 
 	float2 offsets[4];
 	offsets[0] = float2(-1.0f, 1.0f);
-	offsets[0] = float2(1.0f, 1.0f);
-	offsets[0] = float2(1.0f, -1.0f);
-	offsets[0] = float2(-1.0f, -1.0f);
+	offsets[1] = float2(1.0f, 1.0f);
+	offsets[2] = float2(1.0f, -1.0f);
+	offsets[3] = float2(-1.0f, -1.0f);
 
 	float Sine, Cosine;
 
@@ -69,7 +69,7 @@ VertexToPixel main(uint id: SV_VertexID)
 
 	float2 rotatedOffset = mul(offsets[cornerID], rotationMatrix);
 	pos += float3 (view._11, view._21, view._31) * rotatedOffset.x * size;
-	pos += float3 (view._12, view._21, view._31) * rotatedOffset.y * size;
+	pos += float3 (view._12, view._22, view._32) * rotatedOffset.y * size;
 
 	matrix viewProjection = mul(view, projection);
 	output.Position = mul(float4(pos, 1.0f), viewProjection);

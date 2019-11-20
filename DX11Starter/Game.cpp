@@ -286,7 +286,7 @@ void Game::Init()
 		XMFLOAT4(-2, 2, -2, 2),
 		XMFLOAT3(0.2f, 0.2f, 0.2f),
 		XMFLOAT3(0.1f, 0.1f, 0.1f),
-		XMFLOAT3(2, 0, -10),
+		XMFLOAT3(-2, 0, 5),
 		XMFLOAT3(0, -1, 0),
 		210,
 		30,
@@ -307,7 +307,7 @@ void Game::Init()
 		XMFLOAT4(-2, 2, -2, 2),
 		XMFLOAT3(0.2f, 0.2f, 0.2f),
 		XMFLOAT3(0.1f, 0.1f, 0.1f),
-		XMFLOAT3(0, 0, 5),
+		XMFLOAT3(2, 0, 5),
 		XMFLOAT3(0, -1, 0),
 		210,
 		30,
@@ -692,7 +692,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	particlePS->SetSamplerState("Sampler", Texture::m_sampler);
 	particlePS->CopyAllBufferData();
 
-	//emitter->DrawEmitter(context, camera);
+	emitter->DrawEmitter(context, camera);
 	emitterHY->DrawEmitter(context, camera, totalTime);
 
 	//if (GetAsyncKeyState('C')) 

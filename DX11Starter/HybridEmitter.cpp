@@ -173,7 +173,7 @@ void HybridEmitter::DrawEmitter(ID3D11DeviceContext* context, Camera* camera, fl
 	{
 		m_vs->SetInt("startIndex", 0);
 		m_vs->CopyAllBufferData();
-		context->DrawIndexed((m_deadHead-1)*6,0,0);
+		context->DrawIndexed(m_deadHead*6,0,0);
 
 		m_vs->SetInt("startIndex", m_aliveHead);
 		m_vs->CopyAllBufferData();
