@@ -299,6 +299,27 @@ void Game::Init()
 		texMap["particle"]->GetSRV()
 	);
 
+	emitterHY = new HybridEmitter
+	(
+		XMFLOAT3(-2, 2, 0),
+		XMFLOAT4(1, 0.1f, 0.1f, 0.7f),
+		XMFLOAT4(1, 0.6f, 0.1f, 0.f),
+		XMFLOAT4(-2, 2, -2, 2),
+		XMFLOAT3(0.2f, 0.2f, 0.2f),
+		XMFLOAT3(0.1f, 0.1f, 0.1f),
+		XMFLOAT3(0, 0, 5),
+		XMFLOAT3(0, -1, 0),
+		210,
+		30,
+		2,
+		0.1f,
+		2.0f,
+		device,
+		hybridParticleVS,
+		particlePS,
+		texMap["particle"]->GetSRV()
+	);
+
 	// Ask DirectX for the actual object
 	device->CreateSamplerState(&rSamp, &refractSampler);
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -671,7 +692,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	particlePS->SetSamplerState("Sampler", Texture::m_sampler);
 	particlePS->CopyAllBufferData();
 
-	emitter->DrawEmitter(context, camera);
+	//emitter->DrawEmitter(context, camera);
 	emitterHY->DrawEmitter(context, camera, totalTime);
 
 	//if (GetAsyncKeyState('C')) 

@@ -35,7 +35,7 @@ struct VertexToPixel
 	float4 Color	: COLOR;
 };
 
-VertexToPixel main(uint id: SV_VertexID) : SV_POSITION
+VertexToPixel main(uint id: SV_VertexID)
 {
 	VertexToPixel output;
 
@@ -46,10 +46,10 @@ VertexToPixel main(uint id: SV_VertexID) : SV_POSITION
 	float t = totalTime - particle.spawnTime;
 	float agePercent = t / lifeTime;
 
-	float3 pos = acc * t * t / 2.0f + p.startVel * t + p.startPos;
+	float3 pos = acc * t * t / 2.0f + particle.startVel * t + particle .startPos;
 	float4 color = lerp(startColor, endColor, agePercent);
 	float size = lerp(startSize, endSize, agePercent);
-	float rotation = lerp(p.rotStart, p.rotEnd, agePercent);
+	float rotation = lerp(particle.rotStart, particle.rotEnd, agePercent);
 
 	float2 offsets[4];
 	offsets[0] = float2(-1.0f, 1.0f);
@@ -65,6 +65,21 @@ VertexToPixel main(uint id: SV_VertexID) : SV_POSITION
 		Cosine, Sine, -Sine, Cosine
 	};
 
-	float2 rotatedOffset = mul(offsets[cornerID], rotationMatrix)
+	float2 rotatedOffset = mul(offsets[cornerID], rotationMatrix);
+	pos += float3 (view._11, view._21, view._31) * rotatedOffset.x * size;
+	pos += float3 (view._11, view._21, view._31) * rotatedOffset.y * size;
 
+	matrix viewProjection = mul(view, projection);
+	output.Position = mul(float4(pos, 1.0f), viewProjection);
+
+	float2 UV[4];
+	UV[0] = float2(0, 0);
+	UV[1] = float2(1, 0);
+	UV[2] = float2(1, 1);
+	UV[3] = float2(0, 1);
+
+
+	output.UV = saturate(UV[cornerID]);
+	output.Color = color;
+	return output;
 }

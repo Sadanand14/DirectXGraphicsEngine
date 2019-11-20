@@ -1,5 +1,5 @@
 #include"HybridEmitter.h"
-
+#include <iostream>
 HybridEmitter::HybridEmitter
 (
 	DirectX::XMFLOAT3 startVelocity, DirectX::XMFLOAT4 startColor, DirectX::XMFLOAT4 endColor,
@@ -28,6 +28,7 @@ HybridEmitter::HybridEmitter
 	m_oldestAlive = 0; 
 	m_oldestDead = 0; 
 	m_liveParticles = 0;
+	m_timeSinceEmit = 0;
 
 	m_vs = vs;
 	m_ps = ps;
@@ -115,6 +116,7 @@ void HybridEmitter::UpdateEmitter(float delta, float totalTime)
 	while (m_timeSinceEmit > m_timePerEmission) 
 	{
 		SpawnParticle(totalTime);
+		m_timeSinceEmit -= m_timePerEmission;
 	}
 }
 
@@ -124,7 +126,7 @@ void HybridEmitter::UpdateParticle(unsigned int index, float totalTime)
 	if (age >= m_lifeTime) 
 	{
 		++m_oldestAlive %= m_maxParticles;
-		m_liveParticles++;
+		m_liveParticles--;
 	}
 }
 
@@ -132,7 +134,7 @@ void HybridEmitter::DrawEmitter(ID3D11DeviceContext* context, Camera* camera, fl
 {
 	D3D11_MAPPED_SUBRESOURCE mapped = {};
 	context->Map(m_particleBuff, 0, D3D11_MAP_WRITE_DISCARD, 0 , &mapped);
-	memcpy(mapped.pData, m_particleBuff, sizeof(HybridParticle) * m_maxParticles);
+	memcpy(mapped.pData, m_particleArr, sizeof(HybridParticle) * m_maxParticles);
 	context->Unmap(m_particleBuff, 0);
 
 	UINT stride = 0;
@@ -157,6 +159,8 @@ void HybridEmitter::DrawEmitter(ID3D11DeviceContext* context, Camera* camera, fl
 	context->VSSetShaderResources(0, 1, &m_particleBuffSRV);
 	m_ps->SetShaderResourceView("particleTex", m_texture);
 	m_ps->SetShader();
+
+	std::cout << "live : " << m_liveParticles << " m_oldestAlive : " << m_oldestAlive << " oldestDead : " << m_oldestDead << "\n";
 
 	if (m_oldestAlive < m_oldestDead)
 	{
@@ -199,6 +203,6 @@ void HybridEmitter::SpawnParticle(float totalTime)
 	currParticle->RotationEnd = ((float)rand() / RAND_MAX) * (m_rotRange.w - m_rotRange.z) + m_rotRange.z;
 
 	++m_oldestDead %= m_maxParticles;
-	m_liveParticles;
+	m_liveParticles++;
 
 }
