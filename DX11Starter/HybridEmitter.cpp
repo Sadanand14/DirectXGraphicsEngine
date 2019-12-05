@@ -161,7 +161,7 @@ void HybridEmitter::DrawEmitter(ID3D11DeviceContext* context, Camera* camera, fl
 	m_ps->SetShaderResourceView("particleTex", m_texture);
 	m_ps->SetShader();
 
-	std::cout << "live : " << m_liveParticles << " m_oldestAlive : " << m_aliveHead << " oldestDead : " << m_deadHead << "\n";
+	//std::cout << "live : " << m_liveParticles << " m_oldestAlive : " << m_aliveHead << " oldestDead : " << m_deadHead << "\n";
 
 	if (m_aliveHead < m_deadHead)
 	{

@@ -57,6 +57,16 @@ Game::Game(HINSTANCE hInstance)
 // --------------------------------------------------------
 Game::~Game()
 {
+	//delete / Release GPU particles stuff
+	if (particledeadInitCS != nullptr) particledeadInitCS;
+	if (particleEmitCS != nullptr) particleEmitCS;
+	if (particleUpdateCS != nullptr) particleUpdateCS;
+	if (particleSetArgsBuff != nullptr) particleSetArgsBuff;
+	if (GPUparticleVS != nullptr) GPUparticleVS;
+	if (GpuParticlePS != nullptr) GpuParticlePS;
+	if (emitterGpu != nullptr) emitterGpu;
+
+
 	//delete / Release particle Stuff
 	if (particleDepth != nullptr) particleDepth->Release();
 	if (particleBlend != nullptr) particleBlend->Release();
@@ -635,7 +645,7 @@ void Game::Update(float deltaTime, float totalTime)
 {
 	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, totalTime, totalTime);
 	//entityList[0].SetRot(rot);
-	emitter->UpdateEmitter(deltaTime);
+	//emitter->UpdateEmitter(deltaTime);
 	emitterHY->UpdateEmitter(deltaTime, totalTime);
 
 	rot = XMMatrixRotationRollPitchYaw(totalTime, 0.0f, totalTime);
@@ -692,7 +702,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	particlePS->SetSamplerState("Sampler", Texture::m_sampler);
 	particlePS->CopyAllBufferData();
 
-	emitter->DrawEmitter(context, camera);
+	//emitter->DrawEmitter(context, camera);
 	emitterHY->DrawEmitter(context, camera, totalTime);
 
 	//if (GetAsyncKeyState('C')) 

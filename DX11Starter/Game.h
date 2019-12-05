@@ -11,6 +11,7 @@
 #include "types.h"
 #include "Emitter.h"
 #include "HybridEmitter.h"
+#include "GpuEmitter.h"
 
 class Game
 	: public DXCore
@@ -26,17 +27,15 @@ public:
 	ID3D11RasterizerState* debugRaster = nullptr;
 	Emitter* emitter = nullptr;
 	HybridEmitter* emitterHY = nullptr;
+	GPUEmitter* emitterGpu = nullptr;
 	//Water Stuff
 	Materials* material = nullptr;
 	XMFLOAT4X4 WaterMatrix;
 	float WaterTime;
 	Waves* waves;
-	ID3D11RenderTargetView* refractionRTV = nullptr;
-	ID3D11RenderTargetView*reflectionRTV = nullptr;
+	ID3D11RenderTargetView* refractionRTV = nullptr, * reflectionRTV = nullptr;
 	ID3D11SamplerState* refractSampler = nullptr;
-	ID3D11ShaderResourceView* refractionSRV = nullptr;
-	ID3D11ShaderResourceView* reflectionSRV = nullptr;
-	ID3D11ShaderResourceView* depthSRV = nullptr;
+	ID3D11ShaderResourceView* refractionSRV = nullptr, * reflectionSRV = nullptr, * depthSRV = nullptr;
 	ID3D11DepthStencilView* depthView = nullptr;
 
 
@@ -88,8 +87,7 @@ private:
 	void CreateReflectionDSVRTV();*/
 
 	// Buffers to hold actual geometry data
-	ID3D11Buffer* vertexBuffer = nullptr;
-	ID3D11Buffer* indexBuffer = nullptr;
+	ID3D11Buffer* vertexBuffer = nullptr, * indexBuffer = nullptr;
 
 	// Wrappers for DirectX shaders to provide simplified functionality
 	//sky shaders
@@ -109,11 +107,13 @@ private:
 	SimpleVertexShader* particleVS = nullptr, *hybridParticleVS = nullptr, *GPUparticleVS = nullptr;
 	SimplePixelShader* particlePS = nullptr;
 
+	//GpuParticleStuff
+	SimpleComputeShader* particledeadInitCS, * particleUpdateCS, * particleEmitCS, * particleSetArgsBuff;
+	SimpleVertexShader* GpuParticleVS;
+	SimplePixelShader* GpuParticlePS;
 
 	// The matrices to go from model space to screen space
-	DirectX::XMFLOAT4X4 worldMatrix;
-	DirectX::XMFLOAT4X4 viewMatrix;
-	DirectX::XMFLOAT4X4 projectionMatrix;
+	DirectX::XMFLOAT4X4 worldMatrix, viewMatrix, projectionMatrix;
 
 	//RasterStates
 	ID3D11RasterizerState* skyRS = nullptr;
