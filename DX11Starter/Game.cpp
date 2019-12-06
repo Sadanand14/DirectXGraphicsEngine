@@ -62,8 +62,8 @@ Game::~Game()
 	if (particleEmitCS != nullptr) particleEmitCS;
 	if (particleUpdateCS != nullptr) particleUpdateCS;
 	if (particleSetArgsBuff != nullptr) particleSetArgsBuff;
-	if (GPUparticleVS != nullptr) GPUparticleVS;
-	if (GpuParticlePS != nullptr) GpuParticlePS;
+	if (gpuParticleVS != nullptr) gpuParticleVS;
+	if (gpuParticlePS != nullptr) gpuParticlePS;
 	if (emitterGpu != nullptr) emitterGpu;
 
 
@@ -73,7 +73,6 @@ Game::~Game()
 	if (debugRaster != nullptr) debugRaster->Release();
 	if (particleVS != nullptr) delete particleVS;
 	if (hybridParticleVS != nullptr) delete hybridParticleVS;
-	if (GPUparticleVS != nullptr) delete GPUparticleVS;
 	if (particlePS != nullptr) delete particlePS;
 	if (emitter != nullptr) delete emitter;
 	if (emitterHY != nullptr) delete emitterHY;
@@ -330,6 +329,19 @@ void Game::Init()
 		texMap["particle"]->GetSRV()
 	);
 
+	emitterGpu = new GPUEmitter(
+		1000000, 10000.0f,
+		10.0f,
+		device,
+		context,
+		particledeadInitCS,
+		particleEmitCS,
+		particleUpdateCS,
+		particleSetArgsBuff,
+		gpuParticleVS,
+		gpuParticlePS
+	);
+
 	// Ask DirectX for the actual object
 	device->CreateSamplerState(&rSamp, &refractSampler);
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -431,6 +443,24 @@ void Game::AddLighting()
 
 void Game::LoadShaders()
 {
+	gpuParticleVS = new SimpleVertexShader(device, context);
+	gpuParticleVS->LoadShaderFile(L"GpuParticleVS.cso");
+
+	gpuParticlePS = new SimplePixelShader(device, context);
+	gpuParticlePS->LoadShaderFile(L"GpuParticlePS.cso");
+
+	particledeadInitCS = new SimpleComputeShader(device, context);
+	particledeadInitCS->LoadShaderFile(L"ParticleDeadInitCS.cso");
+
+	particleEmitCS = new SimpleComputeShader(device, context);
+	particleEmitCS->LoadShaderFile(L"ParticleEmitCS.cso");
+
+	particleUpdateCS = new SimpleComputeShader(device, context);
+	particleUpdateCS->LoadShaderFile(L"ParticleUpdateCS.cso");
+
+	particleSetArgsBuff = new SimpleComputeShader(device, context);
+	particleSetArgsBuff->LoadShaderFile(L"ParticleSetArgsBuffCS.cso");
+
 	particleVS = new SimpleVertexShader(device, context);
 	particleVS->LoadShaderFile(L"ParticleVS.cso");
 
@@ -476,6 +506,7 @@ void Game::LoadShaders()
 	terrainPS = new SimplePixelShader(device, context);
 	terrainPS->LoadShaderFile(L"Terrain_PS.cso");
 }
+
 //loads all models and stores them in a mesh map
 void Game::LoadModelDirectory()
 {

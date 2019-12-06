@@ -104,13 +104,13 @@ private:
 	SimplePixelShader* QuadPS = nullptr, * waterShaderPS = nullptr, * SSReflPS = nullptr;
 	
 	//Particle Shaders
-	SimpleVertexShader* particleVS = nullptr, *hybridParticleVS = nullptr, *GPUparticleVS = nullptr;
+	SimpleVertexShader* particleVS = nullptr, * hybridParticleVS = nullptr;
 	SimplePixelShader* particlePS = nullptr;
 
 	//GpuParticleStuff
 	SimpleComputeShader* particledeadInitCS, * particleUpdateCS, * particleEmitCS, * particleSetArgsBuff;
-	SimpleVertexShader* GpuParticleVS;
-	SimplePixelShader* GpuParticlePS;
+	SimpleVertexShader* gpuParticleVS;
+	SimplePixelShader* gpuParticlePS;
 
 	// The matrices to go from model space to screen space
 	DirectX::XMFLOAT4X4 worldMatrix, viewMatrix, projectionMatrix;
