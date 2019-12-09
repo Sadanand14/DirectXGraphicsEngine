@@ -1,2 +1,41 @@
-﻿  HybridEmitter.cpp
-  DX11Starter.vcxproj -> C:\Users\sadan\Desktop\Independent Study\DirectXGraphicsEngine\x64\Debug\DX11Starter.exe
+﻿  Camera.cpp
+  Entity.cpp
+D:\DirectXGraphicsEngine\DX11Starter\Game.h(10,10): warning C4067:  unexpected tokens following preprocessor directive - expected a newline
+  Game.cpp
+D:\DirectXGraphicsEngine\DX11Starter\Game.h(10,10): warning C4067:  unexpected tokens following preprocessor directive - expected a newline
+D:\DirectXGraphicsEngine\DX11Starter\Game.h(10,10): warning C4067:  unexpected tokens following preprocessor directive - expected a newline
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(333,12): warning C4244:  'argument': conversion from 'float' to 'unsigned int', possible loss of data
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(370,68): warning C4267:  '=': conversion from 'size_t' to 'int', possible loss of data
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(375,20): warning C4018:  '<': signed/unsigned mismatch
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(377,21): warning C4018:  '<': signed/unsigned mismatch
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(380,82): warning C4244:  'argument': conversion from 'int' to 'float', possible loss of data
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(380,26): warning C4244:  'argument': conversion from 'int' to 'float', possible loss of data
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(390,20): warning C4018:  '<': signed/unsigned mismatch
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(392,21): warning C4018:  '<': signed/unsigned mismatch
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(516,49): warning C4267:  'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(544,38): warning C4244:  'argument': conversion from 'unsigned int' to 'float', possible loss of data
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(544,32): warning C4244:  'argument': conversion from 'unsigned int' to 'float', possible loss of data
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(589,51): warning C4267:  'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(779,41): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(782,44): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(785,45): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(788,44): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(791,41): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(794,41): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(797,44): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(800,45): warning C4305:  'argument': truncation from 'double' to 'float'
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(980,37): warning C4996:  'std::codecvt_utf8<wchar_t,1114111,0>': warning STL4017: std::wbuffer_convert, std::wstring_convert, and the <codecvt> header (containing std::codecvt_mode, std::codecvt_utf8, std::codecvt_utf16, and std::codecvt_utf8_utf16) are deprecated in C++17. (The std::codecvt class template is NOT deprecated.) The C++ Standard doesn't provide equivalent non-deprecated functionality; consider using MultiByteToWideChar() and WideCharToMultiByte() from <Windows.h> instead. You can define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING or _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS to acknowledge that you have received this warning.
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Tools\MSVC\14.21.27702\include\experimental\filesystem(334): message :  see declaration of 'std::codecvt_utf8<wchar_t,1114111,0>'
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(981,46): warning C4996:  'std::wstring_convert<std::codecvt_utf8<wchar_t,1114111,0>,wchar_t,std::allocator<wchar_t>,std::allocator<char>>': warning STL4017: std::wbuffer_convert, std::wstring_convert, and the <codecvt> header (containing std::codecvt_mode, std::codecvt_utf8, std::codecvt_utf16, and std::codecvt_utf8_utf16) are deprecated in C++17. (The std::codecvt class template is NOT deprecated.) The C++ Standard doesn't provide equivalent non-deprecated functionality; consider using MultiByteToWideChar() and WideCharToMultiByte() from <Windows.h> instead. You can define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING or _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS to acknowledge that you have received this warning.
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Tools\MSVC\14.21.27702\include\experimental\filesystem(334): message :  see declaration of 'std::wstring_convert<std::codecvt_utf8<wchar_t,1114111,0>,wchar_t,std::allocator<wchar_t>,std::allocator<char>>'
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(981,1): warning C4996:  'std::wstring_convert<std::codecvt_utf8<wchar_t,1114111,0>,wchar_t,std::allocator<wchar_t>,std::allocator<char>>::wstring_convert': warning STL4017: std::wbuffer_convert, std::wstring_convert, and the <codecvt> header (containing std::codecvt_mode, std::codecvt_utf8, std::codecvt_utf16, and std::codecvt_utf8_utf16) are deprecated in C++17. (The std::codecvt class template is NOT deprecated.) The C++ Standard doesn't provide equivalent non-deprecated functionality; consider using MultiByteToWideChar() and WideCharToMultiByte() from <Windows.h> instead. You can define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING or _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS to acknowledge that you have received this warning.
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Tools\MSVC\14.21.27702\include\xlocbuf(310): message :  see declaration of 'std::wstring_convert<std::codecvt_utf8<wchar_t,1114111,0>,wchar_t,std::allocator<wchar_t>,std::allocator<char>>::wstring_convert'
+D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(982,1): warning C4996:  'std::wstring_convert<std::codecvt_utf8<wchar_t,1114111,0>,wchar_t,std::allocator<wchar_t>,std::allocator<char>>::from_bytes': warning STL4017: std::wbuffer_convert, std::wstring_convert, and the <codecvt> header (containing std::codecvt_mode, std::codecvt_utf8, std::codecvt_utf16, and std::codecvt_utf8_utf16) are deprecated in C++17. (The std::codecvt class template is NOT deprecated.) The C++ Standard doesn't provide equivalent non-deprecated functionality; consider using MultiByteToWideChar() and WideCharToMultiByte() from <Windows.h> instead. You can define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING or _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS to acknowledge that you have received this warning.
+  GpuEmitter.cpp
+  Main.cpp
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Tools\MSVC\14.21.27702\include\xlocbuf(355): message :  see declaration of 'std::wstring_convert<std::codecvt_utf8<wchar_t,1114111,0>,wchar_t,std::allocator<wchar_t>,std::allocator<char>>::from_bytes'
+  Materials.cpp
+D:\DirectXGraphicsEngine\DX11Starter\Game.h(10,10): warning C4067:  unexpected tokens following preprocessor directive - expected a newline
+  Generating Code...
+D:\DirectXGraphicsEngine\DX11Starter\Game.h(10,10): warning C4067:  unexpected tokens following preprocessor directive - expected a newline
+  DX11Starter.vcxproj -> D:\DirectXGraphicsEngine\x64\Debug\DX11Starter.exe

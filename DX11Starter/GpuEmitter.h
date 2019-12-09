@@ -6,7 +6,7 @@
 #include "SimpleShader.h"
 #include "Camera.h"
 
-struct Particle 
+struct GPUParticle 
 {
 	DirectX::XMFLOAT4 Color;
 	float Age;
@@ -17,7 +17,7 @@ struct Particle
 	DirectX::XMFLOAT3 padding;
 };
 
-struct ParticleSortP
+struct ParticleSort
 {
 	unsigned int index;
 };
@@ -33,9 +33,10 @@ private:
 	SimpleVertexShader* m_VS;
 	SimplePixelShader* m_PS;
 
-	ID3D11Buffer* m_indexBuff;
-	ID3D11UnorderedAccessView* particlePoolUAV;
-	ID3D11ShaderResourceView* particlePoolSRV;
+	ID3D11Buffer* m_indexBuff = nullptr , * drawArgsBuff = nullptr;
+	ID3D11UnorderedAccessView* particlePoolUAV = nullptr, * deadParticleUAV = nullptr , * drawParticleUAV = nullptr, * drawArgsUAV = nullptr;
+	ID3D11ShaderResourceView* particlePoolSRV = nullptr, * deadParticleSRV = nullptr, *drawParticleSRV = nullptr;
+
 
 public:
 

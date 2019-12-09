@@ -58,13 +58,13 @@ Game::Game(HINSTANCE hInstance)
 Game::~Game()
 {
 	//delete / Release GPU particles stuff
-	if (particledeadInitCS != nullptr) particledeadInitCS;
-	if (particleEmitCS != nullptr) particleEmitCS;
-	if (particleUpdateCS != nullptr) particleUpdateCS;
-	if (particleSetArgsBuff != nullptr) particleSetArgsBuff;
-	if (gpuParticleVS != nullptr) gpuParticleVS;
-	if (gpuParticlePS != nullptr) gpuParticlePS;
-	if (emitterGpu != nullptr) emitterGpu;
+	if (particledeadInitCS != nullptr) delete particledeadInitCS;
+	if (particleEmitCS != nullptr) delete particleEmitCS;
+	if (particleUpdateCS != nullptr) delete particleUpdateCS;
+	if (particleSetArgsBuff != nullptr) delete particleSetArgsBuff;
+	if (gpuParticleVS != nullptr) delete gpuParticleVS;
+	if (gpuParticlePS != nullptr) delete gpuParticlePS;
+	if (emitterGpu != nullptr) delete emitterGpu;
 
 
 	//delete / Release particle Stuff
@@ -287,7 +287,7 @@ void Game::Init()
 	rd.FillMode = D3D11_FILL_WIREFRAME;
 	device->CreateRasterizerState(&rd, &debugRaster);
 
-	emitter = new Emitter
+	/*emitter = new Emitter
 	(
 		XMFLOAT3(-2, 2, 0),
 		XMFLOAT4(1, 0.1f, 0.1f, 0.7f),
@@ -327,7 +327,7 @@ void Game::Init()
 		hybridParticleVS,
 		particlePS,
 		texMap["particle"]->GetSRV()
-	);
+	);*/
 
 	emitterGpu = new GPUEmitter(
 		1000000, 10000.0f,
@@ -443,11 +443,11 @@ void Game::AddLighting()
 
 void Game::LoadShaders()
 {
-	gpuParticleVS = new SimpleVertexShader(device, context);
+	/*gpuParticleVS = new SimpleVertexShader(device, context);
 	gpuParticleVS->LoadShaderFile(L"GpuParticleVS.cso");
 
 	gpuParticlePS = new SimplePixelShader(device, context);
-	gpuParticlePS->LoadShaderFile(L"GpuParticlePS.cso");
+	gpuParticlePS->LoadShaderFile(L"GpuParticlePS.cso");*/
 
 	particledeadInitCS = new SimpleComputeShader(device, context);
 	particledeadInitCS->LoadShaderFile(L"ParticleDeadInitCS.cso");
@@ -677,7 +677,7 @@ void Game::Update(float deltaTime, float totalTime)
 	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, totalTime, totalTime);
 	//entityList[0].SetRot(rot);
 	//emitter->UpdateEmitter(deltaTime);
-	emitterHY->UpdateEmitter(deltaTime, totalTime);
+	//emitterHY->UpdateEmitter(deltaTime, totalTime);
 
 	rot = XMMatrixRotationRollPitchYaw(totalTime, 0.0f, totalTime);
 	//entityList[1].SetRot(rot);
@@ -734,7 +734,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	particlePS->CopyAllBufferData();
 
 	//emitter->DrawEmitter(context, camera);
-	emitterHY->DrawEmitter(context, camera, totalTime);
+	//emitterHY->DrawEmitter(context, camera, totalTime);
 
 	//if (GetAsyncKeyState('C')) 
 	//{

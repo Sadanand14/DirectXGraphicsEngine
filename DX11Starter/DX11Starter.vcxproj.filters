@@ -153,10 +153,10 @@
     <FxCompile Include="ParticleUpdateCS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="GpuParticleVS.hlsl">
+    <FxCompile Include="GpuParticlePS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="GpuParticlePS.hlsl">
+    <FxCompile Include="GpuParticleVS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>
