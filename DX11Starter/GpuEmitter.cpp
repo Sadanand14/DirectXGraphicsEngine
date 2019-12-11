@@ -1,14 +1,30 @@
 #include "GpuEmitter.h"
 
-float GPUEmitter::emitTimeCounter = 0;
+float GPUEmitter::s_emitTimeCounter = 0;
 
 GPUEmitter::GPUEmitter
 (
-	unsigned int maxParticles, unsigned int emitRate, float lifeTime, ID3D11Device* device, ID3D11DeviceContext* context,
+	unsigned int maxParticles, unsigned int emitRate, float lifeTime, float startSize, float endSize,
+	DirectX::XMFLOAT3 emitterPos, DirectX::XMFLOAT3 startRot, DirectX::XMFLOAT3 startVel, DirectX::XMFLOAT3 posRange, DirectX::XMFLOAT3 velRange,
+	DirectX::XMFLOAT4 rotRange, DirectX::XMFLOAT4 startColor, DirectX::XMFLOAT4 endColor,
+	ID3D11Device* device, ID3D11DeviceContext* context,
 	SimpleComputeShader* initParticles, SimpleComputeShader* updateParticles, SimpleComputeShader* emitParticles,
 	SimpleComputeShader* updateArgsBuffer, SimpleVertexShader* vertexShader, SimplePixelShader* pixelShader
-) 
+)
 {
+	m_startSize = startSize;
+	m_endSize = endSize;
+	m_emitterPos = emitterPos;
+	m_startRot = startRot;
+	m_startVel = startVel;
+	m_posRange = posRange;
+	m_velRange = velRange;
+	m_rotRange = rotRange;
+	m_startColor = startColor;
+	m_endColor = endColor;
+	m_context = context;
+
+
 	m_maxParticles = maxParticles;
 	m_emitRate = emitRate;
 	m_initParticlesCS = initParticles;
@@ -20,7 +36,7 @@ GPUEmitter::GPUEmitter
 
 	m_timePerEmit = 1.0f / emitRate;
 
-	emitTimeCounter = 0.0f;
+	s_emitTimeCounter = 0.0f;
 
 	//index buffer creation
 	D3D11_BUFFER_DESC ibDesc = {};
@@ -31,9 +47,9 @@ GPUEmitter::GPUEmitter
 	ibDesc.StructureByteStride = 0;
 	ibDesc.Usage = D3D11_USAGE_DEFAULT;
 
-	unsigned long * indexArr = new unsigned long[m_maxParticles * 6];
+	unsigned long* indexArr = new unsigned long[m_maxParticles * 6];
 	unsigned long index = 0;
-	for (unsigned long i = 0; i < m_maxParticles; i++) 
+	for (unsigned long i = 0; i < m_maxParticles; i++)
 	{
 		indexArr[index++] = 0 + 4 * i;
 		indexArr[index++] = 1 + 4 * i;
@@ -49,8 +65,7 @@ GPUEmitter::GPUEmitter
 
 	delete[] indexArr;
 
-	
-	
+
 	//create particle pool SRV and UAV
 	ID3D11Buffer* particlePoolBuff;
 	D3D11_BUFFER_DESC poolDesc = {};
@@ -68,19 +83,17 @@ GPUEmitter::GPUEmitter
 	poolUAVDesc.Buffer.Flags = 0;
 	poolUAVDesc.Buffer.NumElements = m_maxParticles;
 	poolUAVDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
-	device->CreateUnorderedAccessView(particlePoolBuff, &poolUAVDesc, & particlePoolUAV);
+	device->CreateUnorderedAccessView(particlePoolBuff, &poolUAVDesc, &m_particlePoolUAV);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC poolSRVDesc = {};
 	poolSRVDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
 	poolSRVDesc.Buffer.FirstElement = 0;
 	poolSRVDesc.Buffer.NumElements = m_maxParticles;
 	poolSRVDesc.Format = DXGI_FORMAT_UNKNOWN;
-	device->CreateShaderResourceView(particlePoolBuff, &poolSRVDesc, &particlePoolSRV);
+	device->CreateShaderResourceView(particlePoolBuff, &poolSRVDesc, &m_particlePoolSRV);
 
 	particlePoolBuff->Release();
 
-	
-	
 	//DeadList
 	ID3D11Buffer* deadBuffer;
 	D3D11_BUFFER_DESC deadDesc = {};
@@ -99,17 +112,14 @@ GPUEmitter::GPUEmitter
 	deadUAVDesc.Buffer.NumElements = m_maxParticles;
 	deadUAVDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
 
-	device->CreateUnorderedAccessView(deadBuffer, &deadUAVDesc, &deadParticleUAV);
+	device->CreateUnorderedAccessView(deadBuffer, &deadUAVDesc, &m_deadParticleUAV);
 
 	deadBuffer->Release();
 
-	
-	
-	
 	//DrawList
 	ID3D11Buffer* drawBuff;
 	D3D11_BUFFER_DESC drawDesc = {};
-	drawDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS|D3D11_BIND_SHADER_RESOURCE;
+	drawDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
 	drawDesc.ByteWidth = sizeof(ParticleSort) * m_maxParticles;
 	drawDesc.CPUAccessFlags = 0;
 	drawDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
@@ -123,18 +133,16 @@ GPUEmitter::GPUEmitter
 	drawUAVDesc.Buffer.Flags = D3D11_BUFFER_UAV_FLAG_APPEND;
 	drawUAVDesc.Buffer.NumElements = m_maxParticles;
 	drawUAVDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
-	device->CreateUnorderedAccessView(drawBuff, &drawUAVDesc, &drawParticleUAV);
+	device->CreateUnorderedAccessView(drawBuff, &drawUAVDesc, &m_drawParticleUAV);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC drawSRVDesc = {};
 	drawSRVDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
 	drawSRVDesc.Buffer.FirstElement = 0;
 	drawSRVDesc.Buffer.NumElements = m_maxParticles;
 	drawSRVDesc.Format = DXGI_FORMAT_UNKNOWN;
-	device->CreateShaderResourceView(drawBuff, &drawSRVDesc, &drawParticleSRV);
+	device->CreateShaderResourceView(drawBuff, &drawSRVDesc, &m_drawParticleSRV);
 
 	drawBuff->Release();
-
-
 
 
 	//draw Argument Buffer
@@ -152,13 +160,118 @@ GPUEmitter::GPUEmitter
 	drawArgUAVDesc.Buffer.Flags = 0;
 	drawArgUAVDesc.Buffer.NumElements = 5;
 	drawArgUAVDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
-	device->CreateUnorderedAccessView(drawArgsBuff, &drawArgUAVDesc, &drawArgsUAV);
+	device->CreateUnorderedAccessView(m_drawArgsBuff, &drawArgUAVDesc, &m_drawArgsUAV);
+
+	D3D11_BLEND_DESC blendStateDesc = {};
+	blendStateDesc.AlphaToCoverageEnable = false;
+	blendStateDesc.IndependentBlendEnable = false;
+	blendStateDesc.RenderTarget[0].BlendEnable = true;
+	blendStateDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	blendStateDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+	blendStateDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+	blendStateDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	blendStateDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	blendStateDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+	blendStateDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	device->CreateBlendState(&blendStateDesc, &m_blendState);
+
+	D3D11_DEPTH_STENCIL_DESC depthDesc = {};
+	depthDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+	depthDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	depthDesc.DepthEnable = true;
+	device->CreateDepthStencilState(&depthDesc, &m_depthState);
+
+	//initialize the dead list
+	m_initParticlesCS->SetShader();
+	m_initParticlesCS->SetInt("maxParticles", m_maxParticles);
+	m_initParticlesCS->SetUnorderedAccessView("DeadLsit", m_deadParticleUAV);
+	m_initParticlesCS->CopyAllBufferData();
+	m_initParticlesCS->DispatchByThreads(m_maxParticles, 1, 10);
+}
+
+GPUEmitter::~GPUEmitter()
+{
+	//release misc buffers
+	if (m_depthState)		m_depthState->Release();
+	if (m_blendState)		m_blendState->Release();
+	if (m_indexBuff)		m_indexBuff->Release();
+	if (m_drawArgsBuff)		m_drawArgsBuff->Release();
+
+	//release SRV 's
+	if (m_particlePoolSRV)	m_particlePoolSRV->Release();
+	if (m_drawParticleSRV)	m_drawParticleSRV->Release();
+	
+	//release UAV's
+	if (m_particlePoolUAV)	m_particlePoolUAV->Release();
+	if (m_drawParticleUAV)	m_drawParticleUAV->Release();
+	if (m_deadParticleUAV)	m_deadParticleUAV->Release();
+	if (m_drawArgsUAV)		m_drawArgsUAV->Release();
+
 
 }
 
-GPUEmitter::~GPUEmitter() 
+void GPUEmitter::Update(float dt, float totaltime)
 {
-	m_indexBuff->Release();
-	particlePoolSRV->Release();
-	particlePoolUAV->Release();
+	ID3D11UnorderedAccessView* none[8] = {};
+	m_context->CSSetUnorderedAccessViews(0, 8, none, 0);
+
+	s_emitTimeCounter += dt;
+
+	while (s_emitTimeCounter >= m_timePerEmit) 
+	{
+		int emitCount = (int)(s_emitTimeCounter / m_timePerEmit);
+		emitCount = min(emitCount, 65535);
+
+		s_emitTimeCounter = fmod(s_emitTimeCounter, m_timePerEmit);
+
+		m_emitParticleCS->SetShader();
+		m_emitParticleCS->SetFloat3("startPos", m_emitterPos);
+		m_emitParticleCS->SetFloat3("posRange", m_posRange);
+		m_emitParticleCS->SetFloat3("startVel", m_startVel);
+		m_emitParticleCS->SetFloat3("velRange", m_velRange);
+		m_emitParticleCS->SetFloat4("startColor", m_startColor);
+		m_emitParticleCS->SetFloat("startSize", m_startSize);
+		m_emitParticleCS->SetFloat("totalTime", totaltime);
+		m_emitParticleCS->SetInt("emitCount", emitCount);
+		m_emitParticleCS->SetInt("maxParticle", m_maxParticles);
+		m_emitParticleCS->SetUnorderedAccessView("ParticlePool", m_particlePoolUAV);
+		m_emitParticleCS->SetUnorderedAccessView("DeadList", m_deadParticleUAV);
+		m_emitParticleCS->CopyAllBufferData();
+		m_emitParticleCS->DispatchByThreads(emitCount, 1, 1);
+	}
+
+	m_context->CSSetUnorderedAccessViews(0, 8, none, 0);
+}
+
+void GPUEmitter::Draw(Camera* camera, bool additive)
+{
+	if (additive)
+	{
+		m_context->OMSetBlendState(m_blendState, 0, 0xFFFFFFFF);
+		m_context->OMSetDepthStencilState(m_depthState, 0);
+	}
+
+	m_context->IASetIndexBuffer(m_indexBuff, DXGI_FORMAT_R32_UINT, 0);
+
+	m_context->VSSetShaderResources(0, 1, &m_particlePoolSRV);
+	m_context->VSSetShaderResources(0, 1, &m_drawParticleSRV);
+
+	m_VS->SetShader();
+	m_VS->SetMatrix4x4("world", DirectX::XMFLOAT4X4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1));
+	m_VS->SetMatrix4x4("view", camera->GetView());
+	m_VS->SetMatrix4x4("projection", camera->GetProjection());
+	m_VS->CopyAllBufferData();
+
+	m_PS->SetShader();
+
+	m_context->DrawIndexedInstancedIndirect(m_drawArgsBuff, 0);
+
+	ID3D11ShaderResourceView* none[16] = {};
+	m_context->VSSetShaderResources(0, 16, none);
+
+	if (additive) 
+	{
+		m_context->OMSetBlendState(0, 0, 0xFFFFFFFF);
+		m_context->OMSetDepthStencilState(0, 0);
+	}
 }

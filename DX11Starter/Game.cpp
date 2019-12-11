@@ -329,7 +329,7 @@ void Game::Init()
 		texMap["particle"]->GetSRV()
 	);*/
 
-	emitterGpu = new GPUEmitter(
+	/*emitterGpu = new GPUEmitter(
 		1000000, 10000.0f,
 		10.0f,
 		device,
@@ -340,7 +340,7 @@ void Game::Init()
 		particleSetArgsBuff,
 		gpuParticleVS,
 		gpuParticlePS
-	);
+	);*/
 
 	// Ask DirectX for the actual object
 	device->CreateSamplerState(&rSamp, &refractSampler);

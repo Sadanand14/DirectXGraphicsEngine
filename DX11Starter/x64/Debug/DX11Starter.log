@@ -1,10 +1,6 @@
-﻿  Camera.cpp
-  Entity.cpp
-D:\DirectXGraphicsEngine\DX11Starter\Game.h(10,10): warning C4067:  unexpected tokens following preprocessor directive - expected a newline
+﻿  compilation object save succeeded; see D:\DirectXGraphicsEngine\x64\Debug\ParticleEmitCS.cso
   Game.cpp
 D:\DirectXGraphicsEngine\DX11Starter\Game.h(10,10): warning C4067:  unexpected tokens following preprocessor directive - expected a newline
-D:\DirectXGraphicsEngine\DX11Starter\Game.h(10,10): warning C4067:  unexpected tokens following preprocessor directive - expected a newline
-D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(333,12): warning C4244:  'argument': conversion from 'float' to 'unsigned int', possible loss of data
 D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(370,68): warning C4267:  '=': conversion from 'size_t' to 'int', possible loss of data
 D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(375,20): warning C4018:  '<': signed/unsigned mismatch
 D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(377,21): warning C4018:  '<': signed/unsigned mismatch
@@ -32,10 +28,8 @@ D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(981,1): warning C4996:  'std::wstr
 C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Tools\MSVC\14.21.27702\include\xlocbuf(310): message :  see declaration of 'std::wstring_convert<std::codecvt_utf8<wchar_t,1114111,0>,wchar_t,std::allocator<wchar_t>,std::allocator<char>>::wstring_convert'
 D:\DirectXGraphicsEngine\DX11Starter\Game.cpp(982,1): warning C4996:  'std::wstring_convert<std::codecvt_utf8<wchar_t,1114111,0>,wchar_t,std::allocator<wchar_t>,std::allocator<char>>::from_bytes': warning STL4017: std::wbuffer_convert, std::wstring_convert, and the <codecvt> header (containing std::codecvt_mode, std::codecvt_utf8, std::codecvt_utf16, and std::codecvt_utf8_utf16) are deprecated in C++17. (The std::codecvt class template is NOT deprecated.) The C++ Standard doesn't provide equivalent non-deprecated functionality; consider using MultiByteToWideChar() and WideCharToMultiByte() from <Windows.h> instead. You can define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING or _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS to acknowledge that you have received this warning.
   GpuEmitter.cpp
-  Main.cpp
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Tools\MSVC\14.21.27702\include\xlocbuf(355): message :  see declaration of 'std::wstring_convert<std::codecvt_utf8<wchar_t,1114111,0>,wchar_t,std::allocator<wchar_t>,std::allocator<char>>::from_bytes'
   Materials.cpp
-D:\DirectXGraphicsEngine\DX11Starter\Game.h(10,10): warning C4067:  unexpected tokens following preprocessor directive - expected a newline
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Tools\MSVC\14.21.27702\include\xlocbuf(355): message :  see declaration of 'std::wstring_convert<std::codecvt_utf8<wchar_t,1114111,0>,wchar_t,std::allocator<wchar_t>,std::allocator<char>>::from_bytes'
   Generating Code...
 D:\DirectXGraphicsEngine\DX11Starter\Game.h(10,10): warning C4067:  unexpected tokens following preprocessor directive - expected a newline
   DX11Starter.vcxproj -> D:\DirectXGraphicsEngine\x64\Debug\DX11Starter.exe

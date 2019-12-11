@@ -19,8 +19,6 @@ Emitter::Emitter(
 	m_positionRange = positionRange;
 	m_emitterPosition = emitterPosition;
 	m_emitterAcceleration = emitterAcceleration;
-	m_maxParticles = maxParticles;
-	m_emitRate = emitRate;
 	m_lifeTime = lifeTime;
 	m_startSize = startSize;
 	m_endSize = endSize;
