@@ -33,8 +33,8 @@ Game::Game(HINSTANCE hInstance)
 	: DXCore(
 		hInstance,		// The application's handle
 		"DirectX Game",	   	// Text for the window's title bar
-		1920,			// Width of the window's client area
-		1080,			// Height of the window's client area
+		1280,			// Width of the window's client area
+		720,			// Height of the window's client area
 		true)			// Show extra stats (fps) in title bar?
 {
 	// Initialize fields
@@ -61,7 +61,7 @@ Game::~Game()
 	if (particledeadInitCS != nullptr) delete particledeadInitCS;
 	if (particleEmitCS != nullptr) delete particleEmitCS;
 	if (particleUpdateCS != nullptr) delete particleUpdateCS;
-	if (particleSetArgsBuff != nullptr) delete particleSetArgsBuff;
+	if (particleSetArgsBuffCS != nullptr) delete particleSetArgsBuffCS;
 	if (gpuParticleVS != nullptr) delete gpuParticleVS;
 	if (gpuParticlePS != nullptr) delete gpuParticlePS;
 	if (emitterGpu != nullptr) delete emitterGpu;
@@ -287,7 +287,7 @@ void Game::Init()
 	rd.FillMode = D3D11_FILL_WIREFRAME;
 	device->CreateRasterizerState(&rd, &debugRaster);
 
-	/*emitter = new Emitter
+	emitter = new Emitter
 	(
 		XMFLOAT3(-2, 2, 0),
 		XMFLOAT4(1, 0.1f, 0.1f, 0.7f),
@@ -327,20 +327,29 @@ void Game::Init()
 		hybridParticleVS,
 		particlePS,
 		texMap["particle"]->GetSRV()
-	);*/
+	);
 
-	/*emitterGpu = new GPUEmitter(
-		1000000, 10000.0f,
-		10.0f,
+	emitterGpu = new GPUEmitter(
+		1000, 100.0f,
+		3.0f, 0.1f,
+		2.0f,
+		XMFLOAT3(-2, 0, 5),
+		XMFLOAT3(-2, 2, 0),
+		XMFLOAT3(0.1f, 0.1f, 0.1f),
+		XMFLOAT3(0.2f, 0.2f, 0.2f),
+		XMFLOAT4(-2, 2, -2, 2),
+		XMFLOAT4(1, 0.1f, 0.1f, 0.7f),
+		XMFLOAT4(1, 0.6f, 0.1f, 0.f),
 		device,
 		context,
 		particledeadInitCS,
-		particleEmitCS,
 		particleUpdateCS,
-		particleSetArgsBuff,
+		particleEmitCS,
+		particleSetArgsBuffCS,
 		gpuParticleVS,
-		gpuParticlePS
-	);*/
+		gpuParticlePS,
+		texMap["particle"]->GetSRV()
+	);
 
 	// Ask DirectX for the actual object
 	device->CreateSamplerState(&rSamp, &refractSampler);
@@ -443,11 +452,11 @@ void Game::AddLighting()
 
 void Game::LoadShaders()
 {
-	/*gpuParticleVS = new SimpleVertexShader(device, context);
+	gpuParticleVS = new SimpleVertexShader(device, context);
 	gpuParticleVS->LoadShaderFile(L"GpuParticleVS.cso");
 
 	gpuParticlePS = new SimplePixelShader(device, context);
-	gpuParticlePS->LoadShaderFile(L"GpuParticlePS.cso");*/
+	gpuParticlePS->LoadShaderFile(L"GpuParticlePS.cso");
 
 	particledeadInitCS = new SimpleComputeShader(device, context);
 	particledeadInitCS->LoadShaderFile(L"ParticleDeadInitCS.cso");
@@ -458,8 +467,8 @@ void Game::LoadShaders()
 	particleUpdateCS = new SimpleComputeShader(device, context);
 	particleUpdateCS->LoadShaderFile(L"ParticleUpdateCS.cso");
 
-	particleSetArgsBuff = new SimpleComputeShader(device, context);
-	particleSetArgsBuff->LoadShaderFile(L"ParticleSetArgsBuffCS.cso");
+	particleSetArgsBuffCS = new SimpleComputeShader(device, context);
+	particleSetArgsBuffCS->LoadShaderFile(L"ParticleSetArgsBuffCS.cso");
 
 	particleVS = new SimpleVertexShader(device, context);
 	particleVS->LoadShaderFile(L"ParticleVS.cso");
@@ -678,6 +687,7 @@ void Game::Update(float deltaTime, float totalTime)
 	//entityList[0].SetRot(rot);
 	//emitter->UpdateEmitter(deltaTime);
 	//emitterHY->UpdateEmitter(deltaTime, totalTime);
+	emitterGpu->Update(deltaTime, totalTime);
 
 	rot = XMMatrixRotationRollPitchYaw(totalTime, 0.0f, totalTime);
 	//entityList[1].SetRot(rot);
@@ -735,6 +745,7 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	//emitter->DrawEmitter(context, camera);
 	//emitterHY->DrawEmitter(context, camera, totalTime);
+	emitterGpu->Draw(camera);
 
 	//if (GetAsyncKeyState('C')) 
 	//{

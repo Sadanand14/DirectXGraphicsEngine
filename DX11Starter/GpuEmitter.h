@@ -5,6 +5,7 @@
 
 #include "SimpleShader.h"
 #include "Camera.h"
+#include "Textures.h"
 
 struct GPUParticle 
 {
@@ -19,7 +20,7 @@ struct GPUParticle
 
 struct ParticleSort
 {
-	unsigned int index;
+	int index;
 };
 
 class GPUEmitter 
@@ -28,7 +29,7 @@ private:
 
 	static float s_emitTimeCounter;
 	unsigned int m_maxParticles, m_emitRate;
-	float m_timePerEmit;
+	float m_timePerEmit, m_lifeTime;
 
 	//emitterDescriptors
 	float m_startSize, m_endSize;
@@ -52,16 +53,16 @@ public:
 	GPUEmitter
 	(
 		unsigned int maxParticles, unsigned int emitRate, float lifeTime, float startSize, float EndSize,
-		DirectX::XMFLOAT3 emitterPos, DirectX::XMFLOAT3 startRot, DirectX::XMFLOAT3 startVel, DirectX::XMFLOAT3 posRange, DirectX::XMFLOAT3 velRange,
+		DirectX::XMFLOAT3 emitterPos, DirectX::XMFLOAT3 startVel, DirectX::XMFLOAT3 posRange, DirectX::XMFLOAT3 velRange,
 		DirectX::XMFLOAT4 rotRange, DirectX::XMFLOAT4 startColor, DirectX::XMFLOAT4 endColor,
 		ID3D11Device* device, ID3D11DeviceContext* context,
 		SimpleComputeShader* initParticles, SimpleComputeShader* updateParticles, SimpleComputeShader* emitParticles, 
-		SimpleComputeShader* updateArgsBuffer, SimpleVertexShader* vertexShader, SimplePixelShader* pixelShader
+		SimpleComputeShader* updateArgsBuffer, SimpleVertexShader* vertexShader, SimplePixelShader* pixelShader, ID3D11ShaderResourceView* texture
 	);
 
 	~GPUEmitter();
 
 	void Update(float deltaTime, float totalTime);
 
-	void Draw(Camera* camera, bool additive);
+	void Draw(Camera* camera);
 };

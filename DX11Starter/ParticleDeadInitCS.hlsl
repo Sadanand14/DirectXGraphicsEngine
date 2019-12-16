@@ -1,13 +1,13 @@
 cbuffer ExternalData : register(b0)
 {
-	int maxParticles;
+	uint maxParticles;
 }
 
 AppendStructuredBuffer<uint> DeadList : register(u0);
 [numthreads(32, 1, 1)]
 void main( uint3 id: SV_DispatchThreadID )
 {
-	if (id.x >= (uint)maxParticles) return;
+	if (id.x >= maxParticles) return;
 
 	DeadList.Append(id.x);
 }
