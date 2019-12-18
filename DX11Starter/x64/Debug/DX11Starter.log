@@ -1,1 +1,8 @@
-﻿  DX11Starter.vcxproj -> C:\Users\sadan\Desktop\Independent Study\Master\DirectXGraphicsEngine\x64\Debug\DX11Starter.exe
+﻿D:\Independent Study\DirectXGraphicsEngine\DX11Starter\WaterRefl_PS.hlsl(16,18-27): warning X3081: comma expression used where a vector constructor may have been intended
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\WaterRefl_PS.hlsl(16,18-33): warning X3081: comma expression used where a vector constructor may have been intended
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\WaterRefl_PS.hlsl(16,18-39): warning X3081: comma expression used where a vector constructor may have been intended
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\WaterRefl_PS.hlsl(51,22-58): warning X3206: 'Sample': implicit truncation of vector type
+D:\Independent Study\DirectXGraphicsEngine\DX11Starter\WaterRefl_PS.hlsl(52,8-75): warning X3206: implicit truncation of vector type
+  
+  compilation object save succeeded; see D:\Independent Study\DirectXGraphicsEngine\x64\Debug\WaterRefl_PS.cso
+  DX11Starter.vcxproj -> D:\Independent Study\DirectXGraphicsEngine\x64\Debug\DX11Starter.exe

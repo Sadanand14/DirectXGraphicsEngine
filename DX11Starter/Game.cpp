@@ -575,6 +575,223 @@
 			100.0f);			  	// Far clip plane distance
 		XMStoreFloat4x4(&projectionMatrix, XMMatrixTranspose(P)); // Transpose for HLSL!
 	}
+}
+
+
+// --------------------------------------------------------
+// Initializes the matrices necessary to represent our geometry's 
+// transformations and our 3D camera
+// --------------------------------------------------------
+void Game::CreateMatrices()
+{
+	XMMATRIX W = XMMatrixIdentity();
+	XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(W)); // Transpose for HLSL!
+
+
+	XMVECTOR pos = XMVectorSet(0, 0, -5, 0);
+	XMVECTOR dir = XMVectorSet(0, 0, 1, 0);
+	XMVECTOR up = XMVectorSet(0, 1, 0, 0);
+	XMMATRIX V = XMMatrixLookToLH(
+		pos,     // The position of the "camera"
+		dir,     // Direction the camera is looking
+		up);     // "Up" direction in 3D space (prevents roll)
+	XMStoreFloat4x4(&viewMatrix, XMMatrixTranspose(V)); // Transpose for HLSL!
+
+	XMMATRIX P = XMMatrixPerspectiveFovLH(
+		0.25f * 3.1415926535f,		// Field of View Angle
+		(float)width / height,		// Aspect ratio
+		0.1f,						// Near clip plane distance
+		100.0f);					// Far clip plane distance
+	XMStoreFloat4x4(&projectionMatrix, XMMatrixTranspose(P)); // Transpose for HLSL!
+}
+
+
+void Game::CreateBasicGeometry()
+{
+	material = new Materials(vertexShader, pixelShader);//had to create a dummy material so compiler wont throw an error
+
+	XMMATRIX trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
+	XMMATRIX scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
+
+	entityList.push_back(new Entity(trans, rot, scale, "cube", material));
+
+	trans = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
+	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
+	scale = XMMatrixScaling(0.5f, 0.5f, 0.5f);
+
+	entityList.push_back(new Entity(trans, rot, scale, "sphere", material));
+
+}
+
+
+// --------------------------------------------------------
+// Handle resizing DirectX "stuff" to match the new window size.
+// For instance, updating our projection matrix's aspect ratio.
+// --------------------------------------------------------
+void Game::OnResize()
+{
+	// Handle base-level DX resize stuff
+	DXCore::OnResize();
+
+	// Update our projection matrix since the window size changed
+	XMMATRIX P = XMMatrixPerspectiveFovLH(
+		0.25f * 3.1415926535f,	// Field of View Angle
+		(float)width / height,	// Aspect ratio
+		0.1f,				  	// Near clip plane distance
+		100.0f);			  	// Far clip plane distance
+	XMStoreFloat4x4(&projectionMatrix, XMMatrixTranspose(P)); // Transpose for HLSL!
+}
+
+// --------------------------------------------------------
+// Update your game here - user input, move objects, AI, etc.
+// --------------------------------------------------------
+void Game::Update(float deltaTime, float totalTime)
+{
+	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, totalTime, totalTime);
+	//entityList[0].SetRot(rot);
+
+	rot = XMMatrixRotationRollPitchYaw(totalTime, 0.0f, totalTime);
+	//entityList[1].SetRot(rot);
+
+	camera->Update(deltaTime);
+	// Quit if the escape key is pressed
+	if (GetAsyncKeyState(VK_ESCAPE))
+		Quit();
+
+	camera->Update(deltaTime);
+}
+
+// --------------------------------------------------------
+// Clear the screen, redraw everything, present to the user
+// --------------------------------------------------------
+void Game::Draw(float deltaTime, float totalTime)
+{
+	// Background color (Cornflower Blue in this case) for clearing
+	const float color[4] = { 0.4f, 0.6f, 0.75f, 0.0f };
+
+	// Clear the render target and depth buffer (erases what's on the screen)
+	//  - Do this ONCE PER FRAME
+	//  - At the beginning of Draw (before drawing *anything*)
+	context->ClearRenderTargetView(backBufferRTV, color);
+	context->ClearRenderTargetView(refractionRTV, color);
+	context->ClearRenderTargetView(reflectionRTV, color);
+	context->ClearDepthStencilView(depthView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	context->ClearDepthStencilView(
+		depthStencilView,
+		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
+		1.0f,
+		0);
+
+	//Looped all the sequences for loading the worldmatrix as well as loading the index and vertex buffers to the 
+	//GPU using a vector of entities.
+	context->OMSetRenderTargets(1, &refractionRTV, depthView);
+	DrawTerrain();
+	RenderSky();
+	//context->OMSetRenderTargets(1, &backBufferRTV, 0);
+	//DrawQuad(refractionSRV);
+	////////////
+	DrawWater(deltaTime);
+	context->OMSetRenderTargets(1, &backBufferRTV, depthView);
+	DrawQuad(reflectionSRV);
+	ID3D11ShaderResourceView* nullSRV[16] = {};
+	context->PSSetShaderResources(0, 16, nullSRV);
+
+	swapChain->Present(0, 0);
+}
+
+void Game::DrawQuad(ID3D11ShaderResourceView* srv) 
+{
+	context->IASetVertexBuffers(0, 0, 0, 0, 0);
+	context->IASetIndexBuffer(0, DXGI_FORMAT_R32_UINT, 0);
+
+	// Set up the fullscreen quad shaders
+	QuadVS->SetShader();
+	QuadPS->SetShaderResourceView("Pixels", srv);
+	QuadPS->SetSamplerState("Sampler", Texture::m_sampler);
+	QuadPS->SetShader();
+
+	context->Draw(3, 0);
+}
+
+void Game::CreateWaves()
+{
+	waves = new Waves[8];
+
+	waves[0].AFSW = XMFLOAT4(3, 2, 0.22, 3);
+	//waves[0].WaveDirection = XMFLOAT4(1,  0, 0, 0);
+
+	waves[1].AFSW = XMFLOAT4(1, 1, 0.24, 3.53);
+	//waves[1].WaveDirection= XMFLOAT4(0,  1, 0, 0);
+
+	waves[2].AFSW = XMFLOAT4(-1, -3, 0.22, 2.5);
+	//waves[2].AFSW = XMFLOAT4(1, 1, 0, 0);
+
+	waves[3].AFSW = XMFLOAT4(-4, 5, 0.21, 1.6);
+	//waves[3].AFSW = XMFLOAT4(-1, 1, 0, 0);
+
+	waves[4].AFSW = XMFLOAT4(2,-1, 0.48, 4);
+	//waves[4].AFSW = XMFLOAT4(1, 0, 0, 0);
+
+	waves[5].AFSW = XMFLOAT4(1, 0, 0.21, 4);
+	//waves[5].AFSW = XMFLOAT4(1, 1, 0, 0);
+
+	waves[6].AFSW = XMFLOAT4(-1, 0, 0.22, 5.5);
+	//waves[6].AFSW = XMFLOAT4(0, 1, 0, 0);
+
+	waves[7].AFSW = XMFLOAT4(0, -1, 0.36, 5.26);
+	//waves[7].AFSW = XMFLOAT4(1, 1, 0, 0);
+};
+
+void Game::DrawTerrain() 
+{
+	UINT stride = sizeof(TerrainVertex);
+	UINT offset = 0;
+
+	ID3D11Buffer* const vertex = meshMap["terrain"]->GetVertexBuffer();
+	ID3D11Buffer* const index = meshMap["terrain"]->GetIndexBuffer();
+
+	context->IASetVertexBuffers(0, 1, &vertex, &stride, &offset);
+	context->IASetIndexBuffer(index, DXGI_FORMAT_R32_UINT, 0);
+
+	terrainVS->SetShader();
+	terrainPS->SetShader();
+
+	terrainVS->SetMatrix4x4("world", TerrainMatrix);
+	terrainVS->SetMatrix4x4("projection", camera->GetProjection());
+	terrainVS->SetMatrix4x4("view", camera->GetView());
+	terrainVS->CopyAllBufferData();
+
+	terrainPS->SetSamplerState("state", Texture::m_sampler);
+	terrainPS->SetShaderResourceView("terrainTexture", texMap["beach"]->GetSRV());
+	terrainPS->CopyAllBufferData();
+
+	context->DrawIndexed(6 * (m_resolution-1)* (m_resolution - 1), 0, 0);
+}
+
+// function to draw water mesh
+void Game::DrawWater(float delta)
+{
+	WaterTime += delta;
+
+	UINT stride = sizeof(WaterVertex);
+	UINT offset = 0;
+
+	ID3D11Buffer* const vertex = meshMap["water"]->GetVertexBuffer();
+	ID3D11Buffer* const index = meshMap["water"]->GetIndexBuffer();
+
+	context->IASetVertexBuffers(0, 1, &vertex, &stride, &offset);
+	context->IASetIndexBuffer(index, DXGI_FORMAT_R32_UINT, 0);
+	context->OMSetRenderTargets(1, &reflectionRTV, depthView);
+
+	////////////Rendering screen space reflections to our reflection texture
+	SSReflVS->SetShader();
+	SSReflPS->SetShader();
+
+	XMFLOAT4X4 view = camera->GetView();
+	/*XMMATRIX view2 = XMLoadFloat4x4(&view);
+	XMFLOAT4X4 invertedView;
+	XMStoreFloat4x4(&invertedView, XMMatrixTranspose(view2));*/
 
 	// --------------------------------------------------------
 	// Update your game here - user input, move objects, AI, etc.
