@@ -218,7 +218,7 @@ void GPUEmitter::Update(float dt, float totaltime)
 
 	s_emitTimeCounter += dt;
 
-	while (s_emitTimeCounter >= m_timePerEmit)
+	if (s_emitTimeCounter >= m_timePerEmit)
 	{
 		int emitCount = (int)(s_emitTimeCounter / m_timePerEmit);
 		emitCount = min(emitCount, 65535);
@@ -263,7 +263,7 @@ void GPUEmitter::Update(float dt, float totaltime)
 	m_context->CSSetUnorderedAccessViews(0, 8, none, 0);
 
 	m_updateArgsBufferCS->SetShader();
-	m_updateArgsBufferCS->SetFloat("vertsPerParticle", 6);
+	m_updateArgsBufferCS->SetInt("vertsPerParticle", 6);
 	m_updateArgsBufferCS->SetUnorderedAccessView("DrawArgs", m_drawArgsUAV);
 	m_updateArgsBufferCS->SetUnorderedAccessView("DrawList", m_drawParticleUAV);
 	m_updateArgsBufferCS->CopyAllBufferData();

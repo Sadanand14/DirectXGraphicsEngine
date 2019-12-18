@@ -50,7 +50,7 @@ float4 main(vertexToPixel  input) :SV_TARGET
 	}
 
 	// apply sample Size based on the depth
-	float sampleSize = depthSize *(++k);
+	float sampleSize = StepSize *(++k);
 	//float sampleSize = 10;
 	float totalSamples = 0;
 	float currDepth;
@@ -61,7 +61,7 @@ float4 main(vertexToPixel  input) :SV_TARGET
 		currDepth = LinearEyeZ(currDepth);
 		float4 rawColor = rawImage.Load(int3(newUV, 0));
 		//float temp = rawColor.x + rawColor.y + rawColor.z;*/
-		if ((abs(sampleDepth-currDepth)<0.00005f))
+		if ((abs(sampleDepth-currDepth)<0.005f))
 		{
 			color += rawColor;
 			totalSamples++;

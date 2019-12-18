@@ -320,7 +320,7 @@ void Game::Init()
 		XMFLOAT4(-2, 2, -2, 2),
 		XMFLOAT3(0.2f, 0.2f, 0.2f),
 		XMFLOAT3(0.1f, 0.1f, 0.1f),
-		XMFLOAT3(-2, 0, 5),
+		XMFLOAT3(-2, 8, 5),
 		XMFLOAT3(0, -1, 0),
 		210,
 		30,
@@ -341,7 +341,7 @@ void Game::Init()
 		XMFLOAT4(-2, 2, -2, 2),
 		XMFLOAT3(0.2f, 0.2f, 0.2f),
 		XMFLOAT3(0.1f, 0.1f, 0.1f),
-		XMFLOAT3(2, 0, 5),
+		XMFLOAT3(-2, 5, 5),
 		XMFLOAT3(0, -1, 0),
 		210,
 		30,
@@ -477,6 +477,7 @@ void Game::AddLighting()
 
 void Game::LoadShaders()
 {
+
 	PS_merge = new SimplePixelShader(device, context);
 	PS_merge->LoadShaderFile(L"mergeShaderPS.cso");
 
@@ -678,6 +679,26 @@ void Game::CreateMatrices()
 	XMStoreFloat4x4(&projectionMatrix, XMMatrixTranspose(P)); // Transpose for HLSL!
 }
 
+
+void Game::CreateBasicGeometry()
+{
+	material = new Materials(vertexShader, pixelShader);//had to create a dummy material so compiler wont throw an error
+
+	XMMATRIX trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
+	XMMATRIX scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
+
+	entityList.push_back(new Entity(trans, rot, scale, "cube", material));
+
+	trans = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
+	rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
+	scale = XMMatrixScaling(0.5f, 0.5f, 0.5f);
+
+	entityList.push_back(new Entity(trans, rot, scale, "sphere", material));
+
+}
+
+
 // --------------------------------------------------------
 // Handle resizing DirectX "stuff" to match the new window size.
 // For instance, updating our projection matrix's aspect ratio.
@@ -694,443 +715,409 @@ void Game::OnResize()
 		0.1f,				  	// Near clip plane distance
 		100.0f);			  	// Far clip plane distance
 	XMStoreFloat4x4(&projectionMatrix, XMMatrixTranspose(P)); // Transpose for HLSL!
+}
+
+// --------------------------------------------------------
+// Update your game here - user input, move objects, AI, etc.
+// --------------------------------------------------------
+void Game::Update(float deltaTime, float totalTime)
+{
+	XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, totalTime, totalTime);
+	//entityList[0].SetRot(rot);
+	emitter->UpdateEmitter(deltaTime);
+	emitterHY->UpdateEmitter(deltaTime, totalTime);
+	emitterGpu->Update(deltaTime, totalTime);
+
+	rot = XMMatrixRotationRollPitchYaw(totalTime, 0.0f, totalTime);
+	//entityList[1].SetRot(rot);
+
+	camera->Update(deltaTime);
+	// Quit if the escape key is pressed
+	if (GetAsyncKeyState(VK_ESCAPE))
+		Quit();
+
+	camera->Update(deltaTime);
+}
+
+// --------------------------------------------------------
+// Clear the screen, redraw everything, present to the user
+// --------------------------------------------------------
+void Game::Draw(float deltaTime, float totalTime)
+{
+	// Background color (Cornflower Blue in this case) for clearing
+	//const float color[4] = { 0.4f, 0.6f, 0.75f, 0.0f };
+
+	//Black BackGround
+	const float color[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+	// Clear the render target and depth buffer (erases what's on the screen)
+	//  - Do this ONCE PER FRAME
+	//  - At the beginning of Draw (before drawing *anything*)
+	context->ClearRenderTargetView(backBufferRTV, color);
+	context->ClearRenderTargetView(refractionRTV, color);
+	context->ClearRenderTargetView(reflectionRTV, color);
+	context->ClearDepthStencilView(depthView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	context->ClearDepthStencilView(
+		depthStencilView,
+		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
+		1.0f,
+		0);
+
+	//Looped all the sequences for loading the worldmatrix as well as loading the index and vertex buffers to the 
+	//GPU using a vector of entities.
+	context->OMSetRenderTargets(1, &refractionRTV, depthView);
+	DrawTerrain();
+	RenderSky();
+	context->OMSetRenderTargets(1, &DOFRTV1, 0);
+	DrawQuad(refractionSRV);
+	////////////
+	DepthOfField(DOFSRV1);
+	//context->OMSetRenderTargets(1, &backBufferRTV, depthView);
+	//DrawWater(deltaTime);
 
 	
 
-	void Game::CreateBasicGeometry()
+	//Particles Draw
+	float blend[4] = { 1,1,1,1 };
+	context->OMSetBlendState(particleBlend, blend, 0xffffffff);
+	context->OMSetDepthStencilState(particleDepth, 0);
+
+	particlePS->SetInt("debugWireFrame", 0);
+	particlePS->SetSamplerState("Sampler", Texture::m_sampler);
+	particlePS->CopyAllBufferData();
+
+	emitter->DrawEmitter(context, camera);
+	emitterHY->DrawEmitter(context, camera, totalTime);
+	emitterGpu->Draw(camera);
+
+	if (GetAsyncKeyState('C')) 
 	{
-		material = new Materials(vertexShader, pixelShader);//had to create a dummy material so compiler wont throw an error
-
-		XMMATRIX trans = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
-		XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
-		XMMATRIX scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
-
-		entityList.push_back(new Entity(trans, rot, scale, "cube", material));
-
-		trans = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
-		rot = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
-		scale = XMMatrixScaling(0.5f, 0.5f, 0.5f);
-
-		entityList.push_back(new Entity(trans, rot, scale, "sphere", material));
-
-	}
-
-
-	// --------------------------------------------------------
-	// Handle resizing DirectX "stuff" to match the new window size.
-	// For instance, updating our projection matrix's aspect ratio.
-	// --------------------------------------------------------
-	void Game::OnResize()
-	{
-		// Handle base-level DX resize stuff
-		DXCore::OnResize();
-
-		// Update our projection matrix since the window size changed
-		XMMATRIX P = XMMatrixPerspectiveFovLH(
-			0.25f * 3.1415926535f,	// Field of View Angle
-			(float)width / height,	// Aspect ratio
-			0.1f,				  	// Near clip plane distance
-			100.0f);			  	// Far clip plane distance
-		XMStoreFloat4x4(&projectionMatrix, XMMatrixTranspose(P)); // Transpose for HLSL!
-	}
-
-	// --------------------------------------------------------
-	// Update your game here - user input, move objects, AI, etc.
-	// --------------------------------------------------------
-	void Game::Update(float deltaTime, float totalTime)
-	{
-		XMMATRIX rot = XMMatrixRotationRollPitchYaw(0.0f, totalTime, totalTime);
-		//entityList[0].SetRot(rot);
-		//emitter->UpdateEmitter(deltaTime);
-		//emitterHY->UpdateEmitter(deltaTime, totalTime);
-		emitterGpu->Update(deltaTime, totalTime);
-
-		rot = XMMatrixRotationRollPitchYaw(totalTime, 0.0f, totalTime);
-		//entityList[1].SetRot(rot);
-
-		camera->Update(deltaTime);
-		// Quit if the escape key is pressed
-		if (GetAsyncKeyState(VK_ESCAPE))
-			Quit();
-
-		camera->Update(deltaTime);
-	}
-
-	// --------------------------------------------------------
-	// Clear the screen, redraw everything, present to the user
-	// --------------------------------------------------------
-	void Game::Draw(float deltaTime, float totalTime)
-	{
-		// Background color (Cornflower Blue in this case) for clearing
-		//const float color[4] = { 0.4f, 0.6f, 0.75f, 0.0f };
-
-		//Black BackGround
-		const float color[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-
-		// Clear the render target and depth buffer (erases what's on the screen)
-		//  - Do this ONCE PER FRAME
-		//  - At the beginning of Draw (before drawing *anything*)
-		context->ClearRenderTargetView(backBufferRTV, color);
-		context->ClearRenderTargetView(refractionRTV, color);
-		context->ClearRenderTargetView(reflectionRTV, color);
-		context->ClearDepthStencilView(depthView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-		context->ClearDepthStencilView(
-			depthStencilView,
-			D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
-			1.0f,
-			0);
-
-		//Looped all the sequences for loading the worldmatrix as well as loading the index and vertex buffers to the 
-		//GPU using a vector of entities.
-		context->OMSetRenderTargets(1, &refractionRTV, depthView);
-		DrawTerrain();
-		RenderSky();
-		//context->OMSetRenderTargets(1, &backBufferRTV, 0);
-		//DrawQuad(refractionSRV);
-		////////////
-		DrawWater(deltaTime);
-
-
-		float blend[4] = { 1,1,1,1 };
-		context->OMSetBlendState(particleBlend, blend, 0xffffffff);
-		context->OMSetDepthStencilState(particleDepth, 0);
-
-		particlePS->SetInt("debugWireFrame", 0);
-		particlePS->SetSamplerState("Sampler", Texture::m_sampler);
+		context->RSSetState(debugRaster);
+		particlePS->SetInt("debugWireFrame", 1);
 		particlePS->CopyAllBufferData();
-
 		//emitter->DrawEmitter(context, camera);
-		//emitterHY->DrawEmitter(context, camera, totalTime);
-		emitterGpu->Draw(camera);
-
-		//if (GetAsyncKeyState('C')) 
-		//{
-		//	context->RSSetState(debugRaster);
-		//	particlePS->SetInt("debugWireFrame", 1);
-		//	particlePS->CopyAllBufferData();
-		//	//emitter->DrawEmitter(context, camera);
-		//}
-
-		context->OMSetBlendState(0, blend, 0xffffffff);
-		context->OMSetDepthStencilState(0, 0);
-		context->RSSetState(0);
-
-		ID3D11ShaderResourceView* nullSRV[16] = {};
-		context->PSSetShaderResources(0, 16, nullSRV);
-
-		swapChain->Present(0, 0);
 	}
 
-	void Game::DrawQuad(ID3D11ShaderResourceView * srv)
-	{
-		context->IASetVertexBuffers(0, 0, 0, 0, 0);
-		context->IASetIndexBuffer(0, DXGI_FORMAT_R32_UINT, 0);
+	/*context->OMSetBlendState(0, blend, 0xffffffff);
+	context->OMSetDepthStencilState(0, 0);
+	context->RSSetState(0);*/
+	context->OMSetRenderTargets(1, &backBufferRTV, 0);
 
-		// Set up the fullscreen quad shaders
-		QuadVS->SetShader();
-		QuadPS->SetShaderResourceView("Pixels", srv);
-		QuadPS->SetSamplerState("Sampler", Texture::m_sampler);
-		QuadPS->SetShader();
+	ID3D11ShaderResourceView* nullSRV[16] = {};
+	context->PSSetShaderResources(0, 16, nullSRV);
 
-		context->Draw(3, 0);
-	}
+	swapChain->Present(0, 0);
+}
 
-	void Game::DrawTerrain()
-	{
-		UINT stride = sizeof(TerrainVertex);
-		UINT offset = 0;
+void Game::DrawQuad(ID3D11ShaderResourceView* srv)
+{
+	context->IASetVertexBuffers(0, 0, 0, 0, 0);
+	context->IASetIndexBuffer(0, DXGI_FORMAT_R32_UINT, 0);
 
-		ID3D11Buffer* const vertex = meshMap["terrain"]->GetVertexBuffer();
-		ID3D11Buffer* const index = meshMap["terrain"]->GetIndexBuffer();
+	// Set up the fullscreen quad shaders
+	QuadVS->SetShader();
+	QuadPS->SetShaderResourceView("Pixels", srv);
+	QuadPS->SetSamplerState("Sampler", Texture::m_sampler);
+	QuadPS->SetShader();
 
-		context->IASetVertexBuffers(0, 1, &vertex, &stride, &offset);
-		context->IASetIndexBuffer(index, DXGI_FORMAT_R32_UINT, 0);
+	context->Draw(3, 0);
+}
 
-		terrainVS->SetShader();
-		terrainPS->SetShader();
+void Game::DrawTerrain()
+{
+	UINT stride = sizeof(TerrainVertex);
+	UINT offset = 0;
 
-		terrainVS->SetMatrix4x4("world", TerrainMatrix);
-		terrainVS->SetMatrix4x4("projection", camera->GetProjection());
-		terrainVS->SetMatrix4x4("view", camera->GetView());
-		terrainVS->CopyAllBufferData();
+	ID3D11Buffer* const vertex = meshMap["terrain"]->GetVertexBuffer();
+	ID3D11Buffer* const index = meshMap["terrain"]->GetIndexBuffer();
 
-		terrainPS->SetSamplerState("state", Texture::m_sampler);
-		terrainPS->SetShaderResourceView("terrainTexture", texMap["beach"]->GetSRV());
-		terrainPS->CopyAllBufferData();
+	context->IASetVertexBuffers(0, 1, &vertex, &stride, &offset);
+	context->IASetIndexBuffer(index, DXGI_FORMAT_R32_UINT, 0);
 
-		context->DrawIndexed(6 * (m_resolution - 1) * (m_resolution - 1), 0, 0);
-	}
+	terrainVS->SetShader();
+	terrainPS->SetShader();
+
+	terrainVS->SetMatrix4x4("world", TerrainMatrix);
+	terrainVS->SetMatrix4x4("projection", camera->GetProjection());
+	terrainVS->SetMatrix4x4("view", camera->GetView());
+	terrainVS->CopyAllBufferData();
+
+	terrainPS->SetSamplerState("state", Texture::m_sampler);
+	terrainPS->SetShaderResourceView("terrainTexture", texMap["beach"]->GetSRV());
+	terrainPS->CopyAllBufferData();
+
+	context->DrawIndexed(6 * (m_resolution - 1) * (m_resolution - 1), 0, 0);
+}
 
 
-	void Game::DownSample(ID3D11ShaderResourceView * srv)
-	{
+void Game::DownSample(ID3D11ShaderResourceView* srv)
+{
 
-	}
+}
 
-	void Game::DepthOfField(ID3D11ShaderResourceView * srv)
-	{
-		float DepthRanges[8] = { 0.1f,0.25f,0.35f,0.5f,0.62,0.75,0.875,1.0f };
+void Game::DepthOfField(ID3D11ShaderResourceView* srv)
+{
+	float DepthRanges[8] = { 0.1f,0.25f,0.35f,0.5f,0.62,0.75,0.875,1.0f };
 
-		context->OMSetRenderTargets(1, &DOFRTV1, 0);
-		/// sample out areas outside the focus
-		context->IASetVertexBuffers(0, 0, 0, 0, 0);
-		context->IASetIndexBuffer(0, DXGI_FORMAT_R32_UINT, 0);
+	context->OMSetRenderTargets(1, &DOFRTV2, 0);
+	/// sample out areas outside the focus
+	context->IASetVertexBuffers(0, 0, 0, 0, 0);
+	context->IASetIndexBuffer(0, DXGI_FORMAT_R32_UINT, 0);
 
-		QuadVS->SetShader();
-		DownSamPS->SetFloat("width", width);
-		DownSamPS->SetFloat("height", height);
-		//DownSamPS->SetMatrix4x4("projection", camera->GetProjection());
-		DownSamPS->SetShaderResourceView("depthTex", depthSRV);
-		DownSamPS->SetShaderResourceView("inputTex", srv);
-		DownSamPS->SetSamplerState("Sampler", Texture::m_sampler);
-		DownSamPS->SetShader();
+	QuadVS->SetShader();
+	DownSamPS->SetFloat("width", width);
+	DownSamPS->SetFloat("height", height);
+	//DownSamPS->SetMatrix4x4("projection", camera->GetProjection());
+	DownSamPS->SetShaderResourceView("depthTex", depthSRV);
+	DownSamPS->SetShaderResourceView("inputTex", srv);
+	DownSamPS->SetSamplerState("Sampler", Texture::m_sampler);
+	DownSamPS->SetShader();
 
-		context->Draw(3, 0);
+	context->Draw(3, 0);
 
-		//apply horizontal blurr
-		context->OMSetRenderTargets(1, &DOFRTV3, 0);
+	////apply horizontal blurr
+	context->OMSetRenderTargets(1, &DOFRTV3, 0);
 
-		QuadVS->SetShader();
-		PS_gaussianBlurrHor->SetData("depths", &DepthRanges, 8 * sizeof(float));
-		PS_gaussianBlurrHor->SetInt("StepSize", 3);
-		PS_gaussianBlurrHor->SetFloat("upperFocusDepth", 0.2f);
-		PS_gaussianBlurrHor->SetFloat("lowerFocusDepth", 0.1f);;
-		PS_gaussianBlurrHor->SetShaderResourceView("rawImage", DOFSRV1);
-		PS_gaussianBlurrHor->SetSamplerState("Sampler", Texture::m_sampler);
-		PS_gaussianBlurrHor->SetFloat("width", width);
-		PS_gaussianBlurrHor->SetFloat("height", height);
-		PS_gaussianBlurrHor->SetShader();
-		PS_gaussianBlurrHor->CopyAllBufferData();
+	QuadVS->SetShader();
+	PS_gaussianBlurrHor->SetData("depths", &DepthRanges, 8 * sizeof(float));
+	PS_gaussianBlurrHor->SetInt("StepSize", 3);
+	PS_gaussianBlurrHor->SetFloat("upperFocusDepth", 0.2f);
+	PS_gaussianBlurrHor->SetFloat("lowerFocusDepth", 0.1f);;
+	PS_gaussianBlurrHor->SetShaderResourceView("rawImage", DOFSRV2);
+	PS_gaussianBlurrHor->SetSamplerState("Sampler", Texture::m_sampler);
+	PS_gaussianBlurrHor->SetFloat("width", width);
+	PS_gaussianBlurrHor->SetFloat("height", height);
+	PS_gaussianBlurrHor->SetShader();
+	PS_gaussianBlurrHor->CopyAllBufferData();
 
-		context->Draw(3, 0);
+	context->Draw(3, 0);
 
-		context->OMSetRenderTargets(1, &backBufferRTV, 0);
+	context->OMSetRenderTargets(1, &backBufferRTV, 0);
 
-		//apply vertical blurr
-		QuadVS->SetShader();
-		PS_gaussianBlurrVert->SetData("depths", &DepthRanges, 8 * sizeof(float));
-		PS_gaussianBlurrVert->SetInt("StepSize", 3);
-		PS_gaussianBlurrVert->SetFloat("upperFocusDepth", 0.2f);
-		PS_gaussianBlurrVert->SetFloat("lowerFocusDepth", 0.1f);
-		PS_gaussianBlurrVert->SetFloat("StepSize", 3);
-		PS_gaussianBlurrVert->SetShaderResourceView("blurrTex", DOFSRV3);
-		PS_gaussianBlurrVert->SetShaderResourceView("rawImage", srv);
-		PS_gaussianBlurrVert->SetShaderResourceView("depthTex", depthSRV);
-		PS_gaussianBlurrVert->SetSamplerState("Sampler", Texture::m_sampler);
-		PS_gaussianBlurrVert->SetFloat("width", width);
-		PS_gaussianBlurrVert->SetFloat("height", height);
-		PS_gaussianBlurrVert->SetShader();
-		PS_gaussianBlurrVert->CopyAllBufferData();
+	//apply vertical blurr
+	QuadVS->SetShader();
+	PS_gaussianBlurrVert->SetData("depths", &DepthRanges, 8 * sizeof(float));
+	PS_gaussianBlurrVert->SetInt("StepSize", 3);
+	PS_gaussianBlurrVert->SetFloat("upperFocusDepth", 0.2f);
+	PS_gaussianBlurrVert->SetFloat("lowerFocusDepth", 0.1f);
+	//PS_gaussianBlurrVert->SetInt("StepSize", 3);
+	PS_gaussianBlurrVert->SetShaderResourceView("blurrTex", DOFSRV3);
+	PS_gaussianBlurrVert->SetShaderResourceView("rawImage", srv);
+	PS_gaussianBlurrVert->SetShaderResourceView("depthTex", depthSRV);
+	PS_gaussianBlurrVert->SetSamplerState("Sampler", Texture::m_sampler);
+	PS_gaussianBlurrVert->SetFloat("width", width);
+	PS_gaussianBlurrVert->SetFloat("height", height);
+	PS_gaussianBlurrVert->SetShader();
+	PS_gaussianBlurrVert->CopyAllBufferData();
 
-		context->Draw(3, 0);
+	context->Draw(3, 0);
 
-		//merge with original
-		//context->OMSetRenderTargets(1, &backBufferRTV, 0);
+	//merge with original
+	//context->OMSetRenderTargets(1, &backBufferRTV, 0);
 
-		//QuadVS->SetShader();
+	//QuadVS->SetShader();
 
-		//PS_merge->SetShader();
-		//PS_merge->SetShaderResourceView("blurrTex", DOFSRV2);
-		//PS_merge->SetShaderResourceView("rawImage", srv);
-		//PS_merge->SetSamplerState("Sampler", Texture::m_sampler);
-		//context->Draw(3, 0);
-	}
+	//PS_merge->SetShader();
+	//PS_merge->SetShaderResourceView("blurrTex", DOFSRV2);
+	//PS_merge->SetShaderResourceView("rawImage", srv);
+	//PS_merge->SetSamplerState("Sampler", Texture::m_sampler);
+	//context->Draw(3, 0);
+}
 
-	void Game::CreateWaves()
-	{
-		waves = new Waves[8];
+void Game::CreateWaves()
+{
+	waves = new Waves[8];
 
-		waves[0].AFSW = XMFLOAT4(3, 2, 0.22, 3);
-		//waves[0].WaveDirection = XMFLOAT4(1,  0, 0, 0);
+	waves[0].AFSW = XMFLOAT4(3, 2, 0.22, 3);
+	//waves[0].WaveDirection = XMFLOAT4(1,  0, 0, 0);
 
-		waves[1].AFSW = XMFLOAT4(1, 1, 0.24, 3.53);
-		//waves[1].WaveDirection= XMFLOAT4(0,  1, 0, 0);
+	waves[1].AFSW = XMFLOAT4(1, 1, 0.24, 3.53);
+	//waves[1].WaveDirection= XMFLOAT4(0,  1, 0, 0);
 
-		waves[2].AFSW = XMFLOAT4(-1, -3, 0.22, 2.5);
-		//waves[2].AFSW = XMFLOAT4(1, 1, 0, 0);
+	waves[2].AFSW = XMFLOAT4(-1, -3, 0.22, 2.5);
+	//waves[2].AFSW = XMFLOAT4(1, 1, 0, 0);
 
-		waves[3].AFSW = XMFLOAT4(-4, 5, 0.21, 1.6);
-		//waves[3].AFSW = XMFLOAT4(-1, 1, 0, 0);
+	waves[3].AFSW = XMFLOAT4(-4, 5, 0.21, 1.6);
+	//waves[3].AFSW = XMFLOAT4(-1, 1, 0, 0);
 
-		waves[4].AFSW = XMFLOAT4(2, -1, 0.48, 4);
-		//waves[4].AFSW = XMFLOAT4(1, 0, 0, 0);
+	waves[4].AFSW = XMFLOAT4(2, -1, 0.48, 4);
+	//waves[4].AFSW = XMFLOAT4(1, 0, 0, 0);
 
-		waves[5].AFSW = XMFLOAT4(1, 0, 0.21, 4);
-		//waves[5].AFSW = XMFLOAT4(1, 1, 0, 0);
+	waves[5].AFSW = XMFLOAT4(1, 0, 0.21, 4);
+	//waves[5].AFSW = XMFLOAT4(1, 1, 0, 0);
 
-		waves[6].AFSW = XMFLOAT4(-1, 0, 0.22, 5.5);
-		//waves[6].AFSW = XMFLOAT4(0, 1, 0, 0);
+	waves[6].AFSW = XMFLOAT4(-1, 0, 0.22, 5.5);
+	//waves[6].AFSW = XMFLOAT4(0, 1, 0, 0);
 
-		waves[7].AFSW = XMFLOAT4(0, -1, 0.36, 5.26);
-		//waves[7].AFSW = XMFLOAT4(1, 1, 0, 0);
-	};
+	waves[7].AFSW = XMFLOAT4(0, -1, 0.36, 5.26);
+	//waves[7].AFSW = XMFLOAT4(1, 1, 0, 0);
+};
 
-	// function to draw water mesh
-	void Game::DrawWater(float delta)
-	{
-		WaterTime += delta;
+// function to draw water mesh
+void Game::DrawWater(float delta)
+{
+	WaterTime += delta;
 
-		UINT stride = sizeof(WaterVertex);
-		UINT offset = 0;
+	UINT stride = sizeof(WaterVertex);
+	UINT offset = 0;
 
-		ID3D11Buffer* const vertex = meshMap["water"]->GetVertexBuffer();
-		ID3D11Buffer* const index = meshMap["water"]->GetIndexBuffer();
+	ID3D11Buffer* const vertex = meshMap["water"]->GetVertexBuffer();
+	ID3D11Buffer* const index = meshMap["water"]->GetIndexBuffer();
 
-		context->IASetVertexBuffers(0, 1, &vertex, &stride, &offset);
-		context->IASetIndexBuffer(index, DXGI_FORMAT_R32_UINT, 0);
+	context->IASetVertexBuffers(0, 1, &vertex, &stride, &offset);
+	context->IASetIndexBuffer(index, DXGI_FORMAT_R32_UINT, 0);
 
-		context->OMSetRenderTargets(1, &reflectionRTV, depthView);
-		////////////Rendering screen space reflections to our reflection texture
-		SSReflVS->SetShader();
-		SSReflPS->SetShader();
+	//context->OMSetRenderTargets(1, &reflectionRTV, depthView);
+	////////////Rendering screen space reflections to our reflection texture
+	//SSReflVS->SetShader();
+	//SSReflPS->SetShader();
 
-		XMFLOAT4X4 view = camera->GetView();
-		XMMATRIX view2 = XMLoadFloat4x4(&view);
-		XMFLOAT4X4 invertedView;
-		XMStoreFloat4x4(&invertedView, XMMatrixTranspose(view2));
+	//XMFLOAT4X4 view = camera->GetView();
+	//XMMATRIX view2 = XMLoadFloat4x4(&view);
+	//XMFLOAT4X4 invertedView;
+	//XMStoreFloat4x4(&view, XMMatrixTranspose(camera->GetView()));
 
-		XMFLOAT4X4 projection = camera->GetProjection();
-		XMMATRIX temp = XMLoadFloat4x4(&projection);
-		XMFLOAT4X4 invertedProjection;
-		XMStoreFloat4x4(&invertedProjection, XMMatrixTranspose(temp));
+	//XMFLOAT4X4 projection = camera->GetProjection();
+	//XMMATRIX temp = XMLoadFloat4x4(&projection);
+	//XMFLOAT4X4 invertedProjection;
+	//XMStoreFloat4x4(&invertedProjection, XMMatrixTranspose(temp));
 
-		SSReflVS->SetMatrix4x4("world", WaterMatrix);
-		SSReflVS->SetMatrix4x4("view", view);
-		SSReflVS->SetMatrix4x4("projection", projection);
-		SSReflVS->SetMatrix4x4("invView", invertedView);
-		SSReflVS->CopyAllBufferData();
+	//SSReflVS->SetMatrix4x4("world", WaterMatrix);
+	//SSReflVS->SetMatrix4x4("view", view);
+	//SSReflVS->SetMatrix4x4("projection", projection);
+	//SSReflVS->SetMatrix4x4("invView", invertedView);
+	//SSReflVS->CopyAllBufferData();
 
-		SSReflPS->SetSamplerState("Sampler", Texture::m_sampler);
-		SSReflPS->SetShaderResourceView("depthTex", depthSRV);
-		SSReflPS->SetShaderResourceView("SceneTex", refractionSRV);
-		SSReflPS->SetMatrix4x4("invertedProj", invertedProjection);
-		SSReflPS->CopyAllBufferData();
-		context->DrawIndexed(6 * 999 * 999, 0, 0);
+	//SSReflPS->SetSamplerState("Sampler", Texture::m_sampler);
+	//SSReflPS->SetShaderResourceView("depthTex", depthSRV);
+	//SSReflPS->SetShaderResourceView("SceneTex", refractionSRV);
+	//SSReflPS->SetMatrix4x4("invertedProj", invertedProjection);
+	//SSReflPS->CopyAllBufferData();
+	//context->DrawIndexed(6 * 999 * 999, 0, 0);
 
-		//////////////////////////////////////////////////////////
-		/*context->OMSetRenderTargets(1, &backBufferRTV, depthView);
-		waterShaderVS->SetShader();
-		waterShaderPS->SetShader();
+	//////////////////////////////////////////////////////////
+	context->OMSetRenderTargets(1, &backBufferRTV, depthView);
+	waterShaderVS->SetShader();
+	waterShaderPS->SetShader();
 
-		waterShaderVS->SetMatrix4x4("world", WaterMatrix);
-		waterShaderVS->SetMatrix4x4("view", camera->GetView());
-		waterShaderVS->SetMatrix4x4("projection", camera->GetProjection());
-		waterShaderVS->SetFloat("waterTime", WaterTime);
-		waterShaderVS->SetData("waves", waves, sizeof(Waves) * 8);
-		waterShaderVS->CopyAllBufferData();
+	waterShaderVS->SetMatrix4x4("world", WaterMatrix);
+	waterShaderVS->SetMatrix4x4("view", camera->GetView());
+	waterShaderVS->SetMatrix4x4("projection", camera->GetProjection());
+	waterShaderVS->SetFloat("waterTime", WaterTime);
+	waterShaderVS->SetData("waves", waves, sizeof(Waves) * 8);
+	waterShaderVS->CopyAllBufferData();
 
-		waterShaderPS->SetSamplerState("Sampler", Texture::m_sampler);
-		waterShaderPS->SetShaderResourceView("waterTexture", texMap["water"]->GetSRV());
-		waterShaderPS->SetSamplerState("RefracSampler", refractSampler);
-		waterShaderPS->SetShaderResourceView("Scene", refractionSRV);
-		waterShaderPS->SetFloat3("CameraPosition", camera->GetPosition());
-		waterShaderPS->SetShaderResourceView("Reflection", reflectionSRV);
-		waterShaderPS->CopyAllBufferData();
+	waterShaderPS->SetSamplerState("Sampler", Texture::m_sampler);
+	waterShaderPS->SetShaderResourceView("waterTexture", texMap["water"]->GetSRV());
+	waterShaderPS->SetSamplerState("RefracSampler", refractSampler);
+	waterShaderPS->SetShaderResourceView("Scene", refractionSRV);
+	waterShaderPS->SetFloat3("CameraPosition", camera->GetPosition());
+	waterShaderPS->SetShaderResourceView("Reflection", reflectionSRV);
+	waterShaderPS->CopyAllBufferData();
 
-		context->DrawIndexed(6 * 999 * 999, 0, 0);*/
+	context->DrawIndexed(6 * 999 * 999, 0, 0);
+}
 
-	}
+//funciton to draw sky
+void Game::RenderSky()
+{
+	Mesh* skymesh = meshMap["cube"];
+	ID3D11Buffer* vb = skymesh->GetVertexBuffer();
+	ID3D11Buffer* ib = skymesh->GetIndexBuffer();
 
-	//funciton to draw sky
-	void Game::RenderSky()
-	{
-		Mesh* skymesh = meshMap["cube"];
-		ID3D11Buffer* vb = skymesh->GetVertexBuffer();
-		ID3D11Buffer* ib = skymesh->GetIndexBuffer();
+	UINT stride = sizeof(Vertex);
+	UINT offset = 0;
+	context->IASetVertexBuffers(0, 1, &vb, &stride, &offset);
+	context->IASetIndexBuffer(ib, DXGI_FORMAT_R32_UINT, 0);
 
-		UINT stride = sizeof(Vertex);
-		UINT offset = 0;
-		context->IASetVertexBuffers(0, 1, &vb, &stride, &offset);
-		context->IASetIndexBuffer(ib, DXGI_FORMAT_R32_UINT, 0);
+	SkyVS->SetMatrix4x4("view", camera->GetView());
+	SkyVS->SetMatrix4x4("projection", camera->GetProjection());
+	SkyVS->CopyAllBufferData();
+	SkyVS->SetShader();
 
-		SkyVS->SetMatrix4x4("view", camera->GetView());
-		SkyVS->SetMatrix4x4("projection", camera->GetProjection());
-		SkyVS->CopyAllBufferData();
-		SkyVS->SetShader();
+	SkyPS->SetShaderResourceView("sky", texMap["SunnyCubeMap"]->GetSRV());
+	SkyPS->SetSamplerState("BasicSampler", Texture::m_sampler);
+	SkyPS->CopyAllBufferData();
+	SkyPS->SetShader();
 
-		SkyPS->SetShaderResourceView("sky", texMap["SunnyCubeMap"]->GetSRV());
-		SkyPS->SetSamplerState("BasicSampler", Texture::m_sampler);
-		SkyPS->CopyAllBufferData();
-		SkyPS->SetShader();
+	context->RSSetState(skyRS);
+	context->OMSetDepthStencilState(skyDS, 0);
 
-		context->RSSetState(skyRS);
-		context->OMSetDepthStencilState(skyDS, 0);
+	context->DrawIndexed(skymesh->GetIndexCount(), 0, 0);
 
-		context->DrawIndexed(skymesh->GetIndexCount(), 0, 0);
-
-		context->RSSetState(0);
-		context->OMSetDepthStencilState(0, 0);
-	}
+	context->RSSetState(0);
+	context->OMSetDepthStencilState(0, 0);
+}
 
 
 #pragma region Mouse Input
 
-	// --------------------------------------------------------
-	// Helper method for mouse clicking.  We get this information
-	// from the OS-level messages anyway, so these helpers have
-	// been created to provide basic mouse input if you want it.
-	// --------------------------------------------------------
-	void Game::OnMouseDown(WPARAM buttonState, int x, int y)
+// --------------------------------------------------------
+// Helper method for mouse clicking.  We get this information
+// from the OS-level messages anyway, so these helpers have
+// been created to provide basic mouse input if you want it.
+// --------------------------------------------------------
+void Game::OnMouseDown(WPARAM buttonState, int x, int y)
+{
+	// Add any custom code here...
+
+	// Save the previous mouse position, so we have it for the future
+	prevMousePos.x = x;
+	prevMousePos.y = y;
+
+	// Caputure the mouse so we keep getting mouse move
+	// events even if the mouse leaves the window.  we'll be
+	// releasing the capture once a mouse button is released
+	SetCapture(hWnd);
+}
+
+// --------------------------------------------------------
+// Helper method for mouse release
+// --------------------------------------------------------
+void Game::OnMouseUp(WPARAM buttonState, int x, int y)
+{
+	// Add any custom code here...
+
+	// We don't care about the tracking the cursor outside
+	// the window anymore (we're not dragging if the mouse is up)
+	ReleaseCapture();
+}
+
+// --------------------------------------------------------
+// Helper method for mouse movement.  We only get this message
+// if the mouse is currently over the window, or if we're 
+// currently capturing the mouse.
+// --------------------------------------------------------
+void Game::OnMouseMove(WPARAM buttonState, int x, int y)
+{
+	// Add any custom code here...
+	if (buttonState & 0x0001)
 	{
-		// Add any custom code here...
-
-		// Save the previous mouse position, so we have it for the future
-		prevMousePos.x = x;
-		prevMousePos.y = y;
-
-		// Caputure the mouse so we keep getting mouse move
-		// events even if the mouse leaves the window.  we'll be
-		// releasing the capture once a mouse button is released
-		SetCapture(hWnd);
+		float xDiff = (x - prevMousePos.x) * 0.005f;
+		float yDiff = (y - prevMousePos.y) * 0.005f;
+		camera->Rotate(yDiff, xDiff);
 	}
+	// Save the previous mouse position, so we have it for the future
+	prevMousePos.x = x;
+	prevMousePos.y = y;
+}
 
-	// --------------------------------------------------------
-	// Helper method for mouse release
-	// --------------------------------------------------------
-	void Game::OnMouseUp(WPARAM buttonState, int x, int y)
-	{
-		// Add any custom code here...
+// --------------------------------------------------------
+// Helper method for mouse wheel scrolling.  
+// WheelDelta may be positive or negative, depending 
+// on the direction of the scroll
+// --------------------------------------------------------
+void Game::OnMouseWheel(float wheelDelta, int x, int y)
+{
+	// Add any custom code here...
+}
 
-		// We don't care about the tracking the cursor outside
-		// the window anymore (we're not dragging if the mouse is up)
-		ReleaseCapture();
-	}
-
-	// --------------------------------------------------------
-	// Helper method for mouse movement.  We only get this message
-	// if the mouse is currently over the window, or if we're 
-	// currently capturing the mouse.
-	// --------------------------------------------------------
-	void Game::OnMouseMove(WPARAM buttonState, int x, int y)
-	{
-		// Add any custom code here...
-		if (buttonState & 0x0001)
-		{
-			float xDiff = (x - prevMousePos.x) * 0.005f;
-			float yDiff = (y - prevMousePos.y) * 0.005f;
-			camera->Rotate(yDiff, xDiff);
-		}
-		// Save the previous mouse position, so we have it for the future
-		prevMousePos.x = x;
-		prevMousePos.y = y;
-	}
-
-	// --------------------------------------------------------
-	// Helper method for mouse wheel scrolling.  
-	// WheelDelta may be positive or negative, depending 
-	// on the direction of the scroll
-	// --------------------------------------------------------
-	void Game::OnMouseWheel(float wheelDelta, int x, int y)
-	{
-		// Add any custom code here...
-	}
-
-	std::wstring stringStream2wstring(std::stringstream & strs)
-	{
-		std::string str = strs.str();
-		typedef std::codecvt_utf8<wchar_t> convert_type;
-		std::wstring_convert<convert_type, wchar_t> converter;
-		return converter.from_bytes(str);
-	}
+std::wstring stringStream2wstring(std::stringstream& strs)
+{
+	std::string str = strs.str();
+	typedef std::codecvt_utf8<wchar_t> convert_type;
+	std::wstring_convert<convert_type, wchar_t> converter;
+	return converter.from_bytes(str);
+}
 
 #pragma endregion

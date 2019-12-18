@@ -62,7 +62,7 @@ float4 main(vertexToPixel  input) :SV_TARGET
 		currDepth = LinearEyeZ(currDepth);
 		float4 rawColor = blurrTex.Load(int3(newUV, 0));
 		//float temp = rawColor.x + rawColor.y + rawColor.z;
-		if ((abs(sampleDepth - currDepth) < 0.00005f))
+		if ((abs(sampleDepth - currDepth) < 0.005f))
 		{
 			color += rawColor;
 			totalSamples++;
@@ -82,5 +82,4 @@ float4 main(vertexToPixel  input) :SV_TARGET
 	//return float4(((float)StepSize) / 10, ((float)StepSize) / 10, ((float)StepSize) / 10, 1.0f);
 	//return float4(((float)StepSize) / 10, ((float)StepSize) / 10, ((float)StepSize) / 10, 1.0f);
 	return output;
-	
 }
