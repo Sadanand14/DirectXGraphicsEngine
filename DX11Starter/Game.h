@@ -7,7 +7,11 @@
 #include "Camera.h"
 #include "Lights.h"
 #include "Textures.h"
+#include "Materials.h";
 #include "types.h"
+#include "Emitter.h"
+#include "HybridEmitter.h"
+#include "GpuEmitter.h"
 
 class Game
 	: public DXCore
@@ -17,23 +21,28 @@ public:
 	Game(HINSTANCE hInstance);
 	~Game();
 
+	//Particle Stuff
+	ID3D11DepthStencilState* particleDepth = nullptr;
+	ID3D11BlendState* particleBlend = nullptr;
+	ID3D11RasterizerState* debugRaster = nullptr;
+	Emitter* emitter = nullptr;
+	HybridEmitter* emitterHY = nullptr;
+	GPUEmitter* emitterGpu = nullptr;
 	//Water Stuff
 	Materials* material = nullptr;
 	XMFLOAT4X4 WaterMatrix;
 	float WaterTime;
 	Waves* waves;
+
 	ID3D11RenderTargetView* refractionRTV = nullptr;
-	ID3D11RenderTargetView*reflectionRTV = nullptr;
-	ID3D11RenderTargetView*DOFRTV1 = nullptr, *DOFRTV2 = nullptr, * DOFRTV3= nullptr;
+	ID3D11RenderTargetView* reflectionRTV = nullptr;
+	ID3D11RenderTargetView* DOFRTV1 = nullptr, *DOFRTV2 = nullptr, * DOFRTV3= nullptr;
 	ID3D11ShaderResourceView* DOFSRV1 = nullptr, *DOFSRV2 = nullptr , *DOFSRV3 = nullptr;
+
+
 	ID3D11SamplerState* refractSampler = nullptr;
-	ID3D11ShaderResourceView* refractionSRV = nullptr;
-	ID3D11ShaderResourceView* reflectionSRV = nullptr;
-	ID3D11ShaderResourceView* depthSRV = nullptr;
+	ID3D11ShaderResourceView* refractionSRV = nullptr, * reflectionSRV = nullptr, * depthSRV = nullptr;
 	ID3D11DepthStencilView* depthView = nullptr;
-
-
-
 
 	//TerrainStuff
 	TerrainVertex* terrainVertices = nullptr;
@@ -42,7 +51,7 @@ public:
 	unsigned int m_resolution;
 
 	//General Stuff
-	Camera* camera = nullptr;
+	Camera * camera = nullptr;
 	std::vector<Entity*> entityList;
 	std::map<std::string, Mesh*> meshMap;
 	std::map<std::string, Texture*> texMap;
@@ -84,9 +93,9 @@ private:
 	//void CreateReflectionDSVRTV();
 	void DownSample(ID3D11ShaderResourceView* srv);
 
+
 	// Buffers to hold actual geometry data
-	ID3D11Buffer* vertexBuffer = nullptr;
-	ID3D11Buffer* indexBuffer = nullptr;
+	ID3D11Buffer* vertexBuffer = nullptr, * indexBuffer = nullptr;
 
 	// Wrappers for DirectX shaders to provide simplified functionality
 	//sky shaders
@@ -110,10 +119,18 @@ private:
 	SimplePixelShader* PS_gaussianBlurrHor = nullptr;
 	SimplePixelShader* PS_merge = nullptr;
 
+	//Particle Shaders
+	SimpleVertexShader* particleVS = nullptr, * hybridParticleVS = nullptr;
+	SimplePixelShader* particlePS = nullptr;
+
+	//GpuParticleStuff
+	SimpleComputeShader* particledeadInitCS = nullptr, * particleUpdateCS = nullptr, * particleEmitCS = nullptr, * particleSetArgsBuffCS = nullptr;
+	SimpleVertexShader* gpuParticleVS = nullptr;
+	SimplePixelShader* gpuParticlePS = nullptr;
+
+
 	// The matrices to go from model space to screen space
-	DirectX::XMFLOAT4X4 worldMatrix;
-	DirectX::XMFLOAT4X4 viewMatrix;
-	DirectX::XMFLOAT4X4 projectionMatrix;
+	DirectX::XMFLOAT4X4 worldMatrix, viewMatrix, projectionMatrix;
 
 	//RasterStates
 	ID3D11RasterizerState* skyRS = nullptr;
